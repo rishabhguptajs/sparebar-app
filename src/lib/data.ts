@@ -71,3 +71,36 @@ export async function getJob(supabase: Supabase, id: string) {
   const { data } = await supabase.from("jobs").select("*").eq("id", id).is("deleted_at", null).maybeSingle();
   return data ? presentJob(data as JobRow) : null;
 }
+
+export type PaymentRow = {
+  id: string;
+  product_key: string;
+  credits: number;
+  currency: "USD" | "INR";
+  total_minor: number;
+  status: "created" | "paid" | "failed" | "refunded";
+  invoice_no: string | null;
+  created_at: string;
+};
+
+export async function getPayments(supabase: Supabase) {
+  const { data } = await supabase
+    .from("payments")
+    .select("id, product_key, credits, currency, total_minor, status, invoice_no, created_at")
+    .in("status", ["paid", "refunded"])
+    .order("created_at", { ascending: false })
+    .limit(30);
+  return (data ?? []) as PaymentRow[];
+}
+
+export type ActivityRow = { id: number; type: string; amount: number; note: string | null; created_at: string };
+
+export async function getActivity(supabase: Supabase) {
+  const { data } = await supabase
+    .from("credit_entries")
+    .select("id, type, amount, note, created_at")
+    .neq("type", "settle")
+    .order("id", { ascending: false })
+    .limit(40);
+  return (data ?? []) as ActivityRow[];
+}

@@ -251,8 +251,11 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
           {short && (
             <p className="text-sm text-ink-2">
               {model?.kind === "video" && model.available === 0
-                ? "Free credits work for images only. Buy credits to make video."
-                : `You need ${model?.credits} credits for this and have ${model?.available}.`}
+                ? "Free credits work for images only. Add credits to make video."
+                : `You need ${model?.credits} credits for this and have ${model?.available}.`}{" "}
+              <Link href={`${base}/credits`} className="font-medium text-accent hover:underline">
+                Add credits
+              </Link>
             </p>
           )}
           <button

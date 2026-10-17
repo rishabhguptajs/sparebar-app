@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/config/brand";
-import { GridIcon, PeopleIcon, SignOutIcon, StudioIcon } from "@/components/icons";
+import { CoinIcon, GridIcon, PeopleIcon, SignOutIcon, StudioIcon } from "@/components/icons";
 
 type Props = {
   base: string;
@@ -19,6 +19,7 @@ export function AppShell({ base, balance, email, canSignOut, children }: Props) 
     { href: base, label: "Studio", icon: StudioIcon, active: path === base },
     { href: `${base}/characters`, label: "Characters", icon: PeopleIcon, active: path.startsWith(`${base}/characters`) },
     { href: `${base}/library`, label: "Library", icon: GridIcon, active: path.startsWith(`${base}/library`) },
+    { href: `${base}/credits`, label: "Credits", icon: CoinIcon, active: path.startsWith(`${base}/credits`) },
   ];
 
   return (
@@ -45,10 +46,11 @@ export function AppShell({ base, balance, email, canSignOut, children }: Props) 
         </nav>
 
         <div className="mt-auto space-y-4">
-          <div className="rounded-2xl bg-panel p-4">
+          <Link href={`${base}/credits`} className="block rounded-2xl bg-panel p-4 transition-colors hover:bg-panel-2">
             <p className="text-xs text-ink-2">Credits</p>
             <p className="mt-1 font-display text-4xl font-semibold leading-none tabular-nums">{balance}</p>
-          </div>
+            <p className="mt-2 text-xs font-medium text-accent">Add credits</p>
+          </Link>
           <div className="flex items-center justify-between gap-2 px-1">
             <p className="min-w-0 truncate text-xs text-ink-2" title={email ?? undefined}>
               {email ?? "Signed in"}
@@ -73,14 +75,14 @@ export function AppShell({ base, balance, email, canSignOut, children }: Props) 
           <Link href={base} className="font-display text-xl font-semibold tracking-tight">
             {brand.name}
           </Link>
-          <p className="rounded-full bg-panel px-3 py-1 text-sm font-medium tabular-nums">{balance} credits</p>
+          <Link href={`${base}/credits`} className="rounded-full bg-panel px-3 py-1 text-sm font-medium tabular-nums">{balance} credits</Link>
         </header>
         <main>{children}</main>
       </div>
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-3 border-t border-line bg-bg/90 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-line bg-bg/90 backdrop-blur md:hidden"
       >
         {nav.map((n) => (
           <Link
