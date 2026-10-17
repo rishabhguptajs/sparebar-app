@@ -98,7 +98,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
         </div>
         <button
           onClick={() => dialog.current?.showModal()}
-          className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
+          className="flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
         >
           <PlusIcon width={18} height={18} /> New character
         </button>
@@ -249,7 +249,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
 
           <button
             disabled={busy || !name.trim()}
-            className="w-full rounded-xl bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40"
+            className="w-full rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40"
           >
             {busy ? (generating ? "Generating portrait" : "Saving") : generating ? `Create with portrait for ${portraitCredits} credits` : "Save character"}
           </button>

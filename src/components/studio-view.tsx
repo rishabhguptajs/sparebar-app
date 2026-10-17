@@ -273,7 +273,7 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
           )}
           <button
             disabled={!canRun}
-            className="w-full rounded-xl bg-accent px-5 py-3.5 text-[15px] font-semibold text-accent-ink transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-full bg-accent px-5 py-3.5 text-[15px] font-semibold text-accent-ink transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy || running ? "Generating" : `Generate${model ? ` for ${model.credits} credits` : ""}`}
           </button>

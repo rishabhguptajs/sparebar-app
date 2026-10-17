@@ -159,7 +159,7 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
             <p className="text-xs text-ink-2">${perCredit(p).toFixed(3)} per credit{i === PLANS.length - 1 ? ", the lowest rate" : ""}</p>
             <button
               onClick={() => open(p)}
-              className="mt-6 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
+              className="mt-6 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
             >
               Buy {p.label}
             </button>
@@ -350,7 +350,7 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
 
             <button
               disabled={busy || !q}
-              className="w-full rounded-xl bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40"
+              className="w-full rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40"
             >
               {busy ? "Waiting for payment" : q ? `Pay ${formatMoney(q.totalMinor, q.currency)}` : "Pay"}
             </button>
@@ -372,7 +372,7 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
           <div className="space-y-4 p-8 text-center">
             <p className="font-display text-3xl font-semibold">{done} credits added</p>
             <p className="text-sm text-ink-2">Your invoice is under Payments on this page.</p>
-            <button onClick={() => dialog.current?.close()} className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
+            <button onClick={() => dialog.current?.close()} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
               Done
             </button>
           </div>

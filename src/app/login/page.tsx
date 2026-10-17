@@ -68,7 +68,7 @@ export default function LoginPage() {
               />
               <button
                 disabled={codeState === "checking" || code.length < 6}
-                className="rounded-xl bg-accent px-4 py-3 font-semibold text-accent-ink disabled:opacity-40"
+                className="rounded-full bg-accent px-4 py-3 font-semibold text-accent-ink disabled:opacity-40"
               >
                 {codeState === "checking" ? "Checking" : "Sign in"}
               </button>
@@ -100,7 +100,7 @@ export default function LoginPage() {
               placeholder="you@example.com"
               className="rounded-xl border border-line bg-panel px-4 py-3"
             />
-            <button disabled={state === "sending"} className="rounded-xl bg-accent px-4 py-3 font-semibold text-accent-ink disabled:opacity-60">
+            <button disabled={state === "sending"} className="rounded-full bg-accent px-4 py-3 font-semibold text-accent-ink disabled:opacity-60">
               {state === "sending" ? "Sending" : "Email me a sign-in link"}
             </button>
             {state === "error" && <p role="alert" className="text-sm text-danger">That did not work. Try again in a minute.</p>}

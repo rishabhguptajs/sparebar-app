@@ -231,7 +231,7 @@ function LabCard({ stat, demo }: { stat: LabStat; demo?: boolean }) {
             className="mt-1 w-full rounded-xl border border-line bg-bg px-3 py-2 text-sm text-ink"
           />
         </label>
-        <button disabled={busy} className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
+        <button disabled={busy} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
           Record
         </button>
       </form>
@@ -298,7 +298,7 @@ function GrantForm({ demo }: { demo?: boolean }) {
             className="mt-1 w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm text-ink"
           />
         </label>
-        <button disabled={busy} className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
+        <button disabled={busy} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
           Add credits
         </button>
       </form>

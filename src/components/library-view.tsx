@@ -175,7 +175,7 @@ export function LibraryView({ base, jobs, demo }: Props) {
               <div className="mt-auto flex flex-col gap-2">
                 <a
                   href={open.outputs[0].downloadUrl}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
+                  className="flex items-center justify-center gap-2 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
                 >
                   <DownloadIcon width={18} height={18} /> Download
                 </a>
