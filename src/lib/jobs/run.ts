@@ -3,6 +3,7 @@ import { currentPrice, getModel } from "@/config/models";
 import { creditsForCost } from "@/lib/credits";
 import { getAdapter, ProviderError, type OutputFile, type ProviderResult, type ReferenceImage } from "@/lib/providers";
 import { extFor, putObject } from "@/lib/r2";
+import { getPausedLabs, noteBillingError } from "@/lib/labs-server";
 import { admin } from "@/lib/supabase/admin";
 
 /** Give up on a job that has not finished after this long, and refund it. */
@@ -57,6 +58,10 @@ export async function startJob(input: StartInput): Promise<JobRow> {
   const adapter = model && getAdapter(model.lab);
   if (!model || !model.enabled || !adapter) throw new UserFacingError("This model is not available.");
 
+  if ((await getPausedLabs()).has(model.lab)) {
+    throw new UserFacingError("This model is temporarily unavailable. Try another model or come back soon.", 503);
+  }
+
   const price = currentPrice(model);
   const credits = creditsForCost(price.costMicros);
   const db = admin();
@@ -87,7 +92,7 @@ export async function startJob(input: StartInput): Promise<JobRow> {
       references: input.references,
     });
   } catch (e) {
-    result = failure(e);
+    result = failure(e, model.lab);
   }
   try {
     return await applyResult(jobId as string, input.userId, result);
@@ -131,7 +136,7 @@ export async function advanceJob(jobId: string): Promise<JobRow | null> {
   try {
     result = await adapter.poll(job.provider_ref, model);
   } catch (e) {
-    result = failure(e);
+    result = failure(e, model.lab);
     // A network blip while polling should not refund a job the lab is still rendering.
     if (result.status === "failed" && !result.permanent) {
       await reschedule(job, job.provider_ref);
@@ -141,8 +146,11 @@ export async function advanceJob(jobId: string): Promise<JobRow | null> {
   return applyResult(job.id, job.user_id, result, job);
 }
 
-function failure(e: unknown): ProviderResult {
-  if (e instanceof ProviderError) return { status: "failed", error: e.message, permanent: e.permanent };
+function failure(e: unknown, lab?: string): ProviderResult {
+  if (e instanceof ProviderError) {
+    if (lab) void noteBillingError(lab, e.status, e.message);
+    return { status: "failed", error: e.message, permanent: e.permanent };
+  }
   return { status: "failed", error: e instanceof Error ? e.message : String(e), permanent: false };
 }
 

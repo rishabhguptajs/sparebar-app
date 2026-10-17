@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { advanceDueJobs } from "@/lib/jobs/run";
+import { checkLabAlerts } from "@/lib/labs-server";
 import { admin } from "@/lib/supabase/admin";
 
 export const maxDuration = 60;
@@ -14,5 +15,9 @@ export async function POST(req: Request) {
   const jobs = await advanceDueJobs();
   const { data: expired, error } = await admin().rpc("expire_grants");
   if (error) console.error("expire_grants failed", error);
-  return NextResponse.json({ jobs, expiredGrants: expired ?? null });
+  const alerts = await checkLabAlerts().catch((e) => {
+    console.error("lab alert check failed", e);
+    return [];
+  });
+  return NextResponse.json({ jobs, expiredGrants: expired ?? null, alerts });
 }
