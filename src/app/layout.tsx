@@ -20,9 +20,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: brand.name,
-  description: "Create AI characters and generate UGC style images and videos with them.",
   metadataBase: new URL(brand.url),
+  title: { default: `${brand.name}: one character, every shot`, template: `%s | ${brand.name}` },
+  description: "Create a character once, then make UGC style images and videos with the same face in any scene you can describe.",
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    title: `${brand.name}: one character, every shot`,
+    description: "Create a character once, then make UGC style images and videos with the same face in any scene you can describe.",
+  },
+  twitter: { card: "summary" },
 };
 
 export default function RootLayout({
