@@ -14,4 +14,14 @@ export const env = {
   r2SecretAccessKey: () => need("R2_SECRET_ACCESS_KEY"),
   r2Bucket: () => need("R2_BUCKET"),
   cronSecret: () => need("CRON_SECRET"),
+  razorpayKeyId: () => need("RAZORPAY_KEY_ID"),
+  razorpayKeySecret: () => need("RAZORPAY_KEY_SECRET"),
+  razorpayWebhookSecret: () => need("RAZORPAY_WEBHOOK_SECRET"),
+  /** Rupees per US dollar for Indian checkout. Unset turns Indian checkout off. */
+  inrPerUsd: () => {
+    const n = Number(process.env.INR_PER_USD);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  },
+  /** GST state code of the seller, for the CGST/SGST versus IGST split. */
+  sellerStateCode: () => process.env.SELLER_STATE_CODE || undefined,
 };
