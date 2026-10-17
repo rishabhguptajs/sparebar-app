@@ -105,11 +105,13 @@ describe("alertText", () => {
 });
 
 describe("looksLikeBillingError", () => {
-  it("catches payment required and billing messages but not rate limits", () => {
-    expect(looksLikeBillingError(402, "")).toBe(true);
-    expect(looksLikeBillingError(403, "Billing account is not active")).toBe(true);
-    expect(looksLikeBillingError(400, "Insufficient balance")).toBe(true);
-    expect(looksLikeBillingError(429, "Too many requests, billing")).toBe(false);
-    expect(looksLikeBillingError(400, "Prompt blocked by safety filter")).toBe(false);
+  it("uses the status or a structured flag, never the message", () => {
+    expect(looksLikeBillingError(402)).toBe(true);
+    expect(looksLikeBillingError(403)).toBe(true);
+    expect(looksLikeBillingError(401)).toBe(true);
+    expect(looksLikeBillingError(400)).toBe(false);
+    expect(looksLikeBillingError(429)).toBe(false);
+    expect(looksLikeBillingError(undefined)).toBe(false);
+    expect(looksLikeBillingError(200, true)).toBe(true);
   });
 });

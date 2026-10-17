@@ -148,7 +148,7 @@ export async function advanceJob(jobId: string): Promise<JobRow | null> {
 
 function failure(e: unknown, lab?: string): ProviderResult {
   if (e instanceof ProviderError) {
-    if (lab) void noteBillingError(lab, e.status, e.message);
+    if (lab) void noteBillingError(lab, e.status, e.billing);
     return { status: "failed", error: e.message, permanent: e.permanent };
   }
   return { status: "failed", error: e instanceof Error ? e.message : String(e), permanent: false };

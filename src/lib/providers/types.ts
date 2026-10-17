@@ -30,6 +30,8 @@ export class ProviderError extends Error {
     message: string,
     readonly permanent: boolean,
     readonly status?: number,
+    /** Set by an adapter when the lab's structured error code says the account has a billing problem. */
+    readonly billing = false,
   ) {
     super(message);
   }

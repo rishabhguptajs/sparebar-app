@@ -115,9 +115,12 @@ export function alertText(r: LabReport) {
   }
 }
 
-/** Does this error look like an empty balance or a billing problem, rather than a bad request? */
-export function looksLikeBillingError(status: number | undefined, message: string) {
-  if (status === 402) return true;
-  if (status === 429) return false; // usually a rate limit
-  return /insufficient|billing|balance|payment required|out of credit|credit.*(exhaust|insufficient)/i.test(message);
+/**
+ * Does this failure mean the lab account itself is the problem (empty balance, bad key, billing off)?
+ * Decided only from the HTTP status or a structured flag the adapter sets from the lab's error code.
+ * Free text is never used: provider messages can echo a user's prompt, so a crafted prompt could
+ * otherwise pause a lab for everyone.
+ */
+export function looksLikeBillingError(status: number | undefined, structuredBilling = false) {
+  return structuredBilling || status === 401 || status === 402 || status === 403;
 }

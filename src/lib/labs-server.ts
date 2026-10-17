@@ -22,8 +22,8 @@ export async function getPausedLabs(): Promise<Set<string>> {
 }
 
 /** Record that a lab refused a request in a way that looks like an empty balance. */
-export async function noteBillingError(lab: string, status: number | undefined, message: string) {
-  if (!looksLikeBillingError(status, message)) return;
+export async function noteBillingError(lab: string, status: number | undefined, structuredBilling = false) {
+  if (!looksLikeBillingError(status, structuredBilling)) return;
   try {
     await admin().rpc("note_lab_billing_error", { p_lab: lab } as never);
   } catch (e) {
