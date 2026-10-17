@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { normalizeEmail } from "@/lib/abuse";
 import { getAdminUser } from "@/lib/data";
 import { admin } from "@/lib/supabase/admin";
 
@@ -19,9 +18,9 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Enter an email and a whole number of credits." }, { status: 400 });
   const { email, credits } = parsed.data;
 
-  const { data: profile } = await admin().from("profiles").select("id").ilike("email", email).maybeSingle();
+  const { data: profile } = await admin().from("profiles").select("id").eq("email", email.toLowerCase()).maybeSingle();
   const id = (profile as { id: string } | null)?.id;
-  if (!id) return NextResponse.json({ error: `No account for ${normalizeEmail(email)}. They need to sign in once first.` }, { status: 404 });
+  if (!id) return NextResponse.json({ error: `No account for ${email.toLowerCase()}. They need to sign in once first.` }, { status: 404 });
 
   const { error } = await admin().rpc("grant_credits", {
     p_user: id,
@@ -31,5 +30,5 @@ export async function POST(req: Request) {
     p_source_ref: `admin:${randomUUID()}`,
   } as never);
   if (error) return NextResponse.json({ error: "Could not add credits." }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, email: email.toLowerCase(), credits });
 }

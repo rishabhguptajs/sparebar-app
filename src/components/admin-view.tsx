@@ -266,7 +266,7 @@ function GrantForm({ demo }: { demo?: boolean }) {
     const body = await res.json();
     setBusy(false);
     if (!res.ok) return setMsg(body.error ?? "Could not add credits.");
-    setMsg(`Added ${credits} credits to ${email}.`);
+    setMsg(`Added ${body.credits} credits to ${body.email}.`);
     setEmail("");
     setCredits("");
   }
