@@ -1,31 +1,35 @@
+import type { User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { DEVICE_COOKIE } from "@/config/free-tier";
 import { claimFreeCredits } from "@/lib/free-tier";
 import { createClient } from "@/lib/supabase/server";
 
-// Magic link lands here with ?code=...; exchange it for a session cookie.
+// Two ways in. The email link lands here with ?code=..., and the 6 digit code form sends people here
+// with ?session=1 once it has signed them in. Both end the same way: offer free credits, then go to the app.
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next");
-  const dest = safeNext(next, url.origin);
+  const dest = safeNext(url.searchParams.get("next"), url.origin);
+  const supabase = await createClient();
 
+  let user: User | null = null;
   if (code) {
-    const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      // The email link proves the address, so this is the moment to offer free credits.
-      const free = data.user ? await claimFreeCredits(data.user, req.headers) : { outcome: "off" as const };
-      const target = new URL(dest, url.origin);
-      if (free.outcome !== "off") target.searchParams.set("welcome", free.outcome);
-      const res = NextResponse.redirect(target);
-      if (free.newDeviceId) {
-        res.cookies.set(DEVICE_COOKIE, free.newDeviceId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 400, path: "/" });
-      }
-      return res;
-    }
+    if (!error) user = data.user;
+  } else if (url.searchParams.get("session")) {
+    user = (await supabase.auth.getUser()).data.user;
   }
-  return NextResponse.redirect(new URL("/login?error=link", url.origin));
+  if (!user) return NextResponse.redirect(new URL("/login?error=link", url.origin));
+
+  // The email proves the address, so this is the moment to offer free credits.
+  const free = await claimFreeCredits(user, req.headers);
+  const target = new URL(dest, url.origin);
+  if (free.outcome !== "off") target.searchParams.set("welcome", free.outcome);
+  const res = NextResponse.redirect(target);
+  if (free.newDeviceId) {
+    res.cookies.set(DEVICE_COOKIE, free.newDeviceId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 400, path: "/" });
+  }
+  return res;
 }
 
 // Resolve first, then compare origins: string checks miss tricks like "/\evil.com".

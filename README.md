@@ -85,6 +85,7 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 - **Razorpay:** international payments approval, subscriptions on foreign cards (plans are sold as manual monthly renewals until confirmed), the forex markup, and real webhook delivery.
 - **R2** honoring the download filename on signed links.
 - **Supabase email:** the built in sender is rate limited. Set up custom SMTP before real users sign in.
+- **Sign in code.** Email links only work in the browser that asked for them, which fails in many phone mail apps. The login page also accepts a code, but the Supabase email template must include it: in Auth > Email Templates > Magic Link add a line such as `Or enter this code: {{ .Token }}`.
 
 ## Decisions made on your behalf
 
