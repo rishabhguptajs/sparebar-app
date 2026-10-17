@@ -14,6 +14,8 @@ export type Price = {
    * actual cost from the usage the lab reports. Micro-USD per 1M tokens.
    */
   perMillionOutputTokens?: Partial<Record<"text" | "image" | "video" | "audio", number>>;
+  /** Per second of output video, for labs that report the seconds they billed. Micro-USD. */
+  perSecondMicros?: number;
 };
 
 export type ModelConfig = {
@@ -50,7 +52,7 @@ export const MODELS: ModelConfig[] = [
     key: "grok-imagine-image",
     label: "Grok Imagine Image",
     lab: "xai",
-    apiModel: "grok-imagine-image", // confirm id in xAI console before enabling
+    apiModel: "grok-imagine-image-quality",
     kind: "image",
     defaults: { imageSize: "1K" },
     prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
@@ -74,7 +76,7 @@ export const MODELS: ModelConfig[] = [
     lab: "xai",
     apiModel: "grok-imagine-video-1.5-lite",
     kind: "video",
-    defaults: { resolution: "720p", seconds: 8 },
+    defaults: { resolution: "720p", seconds: 8, aspectRatio: "9:16" },
     prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.03) * 8 }],
     enabled: false,
     freeEligible: false,
@@ -85,7 +87,7 @@ export const MODELS: ModelConfig[] = [
     lab: "xai",
     apiModel: "grok-imagine-video",
     kind: "video",
-    defaults: { resolution: "720p", seconds: 8 },
+    defaults: { resolution: "720p", seconds: 8, aspectRatio: "9:16" },
     prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.07) * 8 }],
     enabled: false,
     freeEligible: false,
@@ -96,8 +98,8 @@ export const MODELS: ModelConfig[] = [
     lab: "minimax",
     apiModel: "MiniMax-H3",
     kind: "video",
-    defaults: { resolution: "768p", seconds: 8 },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.08) * 8 }],
+    defaults: { resolution: "768P", seconds: 8, aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.08) * 8, perSecondMicros: usd(0.08) }],
     enabled: false,
     freeEligible: false,
   },
@@ -123,10 +125,10 @@ export const MODELS: ModelConfig[] = [
     key: "wan-3.0",
     label: "Wan 3.0",
     lab: "alibaba",
-    apiModel: "wan3.0-t2v", // confirm id in Model Studio before enabling
+    apiModel: "wan3.0-video", // preview model; also wan3.0-video-prime (faster)
     kind: "video",
-    defaults: { resolution: "720p", seconds: 8 },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.1) * 8 }],
+    defaults: { resolution: "720P", seconds: 8, aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.1) * 8, perSecondMicros: usd(0.1) }],
     enabled: false,
     freeEligible: false,
   },
@@ -136,7 +138,7 @@ export const MODELS: ModelConfig[] = [
     lab: "xai",
     apiModel: "grok-imagine-video-1.5",
     kind: "video",
-    defaults: { resolution: "720p", seconds: 8 },
+    defaults: { resolution: "720p", seconds: 8, aspectRatio: "9:16" },
     prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.14) * 8 }],
     enabled: false,
     freeEligible: false,
