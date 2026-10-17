@@ -15,7 +15,14 @@ export async function getLabReports(): Promise<LabReport[]> {
 /** Labs whose models should be hidden for now because the lab recently refused requests over billing. */
 export async function getPausedLabs(): Promise<Set<string>> {
   try {
-    return new Set((await getLabStats()).filter((s) => labPaused(s)).map((s) => s.lab));
+    // Reads only the small lab_balances table. lab_stats() aggregates every job and is for the admin page.
+    const { data } = await admin().from("lab_balances").select("lab, recorded, recorded_at, billing_error_at").not("billing_error_at", "is", null);
+    const rows = (data ?? []) as { lab: string; recorded: boolean; recorded_at: string | null; billing_error_at: string }[];
+    return new Set(
+      rows
+        .filter((r) => labPaused({ billing_error_at: r.billing_error_at, recorded_at: r.recorded_at, has_balance: r.recorded } as LabStat))
+        .map((r) => r.lab),
+    );
   } catch {
     return new Set();
   }
