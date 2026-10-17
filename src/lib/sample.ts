@@ -23,8 +23,8 @@ ${
 }
 
 export const sampleModels: ModelOption[] = [
-  { key: "nano-banana-2.1", label: "Nano Banana 2.1", kind: "image", credits: 2, detail: "1K image", available: 38 },
-  { key: "gemini-omni-flash", label: "Gemini Omni Flash", kind: "video", credits: 27, detail: "Around 8 seconds, 720p", available: 36 },
+  { key: "nano-banana-2.1", label: "Nano Banana 2.1", kind: "image", credits: 2, detail: "1K image", available: 38, paused: false },
+  { key: "gemini-omni-flash", label: "Gemini Omni Flash", kind: "video", credits: 27, detail: "Around 8 seconds, 720p", available: 36, paused: false },
 ];
 
 export const sampleCharacters: CharacterCard[] = [

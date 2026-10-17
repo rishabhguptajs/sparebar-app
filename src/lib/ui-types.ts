@@ -8,6 +8,8 @@ export type ModelOption = {
   detail: string;
   /** Credits the user can spend on this model right now (free credits only count for eligible models). */
   available: number;
+  /** The lab recently refused requests over billing, so this model is hidden for now. */
+  paused: boolean;
 };
 
 export type CharacterCard = {

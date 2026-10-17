@@ -5,6 +5,7 @@ import { creditsForModel } from "@/lib/credits";
 import { presentCharacter, type CharacterRow } from "@/lib/characters";
 import { presentJob } from "@/lib/jobs/present";
 import type { JobRow } from "@/lib/jobs/run";
+import { getPausedLabs } from "@/lib/labs-server";
 import { getAdapter } from "@/lib/providers";
 import { createClient } from "@/lib/supabase/server";
 import type { ModelOption } from "@/lib/ui-types";
@@ -31,6 +32,7 @@ export async function getBalance(supabase: Supabase, userId: string) {
 /** Models the user can pick, with what they can spend on each. */
 export async function getModelOptions(supabase: Supabase, userId: string): Promise<ModelOption[]> {
   const live = MODELS.filter((m) => m.enabled && getAdapter(m.lab));
+  const paused = await getPausedLabs();
   const cache = new Map<string, number>();
   const options: ModelOption[] = [];
   for (const m of live) {
@@ -46,6 +48,7 @@ export async function getModelOptions(supabase: Supabase, userId: string): Promi
           ? `Around ${m.defaults.seconds ?? 8} seconds, ${m.defaults.resolution ?? "720p"}`
           : `${m.defaults.imageSize ?? "1K"} image`,
       available: cache.get(k) ?? 0,
+      paused: paused.has(m.lab),
     });
   }
   return options;
@@ -103,4 +106,13 @@ export async function getActivity(supabase: Supabase) {
     .order("id", { ascending: false })
     .limit(40);
   return (data ?? []) as ActivityRow[];
+}
+
+/** The signed-in user if they are an admin. Admins are set by hand: update profiles set is_admin = true. */
+export async function getAdminUser() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return null;
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
+  return (profile as { is_admin?: boolean } | null)?.is_admin ? data.user : null;
 }

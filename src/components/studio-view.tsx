@@ -44,7 +44,7 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
   const character = characters.find((c) => c.id === characterId) ?? null;
   const short = !!model && model.credits > model.available;
   const running = active(job);
-  const canRun = !!model && prompt.trim().length >= 3 && !busy && !running && !short;
+  const canRun = !!model && !model.paused && prompt.trim().length >= 3 && !busy && !running && !short;
 
   function pickKind(next: "image" | "video") {
     setKind(next);
@@ -179,13 +179,14 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
                   role="radio"
                   aria-checked={on}
                   onClick={() => setModelKey(m.key)}
+                  disabled={m.paused}
                   className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                     on ? "border-accent bg-panel" : "border-line bg-panel/50 hover:bg-panel"
-                  }`}
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <span className="min-w-0">
                     <span className="block text-sm font-medium">{m.label}</span>
-                    <span className="block text-xs text-ink-2">{m.detail}</span>
+                    <span className="block text-xs text-ink-2">{m.paused ? "Temporarily unavailable" : m.detail}</span>
                   </span>
                   <span className="shrink-0 text-sm tabular-nums text-ink-2">{m.credits} credits</span>
                 </button>

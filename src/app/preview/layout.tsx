@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 export default function PreviewLayout({ children }: { children: React.ReactNode }) {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <AppShell base="/preview" balance={38} email="maya@example.com" canSignOut={false}>
+    <AppShell base="/preview" balance={38} email="maya@example.com" canSignOut={false} isAdmin>
       {children}
     </AppShell>
   );

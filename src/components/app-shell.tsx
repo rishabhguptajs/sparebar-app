@@ -3,23 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/config/brand";
-import { CoinIcon, GridIcon, PeopleIcon, SignOutIcon, StudioIcon } from "@/components/icons";
+import { CoinIcon, GridIcon, PeopleIcon, ShieldIcon, SignOutIcon, StudioIcon } from "@/components/icons";
 
 type Props = {
   base: string;
   balance: number;
   email: string | null;
   canSignOut: boolean;
+  isAdmin?: boolean;
   children: React.ReactNode;
 };
 
-export function AppShell({ base, balance, email, canSignOut, children }: Props) {
+export function AppShell({ base, balance, email, canSignOut, isAdmin, children }: Props) {
   const path = usePathname();
   const nav = [
     { href: base, label: "Studio", icon: StudioIcon, active: path === base },
     { href: `${base}/characters`, label: "Characters", icon: PeopleIcon, active: path.startsWith(`${base}/characters`) },
     { href: `${base}/library`, label: "Library", icon: GridIcon, active: path.startsWith(`${base}/library`) },
     { href: `${base}/credits`, label: "Credits", icon: CoinIcon, active: path.startsWith(`${base}/credits`) },
+    ...(isAdmin ? [{ href: `${base}/admin`, label: "Admin", icon: ShieldIcon, active: path.startsWith(`${base}/admin`) }] : []),
   ];
 
   return (
@@ -82,7 +84,8 @@ export function AppShell({ base, balance, email, canSignOut, children }: Props) 
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-line bg-bg/90 backdrop-blur md:hidden"
+        style={{ gridTemplateColumns: `repeat(${nav.length}, minmax(0, 1fr))` }}
+        className="fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-bg/90 backdrop-blur md:hidden"
       >
         {nav.map((n) => (
           <Link
