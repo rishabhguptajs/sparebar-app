@@ -101,41 +101,43 @@ dialog::backdrop {
   backdrop-filter: blur(3px);
 }
 
-/* The landing page has its own look: overexposed bathroom tile, flash photo pink, one hard shadow. */
+/* The landing page is dark and quiet: near black, warm white type, hairlines, one soft light. */
 .landing {
-  --bg: #c9d9dc;
-  --panel: #e6f0f2;
-  --panel-2: #d6e4e7;
-  --line: #9db8bd;
-  --ink: #0b1519;
-  --ink-2: #324950;
-  --accent: #ff2f7e;
-  --accent-ink: #0b1519;
-  color-scheme: light;
+  --bg: #07070a;
+  --panel: #101015;
+  --panel-2: #16161c;
+  --line: rgb(255 255 255 / 0.1);
+  --ink: #efeee9;
+  --ink-2: #8d8f9a;
+  --accent: #ff4d94;
+  --accent-ink: #07070a;
+  color-scheme: dark;
   background: var(--bg);
   color: var(--ink);
-}
-
-.landing .wide {
-  font-family: var(--font-wide), var(--font-display), sans-serif;
-  font-weight: 800;
-}
-
-.landing .ghost {
-  text-shadow: -0.035em 0.02em 0 var(--accent);
+  letter-spacing: -0.005em;
 }
 
 .landing .btn {
   display: inline-block;
-  border-radius: 4px;
+  border-radius: 999px;
   background: var(--ink);
   color: var(--bg);
-  font-weight: 600;
-  box-shadow: 5px 5px 0 0 var(--accent);
-  transition: transform 0.12s, box-shadow 0.12s;
+  font-weight: 500;
+  transition: box-shadow 0.25s, transform 0.25s;
 }
 
 .landing .btn:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 3px 3px 0 0 var(--accent);
+  box-shadow: 0 0 0 6px rgb(255 255 255 / 0.12), 0 8px 40px -8px rgb(255 77 148 / 0.55);
+}
+
+.landing .btn-ghost {
+  display: inline-block;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.landing .btn-ghost:hover {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.25);
 }
