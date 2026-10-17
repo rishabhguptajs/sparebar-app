@@ -55,7 +55,8 @@ function interactionId(id: string): string {
 
 async function download(uri: string): Promise<Uint8Array> {
   const res = await fetch(uri, { headers: { "x-goog-api-key": apiKey() }, cache: "no-store" });
-  if (!res.ok) throw new ProviderError(`Google download ${res.status}`, false, res.status);
+  // No status is attached: an expired result link returns 403, which must not read as a billing problem.
+  if (!res.ok) throw new ProviderError(`Google download ${res.status}`, false);
   return new Uint8Array(await res.arrayBuffer());
 }
 

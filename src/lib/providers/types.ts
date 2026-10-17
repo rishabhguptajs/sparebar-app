@@ -1,5 +1,8 @@
 import type { Kind, Lab, ModelConfig } from "@/config/models";
 
+/** The model config as adapters receive it. */
+export type ModelConfigLike = ModelConfig;
+
 export type ReferenceImage = { mime: string; base64: string };
 
 export type GenerateInput = {
