@@ -21,7 +21,9 @@ function safeNext(next: string | null, origin: string): string {
   if (!next) return "/app";
   try {
     const target = new URL(next, origin);
-    return target.origin === origin ? target.pathname + target.search : "/app";
+    if (target.origin !== origin) return "/app";
+    // Collapse leading slashes so "//host" can never be read as a protocol-relative URL.
+    return "/" + target.pathname.replace(/^\/+/, "") + target.search;
   } catch {
     return "/app";
   }
