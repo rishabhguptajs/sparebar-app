@@ -64,7 +64,7 @@ export default function Home() {
 
         <div className="relative mt-2 sm:mt-4">
           <HeroStrip />
-          <h1 className="wide ghost pointer-events-none relative z-10 mx-auto -mt-[0.3em] max-w-7xl whitespace-nowrap px-5 text-[clamp(2.4rem,9vw,10rem)] leading-[0.88] tracking-[-0.04em] lg:px-10">
+          <h1 className="wide ghost pointer-events-none relative z-10 mx-auto mt-2 max-w-7xl whitespace-nowrap px-5 text-[clamp(2.4rem,9vw,10rem)] leading-[0.88] tracking-[-0.04em] lg:px-10">
             One face.
             <br />
             Every shot.
