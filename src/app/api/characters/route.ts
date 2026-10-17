@@ -10,7 +10,8 @@ import { getUser } from "@/lib/supabase/server";
 export const maxDuration = 60;
 
 const MAX_FILES = 3;
-const MAX_BYTES = 8 * 1024 * 1024;
+// The browser shrinks photos before upload. A serverless request body is capped at about 4.5 MB in total.
+const MAX_BYTES = 1.4 * 1024 * 1024;
 const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 const Fields = z.object({
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
   if (files.length > MAX_FILES) return NextResponse.json({ error: `Add up to ${MAX_FILES} photos.` }, { status: 400 });
   for (const f of files) {
     if (!ALLOWED.has(f.type)) return NextResponse.json({ error: "Photos must be PNG, JPG or WebP." }, { status: 400 });
-    if (f.size > MAX_BYTES) return NextResponse.json({ error: "Each photo must be under 8 MB." }, { status: 400 });
+    if (f.size > MAX_BYTES) return NextResponse.json({ error: "That photo is too large. Try a smaller one." }, { status: 400 });
   }
   if (files.length === 0 && fields.data.description.length < 10) {
     return NextResponse.json({ error: "Describe the character in a sentence, or add a photo." }, { status: 400 });

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { CloseIcon, PlusIcon, TrashIcon, UploadIcon } from "@/components/icons";
 import { Thumb } from "@/components/media";
+import { resizeImage } from "@/lib/resize-image";
 import type { CharacterCard } from "@/lib/ui-types";
 
 type Props = {
@@ -44,9 +45,16 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
     setError(null);
   }
 
-  function addFiles(list: FileList | null) {
+  async function addFiles(list: FileList | null) {
     if (!list) return;
-    setFiles((prev) => [...prev, ...Array.from(list)].slice(0, 3));
+    setError(null);
+    try {
+      // Shrink first: phone photos are several MB, more than a server request can carry.
+      const resized = await Promise.all(Array.from(list).map(resizeImage));
+      setFiles((prev) => [...prev, ...resized].slice(0, 3));
+    } catch {
+      setError("We could not read that photo. Use a JPG, PNG or WebP.");
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -229,7 +237,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
             <p className="text-xs text-ink-2">
               {generating
                 ? `No photos? We generate a portrait from your description for ${portraitCredits} credits.`
-                : "Up to 3 clear photos of the same person. PNG, JPG or WebP, under 8 MB each."}
+                : "Up to 3 clear photos of the same person. PNG, JPG or WebP. Large photos are shrunk before upload."}
             </p>
           </div>
 
