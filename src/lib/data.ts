@@ -1,0 +1,73 @@
+import "server-only";
+import { redirect } from "next/navigation";
+import { MODELS } from "@/config/models";
+import { creditsForModel } from "@/lib/credits";
+import { presentCharacter, type CharacterRow } from "@/lib/characters";
+import { presentJob } from "@/lib/jobs/present";
+import type { JobRow } from "@/lib/jobs/run";
+import { getAdapter } from "@/lib/providers";
+import { createClient } from "@/lib/supabase/server";
+import type { ModelOption } from "@/lib/ui-types";
+
+/** Signed-in user plus a Supabase client that acts as them. Redirects to login otherwise. */
+export async function requireSession() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect("/login");
+  return { supabase, user: data.user };
+}
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+async function balanceFor(supabase: Supabase, userId: string, kind: string | null, freeOk: boolean) {
+  const { data } = await supabase.rpc("credit_balance", { p_user: userId, p_kind: kind, p_free_ok: freeOk } as never);
+  return Number(data ?? 0);
+}
+
+export async function getBalance(supabase: Supabase, userId: string) {
+  return balanceFor(supabase, userId, null, true);
+}
+
+/** Models the user can pick, with what they can spend on each. */
+export async function getModelOptions(supabase: Supabase, userId: string): Promise<ModelOption[]> {
+  const live = MODELS.filter((m) => m.enabled && getAdapter(m.lab));
+  const cache = new Map<string, number>();
+  const options: ModelOption[] = [];
+  for (const m of live) {
+    const k = `${m.kind}:${m.freeEligible}`;
+    if (!cache.has(k)) cache.set(k, await balanceFor(supabase, userId, m.kind, m.freeEligible));
+    options.push({
+      key: m.key,
+      label: m.label,
+      kind: m.kind,
+      credits: creditsForModel(m),
+      detail:
+        m.kind === "video"
+          ? `Around ${m.defaults.seconds ?? 8} seconds, ${m.defaults.resolution ?? "720p"}`
+          : `${m.defaults.imageSize ?? "1K"} image`,
+      available: cache.get(k) ?? 0,
+    });
+  }
+  return options;
+}
+
+export async function getCharacters(supabase: Supabase) {
+  const { data } = await supabase
+    .from("characters")
+    .select("*")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
+  return Promise.all(((data ?? []) as CharacterRow[]).map(presentCharacter));
+}
+
+export async function getJobs(supabase: Supabase, opts: { limit: number; succeededOnly?: boolean }) {
+  let q = supabase.from("jobs").select("*").is("deleted_at", null).order("created_at", { ascending: false }).limit(opts.limit);
+  if (opts.succeededOnly) q = q.eq("status", "succeeded");
+  const { data } = await q;
+  return Promise.all(((data ?? []) as JobRow[]).map(presentJob));
+}
+
+export async function getJob(supabase: Supabase, id: string) {
+  const { data } = await supabase.from("jobs").select("*").eq("id", id).is("deleted_at", null).maybeSingle();
+  return data ? presentJob(data as JobRow) : null;
+}

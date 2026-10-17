@@ -1,29 +1,21 @@
-import { MODELS } from "@/config/models";
-import { creditsForModel } from "@/lib/credits";
-import { getAdapter } from "@/lib/providers";
-import { createClient } from "@/lib/supabase/server";
-import { Playground } from "./playground";
+import { StudioView } from "@/components/studio-view";
+import { getCharacters, getJob, getJobs, getModelOptions, requireSession } from "@/lib/data";
 
-// Temporary test surface for build step 1. Replaced by the real studio UI in step 2.
-export default async function AppPage() {
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  const { data: balance } = await supabase.rpc("credit_balance", { p_user: auth.user!.id } as never);
+type SP = { rerun?: string; character?: string };
 
-  const models = MODELS.filter((m) => m.enabled && getAdapter(m.lab)).map((m) => ({
-    key: m.key,
-    label: m.label,
-    kind: m.kind,
-    credits: creditsForModel(m),
-  }));
+export default async function StudioPage({ searchParams }: { searchParams: Promise<SP> }) {
+  const { rerun, character } = await searchParams;
+  const { supabase, user } = await requireSession();
+  const [models, characters, recent, source] = await Promise.all([
+    getModelOptions(supabase, user.id),
+    getCharacters(supabase),
+    getJobs(supabase, { limit: 14, succeededOnly: true }),
+    rerun ? getJob(supabase, rerun) : null,
+  ]);
 
-  return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-xl font-semibold">Playground</h1>
-        <span className="text-sm opacity-70">{Number(balance ?? 0)} credits</span>
-      </div>
-      <Playground models={models} />
-    </main>
-  );
+  const initial = source
+    ? { modelKey: source.modelKey, prompt: source.prompt, characterId: source.characterId ?? undefined, aspectRatio: source.aspectRatio ?? undefined }
+    : { characterId: characters.some((c) => c.id === character) ? character : undefined };
+
+  return <StudioView key={rerun ?? character ?? "studio"} base="/app" models={models} characters={characters} recent={recent} initial={initial} />;
 }
