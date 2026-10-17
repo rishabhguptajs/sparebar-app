@@ -29,6 +29,12 @@ export async function putObject(key: string, bytes: Uint8Array, mime: string) {
   await client().send(new PutObjectCommand({ Bucket: env.r2Bucket(), Key: key, Body: bytes, ContentType: mime }));
 }
 
+export async function getObjectBytes(key: string): Promise<{ bytes: Uint8Array; mime: string }> {
+  const res = await client().send(new GetObjectCommand({ Bucket: env.r2Bucket(), Key: key }));
+  if (!res.Body) throw new Error(`Empty object ${key}`);
+  return { bytes: await res.Body.transformToByteArray(), mime: res.ContentType ?? "application/octet-stream" };
+}
+
 /** Private bucket: media is served through short-lived signed URLs. */
 export async function signedUrl(key: string, seconds = 3600, downloadName?: string) {
   return getSignedUrl(

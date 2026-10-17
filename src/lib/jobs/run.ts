@@ -23,6 +23,8 @@ export type JobRow = {
   lab_cost_is_actual: boolean;
   outputs: { key: string; mime: string; bytes: number }[];
   error: string | null;
+  character_id: string | null;
+  deleted_at: string | null;
   poll_count: number;
   next_poll_at: string | null;
   created_at: string;
@@ -42,6 +44,8 @@ type StartInput = {
   userId: string;
   modelKey: string;
   prompt: string;
+  /** Text actually sent to the lab (prompt plus character details). Defaults to prompt. */
+  providerPrompt?: string;
   aspectRatio?: string;
   references?: ReferenceImage[];
   characterId?: string;
@@ -78,7 +82,7 @@ export async function startJob(input: StartInput): Promise<JobRow> {
   try {
     result = await adapter.submit({
       model,
-      prompt: input.prompt,
+      prompt: input.providerPrompt ?? input.prompt,
       aspectRatio: input.aspectRatio,
       references: input.references,
     });

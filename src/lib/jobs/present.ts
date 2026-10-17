@@ -12,6 +12,8 @@ export async function presentJob(job: JobRow) {
     modelLabel: getModel(job.model_key)?.label ?? job.model_key,
     kind: job.kind,
     prompt: job.prompt,
+    aspectRatio: (job.params as { aspectRatio?: string } | null)?.aspectRatio ?? null,
+    characterId: job.character_id,
     status: job.status,
     credits: job.credits_charged,
     error: job.status === "failed" ? "Generation failed. Your credits were refunded." : null,
