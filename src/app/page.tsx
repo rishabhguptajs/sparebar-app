@@ -3,16 +3,9 @@ import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
 import { MODELS } from "@/config/models";
 import { PACKS, PLANS, perCredit } from "@/config/plans";
-import { art } from "@/lib/art";
+import { HeroStrip } from "@/components/hero-strip";
 import { creditsForModel } from "@/lib/credits";
 import { getAdapter } from "@/lib/providers";
-
-// Frames that show one figure in different scenes. They are illustrations, not product output.
-const FRAMES = [
-  { seed: 4, caption: "Unboxing at a bright bathroom counter", tilt: "-rotate-3 translate-y-4" },
-  { seed: 9, caption: "Coffee run, golden hour", tilt: "translate-y-0" },
-  { seed: 15, caption: "Mirror selfie in the hallway", tilt: "rotate-3 translate-y-6" },
-];
 
 const STEPS = [
   { title: "Create a character", body: "Upload up to three photos, or describe someone and we make a portrait. Save it with a name." },
@@ -47,77 +40,60 @@ export default function Home() {
   }));
 
   return (
-    <div className="min-h-dvh">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 lg:px-8">
-        <Link href="/" className="font-display text-2xl font-semibold tracking-tight">
-          {brand.name}
-        </Link>
-        <nav aria-label="Main" className="flex items-center gap-1 text-sm sm:gap-2">
-          <a href="#how" className="hidden rounded-lg px-3 py-2 text-ink-2 hover:text-ink sm:block">
-            How it works
-          </a>
-          <a href="#pricing" className="hidden rounded-lg px-3 py-2 text-ink-2 hover:text-ink sm:block">
-            Pricing
-          </a>
-          <a href="#faq" className="hidden rounded-lg px-3 py-2 text-ink-2 hover:text-ink sm:block">
-            FAQ
-          </a>
-          <Link href="/login" className="rounded-lg px-3 py-2 font-medium hover:bg-panel">
-            Sign in
+    <div className="landing min-h-dvh">
+      <section className="relative overflow-hidden pb-10">
+        <header className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 lg:px-10">
+          <Link href="/" className="wide text-xl tracking-tight">
+            {brand.name}
           </Link>
-          <Link href="/login" className="rounded-xl bg-accent px-4 py-2 font-semibold text-accent-ink">
-            Start free
-          </Link>
-        </nav>
-      </header>
+          <nav aria-label="Main" className="flex items-center gap-1 text-sm sm:gap-3">
+            <a href="#how" className="hidden px-3 py-2 hover:underline sm:block">
+              How it works
+            </a>
+            <a href="#pricing" className="hidden px-3 py-2 hover:underline sm:block">
+              Pricing
+            </a>
+            <a href="#faq" className="hidden px-3 py-2 hover:underline sm:block">
+              FAQ
+            </a>
+            <Link href="/login" className="px-3 py-2 font-medium hover:underline">
+              Sign in
+            </Link>
+          </nav>
+        </header>
+
+        <div className="relative mt-2 sm:mt-4">
+          <HeroStrip />
+          <h1 className="wide ghost pointer-events-none relative z-10 mx-auto -mt-[0.3em] max-w-7xl whitespace-nowrap px-5 text-[clamp(2.4rem,9vw,10rem)] leading-[0.88] tracking-[-0.04em] lg:px-10">
+            One face.
+            <br />
+            Every shot.
+          </h1>
+        </div>
+
+        <div className="relative z-10 mx-auto mt-10 flex max-w-7xl flex-wrap items-end justify-between gap-6 px-5 lg:px-10">
+          <p className="max-w-md text-lg leading-relaxed">
+            Make a character once. Then put them in any scene you can describe, as a UGC style image or a video, with the same face every time.
+          </p>
+          <div className="flex flex-col items-start gap-3 sm:items-end">
+            <Link href="/login" className="btn px-8 py-4 text-lg">
+              Start free
+            </Link>
+            <p className="text-sm text-ink-2">{FREE_TIER.credits} free credits. No card needed.</p>
+          </div>
+        </div>
+      </section>
 
       <main>
-        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-10 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:px-8 lg:pb-28 lg:pt-16">
-          <div>
-            <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
-              One character. Every shot.
-            </h1>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-ink-2">
-              Create a character once, then make UGC style images and videos with the same face in any scene you can describe.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/login" className="rounded-xl bg-accent px-6 py-3.5 text-base font-semibold text-accent-ink">
-                Start free
-              </Link>
-              <a href="#pricing" className="rounded-xl px-5 py-3.5 text-base font-medium hover:bg-panel">
-                See pricing
-              </a>
-            </div>
-            <p className="mt-4 text-sm text-ink-2">
-              {FREE_TIER.credits} free credits when you sign up. No card needed.
-            </p>
-          </div>
-
-          <div className="relative mx-auto flex w-full max-w-md justify-center gap-3 pb-8 sm:max-w-lg" aria-hidden="true">
-            {FRAMES.map((f) => (
-              <div
-                key={f.seed}
-                className={`relative aspect-[9/16] w-1/3 overflow-hidden rounded-[22px] border border-line shadow-[0_24px_48px_-24px_rgb(0_0_0/0.45)] ${f.tilt}`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art(f.seed, "9:16")} alt="" className="size-full object-cover" />
-                <p className="absolute inset-x-2 bottom-3 rounded-lg bg-black/55 px-2 py-1.5 text-[11px] font-medium leading-tight text-white backdrop-blur-sm">
-                  {f.caption}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="how" className="border-y border-line bg-panel/50">
-          <div className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-20">
-            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">How it works</h2>
-            <ol className="mt-10 grid gap-8 md:grid-cols-3">
+        <section id="how" className="border-t-2 border-ink">
+          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 lg:grid-cols-[1fr_2fr] lg:px-10 lg:py-28">
+            <h2 className="wide text-4xl leading-none tracking-tight sm:text-5xl">How it works</h2>
+            <ol className="divide-y divide-ink/30 border-y border-ink/30">
               {STEPS.map((s, i) => (
-                <li key={s.title}>
-                  <p className="font-display text-5xl font-semibold text-accent">{i + 1}</p>
-                  <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
-                  <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-ink-2">{s.body}</p>
+                <li key={s.title} className="grid gap-2 py-7 sm:grid-cols-[4rem_1fr_1.4fr] sm:gap-6">
+                  <p className="wide text-3xl text-accent">{i + 1}</p>
+                  <h3 className="text-xl font-semibold">{s.title}</h3>
+                  <p className="leading-relaxed text-ink-2">{s.body}</p>
                 </li>
               ))}
             </ol>
@@ -125,111 +101,111 @@ export default function Home() {
         </section>
 
         {models.length > 0 && (
-          <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-20">
-            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Pick the model for the job</h2>
-            <p className="mt-3 max-w-lg text-ink-2">Every model has a fixed credit cost, shown before you run it.</p>
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {models.map((m) => (
-                <li key={m.key} className="flex items-center justify-between gap-4 rounded-2xl bg-panel px-5 py-4">
-                  <div>
-                    <p className="font-medium">{m.label}</p>
-                    <p className="text-sm text-ink-2">{m.kind === "image" ? "Image" : "Video"}</p>
-                  </div>
-                  <p className="text-sm tabular-nums text-ink-2">{m.credits} credits</p>
-                </li>
-              ))}
-            </ul>
+          <section className="border-t-2 border-ink bg-ink text-bg">
+            <div className="mx-auto max-w-7xl px-5 py-20 lg:px-10 lg:py-28">
+              <h2 className="wide max-w-3xl text-4xl leading-none tracking-tight sm:text-5xl">Pick the model for the job</h2>
+              <p className="mt-4 max-w-lg opacity-70">Every model has a fixed credit cost, shown before you run it.</p>
+              <ul className="mt-12 divide-y divide-bg/20 border-y border-bg/20">
+                {models.map((m) => (
+                  <li key={m.key} className="flex items-baseline justify-between gap-4 py-5">
+                    <p className="wide text-2xl tracking-tight sm:text-4xl">{m.label}</p>
+                    <p className="text-right text-sm opacity-70">
+                      {m.kind === "image" ? "Image" : "Video"} · {m.credits} credits
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
 
-        <section id="pricing" className="border-y border-line bg-panel/50">
-          <div className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-20">
-            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Pricing</h2>
-            <p className="mt-3 max-w-xl text-ink-2">
+        <section id="pricing" className="border-t-2 border-ink">
+          <div className="mx-auto max-w-7xl px-5 py-20 lg:px-10 lg:py-28">
+            <h2 className="wide text-4xl leading-none tracking-tight sm:text-5xl">Pricing</h2>
+            <p className="mt-4 max-w-xl text-ink-2">
               Pay for credits, use them on any model. Failed generations are refunded. Paid credits do not expire.
             </p>
 
-            <ul className="mt-10 grid gap-4 md:grid-cols-3">
+            <ul className="mt-12 grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
               {PLANS.map((p) => (
-                <li key={p.key} className="flex flex-col rounded-3xl bg-panel p-7">
-                  <h3 className="text-sm font-medium text-ink-2">{p.label}</h3>
-                  <p className="mt-3 font-display text-5xl font-semibold tabular-nums">${p.priceUsdCents / 100}</p>
+                <li key={p.key} className="flex flex-col bg-bg p-7">
+                  <h3 className="font-medium">{p.label}</h3>
+                  <p className="wide mt-6 text-6xl tabular-nums tracking-tight">${p.priceUsdCents / 100}</p>
                   <p className="mt-1 text-sm text-ink-2">per month</p>
-                  <p className="mt-5 font-medium">{p.credits} credits</p>
+                  <p className="mt-6 font-semibold">{p.credits} credits</p>
                   <p className="text-sm text-ink-2">${perCredit(p).toFixed(3)} per credit</p>
-                  <Link href="/login" className="mt-6 rounded-xl bg-accent px-4 py-2.5 text-center text-sm font-semibold text-accent-ink">
+                  <Link href="/login" className="btn mt-8 px-4 py-3 text-center text-sm">
                     Start with {p.label}
                   </Link>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-sm text-ink-2">Plans are paid month by month. Buy again when you want another month of credits.</p>
+            <p className="mt-4 text-sm text-ink-2">Plans are paid month by month. Buy again when you want another month of credits.</p>
 
-            <h3 className="mt-12 font-display text-xl font-semibold">Or top up when you need to</h3>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            <h3 className="wide mt-16 text-2xl tracking-tight">Or top up when you need to</h3>
+            <ul className="mt-5 divide-y divide-ink/30 border-y border-ink/30">
               {PACKS.map((p) => (
-                <li key={p.key} className="flex items-center justify-between rounded-2xl bg-panel px-5 py-4">
-                  <div>
-                    <p className="font-medium">{p.credits} credits</p>
-                    <p className="text-sm text-ink-2">${perCredit(p).toFixed(3)} per credit</p>
-                  </div>
-                  <p className="font-display text-2xl font-semibold tabular-nums">${p.priceUsdCents / 100}</p>
+                <li key={p.key} className="flex items-baseline justify-between gap-4 py-4">
+                  <p>
+                    <span className="font-semibold">{p.credits} credits</span>
+                    <span className="ml-3 text-sm text-ink-2">${perCredit(p).toFixed(3)} per credit</span>
+                  </p>
+                  <p className="wide text-2xl tabular-nums">${p.priceUsdCents / 100}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-sm text-ink-2">
-              Prices are in US dollars. From India, you pay in rupees with 18% GST added.
-            </p>
+            <p className="mt-6 text-sm text-ink-2">Prices are in US dollars. From India, you pay in rupees with 18% GST added.</p>
           </div>
         </section>
 
-        <section id="faq" className="mx-auto max-w-3xl px-5 py-16 lg:py-20">
-          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Questions</h2>
-          <div className="mt-8 divide-y divide-line border-y border-line">
-            {FAQ.map((f) => (
-              <details key={f.q} className="group py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-1 font-medium [&::-webkit-details-marker]:hidden">
-                  {f.q}
-                  <span aria-hidden="true" className="text-xl text-ink-2 transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-2">{f.a}</p>
-              </details>
-            ))}
+        <section id="faq" className="border-t-2 border-ink">
+          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 lg:grid-cols-[1fr_2fr] lg:px-10 lg:py-28">
+            <h2 className="wide text-4xl leading-none tracking-tight sm:text-5xl">Questions</h2>
+            <div className="divide-y divide-ink/30 border-y border-ink/30">
+              {FAQ.map((f) => (
+                <details key={f.q} className="group py-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-1 text-lg font-medium [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span aria-hidden="true" className="text-2xl transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-2 max-w-xl leading-relaxed text-ink-2">{f.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
-          <div className="rounded-[2rem] bg-panel px-6 py-14 text-center sm:px-12">
-            <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Make your first shot</h2>
-            <p className="mx-auto mt-3 max-w-md text-ink-2">Sign in with your email and use your free credits on an image.</p>
-            <Link href="/login" className="mt-8 inline-block rounded-xl bg-accent px-7 py-3.5 text-base font-semibold text-accent-ink">
+        <section className="border-t-2 border-ink bg-accent text-accent-ink">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-8 px-5 py-20 lg:px-10 lg:py-28">
+            <h2 className="wide max-w-4xl text-[clamp(2.8rem,9vw,8rem)] leading-[0.88] tracking-[-0.04em]">Make the first one.</h2>
+            <Link href="/login" className="btn px-8 py-4 text-lg" style={{ boxShadow: "5px 5px 0 0 var(--bg)" }}>
               Start free
             </Link>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm text-ink-2 lg:px-8">
+      <footer className="bg-ink text-bg">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm lg:px-10">
           <p>
             {brand.name} is made by{" "}
-            <a href={brand.company.site} className="underline hover:text-ink">
+            <a href={brand.company.site} className="underline">
               {brand.company.legalName}
             </a>
           </p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/terms" className="hover:text-ink">
+            <Link href="/terms" className="hover:underline">
               Terms
             </Link>
-            <Link href="/privacy" className="hover:text-ink">
+            <Link href="/privacy" className="hover:underline">
               Privacy
             </Link>
-            <Link href="/refunds" className="hover:text-ink">
+            <Link href="/refunds" className="hover:underline">
               Refunds
             </Link>
-            <a href={`mailto:${brand.supportEmail}`} className="hover:text-ink">
+            <a href={`mailto:${brand.supportEmail}`} className="hover:underline">
               {brand.supportEmail}
             </a>
           </nav>

@@ -100,3 +100,42 @@ dialog::backdrop {
   background: rgb(8 10 14 / 0.6);
   backdrop-filter: blur(3px);
 }
+
+/* The landing page has its own look: overexposed bathroom tile, flash photo pink, one hard shadow. */
+.landing {
+  --bg: #c9d9dc;
+  --panel: #e6f0f2;
+  --panel-2: #d6e4e7;
+  --line: #9db8bd;
+  --ink: #0b1519;
+  --ink-2: #324950;
+  --accent: #ff2f7e;
+  --accent-ink: #0b1519;
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.landing .wide {
+  font-family: var(--font-wide), var(--font-display), sans-serif;
+  font-weight: 800;
+}
+
+.landing .ghost {
+  text-shadow: -0.035em 0.02em 0 var(--accent);
+}
+
+.landing .btn {
+  display: inline-block;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+  box-shadow: 5px 5px 0 0 var(--accent);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.landing .btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0 0 var(--accent);
+}
