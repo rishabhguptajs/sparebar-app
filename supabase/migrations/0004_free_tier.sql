@@ -39,9 +39,13 @@ declare
   existing free_grants%rowtype;
   verdict text := 'granted';
 begin
-  -- Serialise claims from the same device or email so two tabs cannot both pass the checks.
+  -- Serialise claims from the same device, email or network so parallel requests cannot all pass the checks.
   perform pg_advisory_xact_lock(hashtext('free:' || p_device_hash));
   perform pg_advisory_xact_lock(hashtext('free:' || p_email_norm));
+  -- Locks are always taken in the same order (device, email, network) so concurrent claims cannot deadlock.
+  if p_ip_hash is not null then
+    perform pg_advisory_xact_lock(hashtext('free-ip:' || p_ip_hash));
+  end if;
 
   select * into existing from free_grants where user_id = p_user;
   if found then
