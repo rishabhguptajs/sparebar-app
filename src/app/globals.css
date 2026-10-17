@@ -101,17 +101,17 @@ dialog::backdrop {
   backdrop-filter: blur(3px);
 }
 
-/* The landing page is dark and quiet: near black, warm white type, hairlines, one soft light. */
+/* The landing page is bright and airy: cool white, ink type, hairlines, a soft pastel light. */
 .landing {
-  --bg: #07070a;
-  --panel: #101015;
-  --panel-2: #16161c;
-  --line: rgb(255 255 255 / 0.1);
-  --ink: #efeee9;
-  --ink-2: #8d8f9a;
+  --bg: #f6f7fa;
+  --panel: #ffffff;
+  --panel-2: #eceef4;
+  --line: rgb(14 16 24 / 0.1);
+  --ink: #0e1018;
+  --ink-2: #5d6272;
   --accent: #ff4d94;
-  --accent-ink: #07070a;
-  color-scheme: dark;
+  --accent-ink: #ffffff;
+  color-scheme: light;
   background: var(--bg);
   color: var(--ink);
   letter-spacing: -0.005em;
@@ -121,13 +121,14 @@ dialog::backdrop {
   display: inline-block;
   border-radius: 999px;
   background: var(--ink);
-  color: var(--bg);
+  color: #fff;
   font-weight: 500;
   transition: box-shadow 0.25s, transform 0.25s;
 }
 
 .landing .btn:hover {
-  box-shadow: 0 0 0 6px rgb(255 255 255 / 0.12), 0 8px 40px -8px rgb(255 77 148 / 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px -8px rgb(255 77 148 / 0.55);
 }
 
 .landing .btn-ghost {
@@ -138,6 +139,37 @@ dialog::backdrop {
 }
 
 .landing .btn-ghost:hover {
-  background: rgb(255 255 255 / 0.06);
-  border-color: rgb(255 255 255 / 0.25);
+  background: rgb(14 16 24 / 0.05);
+  border-color: rgb(14 16 24 / 0.25);
+}
+
+.demo-shimmer {
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.65) 50%, transparent 80%);
+  animation: demo-sweep 1.3s ease-in-out infinite;
+}
+
+.demo-caret {
+  animation: demo-blink 0.9s steps(1) infinite;
+}
+
+@keyframes demo-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes demo-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-shimmer,
+  .demo-caret {
+    animation: none;
+  }
 }

@@ -3,6 +3,7 @@ import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
 import { MODELS } from "@/config/models";
 import { PACKS, PLANS, perCredit } from "@/config/plans";
+import { HeroDemo } from "@/components/hero-demo";
 import { HeroField } from "@/components/hero-field";
 import { creditsForModel } from "@/lib/credits";
 import { getAdapter } from "@/lib/providers";
@@ -31,12 +32,6 @@ const FAQ = [
   { q: "Who sees my photos?", a: "Your photos are used to make what you ask for and are sent to the model provider you choose for that. The privacy policy lists who processes your data." },
 ];
 
-const FACTS = [
-  { title: "Images and video", body: "Photos and short clips from the same character." },
-  { title: "Priced up front", body: "Every model shows its credit cost before you run it." },
-  { title: "Refunded on failure", body: "A failed generation returns its credits on its own." },
-];
-
 export default function Home() {
   const models = MODELS.filter((m) => m.enabled && getAdapter(m.lab)).map((m) => ({
     key: m.key,
@@ -48,10 +43,10 @@ export default function Home() {
   return (
     <div className="landing min-h-dvh">
       <section className="relative isolate flex min-h-dvh flex-col overflow-hidden">
-        <HeroField className="absolute inset-0 -z-10" />
+        <HeroField light className="absolute inset-0 -z-10" />
 
         <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 lg:px-10">
-          <Link href="/" className="text-[17px] font-medium tracking-[-0.03em]">
+          <Link href="/" className="text-[17px] font-semibold tracking-[-0.03em]">
             {brand.name}
           </Link>
           <nav aria-label="Main" className="flex items-center gap-1 text-sm text-ink-2 sm:gap-2">
@@ -64,38 +59,33 @@ export default function Home() {
             <a href="#faq" className="hidden px-3 py-2 transition-colors hover:text-ink sm:block">
               FAQ
             </a>
-            <Link href="/login" className="px-3 py-2 text-ink transition-colors hover:text-ink-2">
+            <Link href="/login" className="btn-ghost px-4 py-2 text-ink">
               Sign in
             </Link>
           </nav>
         </header>
 
-        <div className="mx-auto mt-auto w-full max-w-7xl px-5 pb-10 pt-24 lg:px-10">
-          <h1 className="text-[clamp(3.2rem,11.5vw,11rem)] font-light leading-[0.9] tracking-[-0.06em]">
-            One face.
-            <br />
-            Every shot.
-          </h1>
-          <div className="mt-10 flex flex-wrap items-end justify-between gap-8">
-            <p className="max-w-sm text-[17px] leading-relaxed text-ink-2">
-              Make a character once. Put them in any scene you can describe, as a UGC style image or a video, with the same face every time.
+        <div className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-14 px-5 pb-16 pt-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:px-10">
+          <div>
+            <p className="inline-block rounded-full border border-line bg-white/60 px-3.5 py-1.5 text-sm backdrop-blur">
+              AI UGC image and video generator
             </p>
-            <div className="flex items-center gap-5">
+            <h1 className="mt-6 text-[clamp(2.8rem,7vw,6.5rem)] font-light leading-[0.95] tracking-[-0.055em]">
+              Make UGC with a character you own.
+            </h1>
+            <p className="mt-6 max-w-md text-lg leading-relaxed text-ink-2">
+              Create a character once, type a scene, and get UGC style photos and videos with the same face every time.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-5">
               <Link href="/login" className="btn px-7 py-3.5 text-[15px]">
                 Start free
               </Link>
               <p className="text-sm text-ink-2">{FREE_TIER.credits} free credits. No card.</p>
             </div>
           </div>
-
-          <dl className="mt-14 grid gap-6 border-t border-line pt-6 sm:grid-cols-3">
-            {FACTS.map((f) => (
-              <div key={f.title}>
-                <dt className="text-sm font-medium">{f.title}</dt>
-                <dd className="mt-1 max-w-[16rem] text-sm leading-relaxed text-ink-2">{f.body}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="flex justify-center lg:justify-end">
+            <HeroDemo imageCredits={models.find((m) => m.key === "nano-banana-2.1")?.credits ?? 2} />
+          </div>
         </div>
       </section>
 
@@ -122,7 +112,7 @@ export default function Home() {
               <p className="mt-5 max-w-lg text-ink-2">Every model has a fixed credit cost, shown before you run it.</p>
               <ul className="mt-14 divide-y divide-line border-y border-line">
                 {models.map((m) => (
-                  <li key={m.key} className="group flex items-baseline justify-between gap-4 py-6 transition-colors hover:bg-white/[0.02]">
+                  <li key={m.key} className="group flex items-baseline justify-between gap-4 py-6 transition-colors hover:bg-ink/[0.03]">
                     <p className="text-2xl font-light tracking-[-0.035em] sm:text-5xl">{m.label}</p>
                     <p className="text-right text-sm text-ink-2">
                       {m.kind === "image" ? "Image" : "Video"}, {m.credits} credits
@@ -193,7 +183,7 @@ export default function Home() {
         </section>
 
         <section className="relative isolate overflow-hidden border-t border-line">
-          <HeroField seed={3} className="absolute inset-0 -z-10" />
+          <HeroField light seed={3} className="absolute inset-0 -z-10" />
           <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-10 px-5 py-28 lg:px-10 lg:py-44">
             <h2 className="max-w-4xl text-[clamp(3rem,9vw,8.5rem)] font-light leading-[0.92] tracking-[-0.055em]">Make the first one.</h2>
             <Link href="/login" className="btn px-7 py-3.5 text-[15px]">

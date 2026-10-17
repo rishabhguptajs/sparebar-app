@@ -20,6 +20,7 @@ uniform float uSeed;
 uniform vec2 uRes;
 uniform vec2 uPointer;
 uniform float uPush;
+uniform float uLight;
 varying vec2 vUv;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -49,26 +50,38 @@ void main() {
   vec2 r = vec2(fbm(p * 1.6 + 2.2 * q + vec2(1.7, 9.2) + t * 1.4), fbm(p * 1.6 + 2.2 * q + vec2(8.3, 2.8) - t));
   float f = fbm(p * 1.1 + 2.6 * r);
 
-  vec3 ink = vec3(0.027, 0.027, 0.04);
-  vec3 indigo = vec3(0.10, 0.07, 0.30);
-  vec3 magenta = vec3(0.95, 0.20, 0.50);
-  vec3 ember = vec3(1.0, 0.55, 0.30);
-
-  vec3 c = mix(ink, indigo, smoothstep(0.25, 0.75, f));
-  c = mix(c, magenta, smoothstep(0.55, 0.95, r.x) * smoothstep(0.35, 0.8, f) * 0.85);
-  c += ember * smoothstep(0.78, 1.0, q.y * f * 1.6) * 0.55;
-  c += vec3(0.5, 0.55, 0.9) * lens * 0.10;
-
-  // Keep the lower left dark so type sits on calm ground.
-  float calm = smoothstep(1.15, 0.1, length((uv - vec2(0.0, 0.0)) * vec2(1.0, 1.3)));
-  c *= mix(1.0, 0.28, calm);
-  c *= smoothstep(1.4, 0.35, length(uv - 0.5));
-
-  c += (hash(uv * uRes + uTime) - 0.5) * 0.045;
+  vec3 c;
+  if (uLight > 0.5) {
+    vec3 base = vec3(0.965, 0.967, 0.975);
+    vec3 lilac = vec3(0.78, 0.72, 1.0);
+    vec3 peach = vec3(1.0, 0.80, 0.68);
+    vec3 sky = vec3(0.66, 0.85, 1.0);
+    vec3 rose = vec3(1.0, 0.68, 0.80);
+    c = mix(base, sky, smoothstep(0.3, 0.8, f) * 0.8);
+    c = mix(c, lilac, smoothstep(0.35, 0.85, r.x) * 0.75);
+    c = mix(c, peach, smoothstep(0.5, 0.95, r.y) * smoothstep(0.3, 0.7, f) * 0.85);
+    c = mix(c, rose, smoothstep(0.7, 1.0, q.x * f * 1.5) * 0.6);
+    c = mix(c, base, 0.35);
+    c += lens * 0.05;
+    c += (hash(uv * uRes + uTime) - 0.5) * 0.025;
+  } else {
+    vec3 ink = vec3(0.027, 0.027, 0.04);
+    vec3 indigo = vec3(0.10, 0.07, 0.30);
+    vec3 magenta = vec3(0.95, 0.20, 0.50);
+    vec3 ember = vec3(1.0, 0.55, 0.30);
+    c = mix(ink, indigo, smoothstep(0.25, 0.75, f));
+    c = mix(c, magenta, smoothstep(0.55, 0.95, r.x) * smoothstep(0.35, 0.8, f) * 0.85);
+    c += ember * smoothstep(0.78, 1.0, q.y * f * 1.6) * 0.55;
+    c += vec3(0.5, 0.55, 0.9) * lens * 0.10;
+    float calm = smoothstep(1.15, 0.1, length(uv * vec2(1.0, 1.3)));
+    c *= mix(1.0, 0.28, calm);
+    c *= smoothstep(1.4, 0.35, length(uv - 0.5));
+    c += (hash(uv * uRes + uTime) - 0.5) * 0.045;
+  }
   gl_FragColor = vec4(c, 1.0);
 }`;
 
-export function HeroField({ seed = 0, className = "" }: { seed?: number; className?: string }) {
+export function HeroField({ seed = 0, light = false, className = "" }: { seed?: number; light?: boolean; className?: string }) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,6 +105,7 @@ export function HeroField({ seed = 0, className = "" }: { seed?: number; classNa
       uRes: { value: new THREE.Vector2(1, 1) },
       uPointer: { value: new THREE.Vector2(0.5, 0.5) },
       uPush: { value: 0 },
+      uLight: { value: light ? 1 : 0 },
     };
     const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms });
     const geo = new THREE.PlaneGeometry(2, 2);
@@ -149,7 +163,7 @@ export function HeroField({ seed = 0, className = "" }: { seed?: number; classNa
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [seed]);
+  }, [seed, light]);
 
   return <div ref={host} aria-hidden="true" className={className} />;
 }
