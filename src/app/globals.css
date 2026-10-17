@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
+/* Cool fog canvas, ink blue-black text, one signal orange. Dark mode keeps the same roles. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #eceef2;
+  --panel: #ffffff;
+  --panel-2: #f4f5f8;
+  --line: #dde0e7;
+  --ink: #12151b;
+  --ink-2: #566070;
+  --accent: #ff4a17;
+  --accent-ink: #12151b;
+  --danger: #c4261d;
+  --ok: #17794a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0c0e12;
+    --panel: #14171d;
+    --panel-2: #1a1e26;
+    --line: #272c36;
+    --ink: #eef0f4;
+    --ink-2: #98a1b2;
+    --accent: #ff6636;
+    --accent-ink: #0c0e12;
+    --danger: #ff7a70;
+    --ok: #4ad08c;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Loading canvas: a slow sweep across the frame so a running job reads as alive. */
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 80%);
+  animation: sweep 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep::after {
+    animation: none;
+    transform: none;
+    opacity: 0.4;
+  }
+}
+
+dialog {
+  color: inherit;
+}
+
+dialog::backdrop {
+  background: rgb(8 10 14 / 0.6);
+  backdrop-filter: blur(3px);
 }
