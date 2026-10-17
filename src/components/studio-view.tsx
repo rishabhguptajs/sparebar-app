@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { DownloadIcon, ImageIcon, PlayIcon, PlusIcon, RerunIcon, VideoIcon } from "@/components/icons";
+import { CloseIcon, DownloadIcon, ImageIcon, PlayIcon, PlusIcon, RerunIcon, VideoIcon } from "@/components/icons";
 import { Media, Thumb } from "@/components/media";
 import { RATIOS, cssRatio, type CharacterCard, type ModelOption, type PresentedJob } from "@/lib/ui-types";
 
@@ -15,13 +15,15 @@ type Props = {
   characters: CharacterCard[];
   recent: PresentedJob[];
   initial?: Initial;
+  /** One-time message shown above the composer, such as the outcome of the free credits. */
+  notice?: string;
   /** Preview mode: simulates a job instead of calling the API. */
   demo?: PresentedJob;
 };
 
 const active = (j: PresentedJob | null) => j?.status === "queued" || j?.status === "running";
 
-export function StudioView({ base, models, characters, recent: recentProp, initial, demo }: Props) {
+export function StudioView({ base, models, characters, recent: recentProp, initial, notice, demo }: Props) {
   const router = useRouter();
   const startModel = models.find((m) => m.key === initial?.modelKey) ?? models[0];
 
@@ -35,6 +37,7 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [showNotice, setShowNotice] = useState(!!notice);
 
   const model = models.find((m) => m.key === modelKey);
   const kindModels = useMemo(() => models.filter((m) => m.kind === kind), [models, kind]);
@@ -135,6 +138,15 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
           <h1 className="font-display text-3xl font-semibold tracking-tight">Studio</h1>
           <p className="mt-1 text-sm text-ink-2">Describe a shot. Add a character to keep the same face across shots.</p>
         </div>
+
+        {notice && showNotice && (
+          <div role="status" className="flex items-start gap-3 rounded-xl border border-accent/50 bg-panel px-4 py-3 text-sm">
+            <p className="flex-1">{notice}</p>
+            <button type="button" onClick={() => setShowNotice(false)} aria-label="Dismiss" className="text-ink-2 hover:text-ink">
+              <CloseIcon width={16} height={16} />
+            </button>
+          </div>
+        )}
 
         <fieldset className="space-y-3">
           <legend className="sr-only">Type</legend>
