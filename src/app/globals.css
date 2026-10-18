@@ -167,3 +167,34 @@ dialog::backdrop {
   letter-spacing: -0.045em;
 }
 
+
+/* Login: a saturated electric blue stage with slow drifting light, nothing like the pale landing page. */
+.login-stage {
+  background-color: #2340ff;
+  background-image:
+    radial-gradient(40rem 32rem at 12% 8%, rgb(120 210 255 / 0.75), transparent 60%),
+    radial-gradient(38rem 30rem at 92% 22%, rgb(255 92 160 / 0.6), transparent 60%),
+    radial-gradient(46rem 36rem at 60% 105%, rgb(150 90 255 / 0.75), transparent 60%);
+  background-size: 140% 140%;
+  animation: login-drift 18s ease-in-out infinite alternate;
+}
+
+.login-mark {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.35);
+}
+
+@keyframes login-drift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-stage {
+    animation: none;
+  }
+}
