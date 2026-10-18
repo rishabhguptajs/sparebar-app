@@ -11,9 +11,36 @@ const PAUSED_PATHS = [
   "/api/billing",
 ];
 
+// The owner can still get in while paused: open /login?pass=<PAUSE_BYPASS_SECRET> once and this browser
+// keeps a cookie that lets it through. Everyone else still sees the paused page.
+const BYPASS_COOKIE = "sb_pass";
+
 // Refreshes the Supabase session cookie on each request and guards /app.
 export async function middleware(req: NextRequest) {
+  const secret = process.env.PAUSE_BYPASS_SECRET;
+  const passed =
+    !!secret &&
+    secret.length >= 16 &&
+    req.cookies.get(BYPASS_COOKIE)?.value === secret;
   if (
+    secret &&
+    secret.length >= 16 &&
+    req.nextUrl.searchParams.get("pass") === secret
+  ) {
+    const url = req.nextUrl.clone();
+    url.searchParams.delete("pass");
+    const res = NextResponse.redirect(url);
+    res.cookies.set(BYPASS_COOKIE, secret, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
+    return res;
+  }
+  if (
+    !passed &&
     process.env.SIGNIN_PAUSED === "true" &&
     PAUSED_PATHS.some(
       (p) =>

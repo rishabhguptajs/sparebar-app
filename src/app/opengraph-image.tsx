@@ -29,15 +29,11 @@ export default function OpengraphImage() {
           letterSpacing: -1,
         }}
       >
-        <div
-          style={{
-            width: 28,
-            height: 28,
-            background: "#ff4f93",
-            borderRadius: 8,
-            transform: "rotate(45deg)",
-          }}
-        />
+        <div style={{ display: "flex", alignItems: "center", width: 64, height: 32, position: "relative" }}>
+          <div style={{ position: "absolute", left: 12, right: 12, height: 8, borderRadius: 8, background: "#ff4a17" }} />
+          <div style={{ position: "absolute", left: 0, width: 24, height: 24, borderRadius: 24, background: "#ff4a17" }} />
+          <div style={{ position: "absolute", right: 0, width: 24, height: 24, borderRadius: 24, background: "#ff4a17" }} />
+        </div>
         Sparebar
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -56,7 +52,7 @@ export default function OpengraphImage() {
           AI image and video generator. Same face, every shot.
         </div>
       </div>
-      <div style={{ fontSize: 28, color: "#ff4f93" }}>sparebar.xyz</div>
+      <div style={{ fontSize: 28, color: "#ff4a17" }}>sparebar.xyz</div>
     </div>,
     size,
   );
