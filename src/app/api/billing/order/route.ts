@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { STATES, getProduct } from "@/config/plans";
 import { env } from "@/lib/env";
+import { isIndia } from "@/lib/country";
+import { getProfile } from "@/lib/profile";
 import { createOrder } from "@/lib/razorpay";
 import { admin } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
@@ -13,7 +15,8 @@ const Body = z.object({
   name: z.string().trim().min(2, "Enter your full name.").max(100),
   // Razorpay needs a real phone number on international payments.
   phone: z.string().trim().regex(/^\+?[0-9][0-9\s-]{7,16}$/, "Enter a valid phone number."),
-  inIndia: z.boolean(),
+  /** Only used when the buyer's country is not known (local development). */
+  inIndia: z.boolean().optional(),
   stateCode: z.string().optional(),
 });
 
@@ -23,7 +26,10 @@ export async function POST(req: Request) {
 
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
-  const { productKey, name, phone, inIndia, stateCode } = parsed.data;
+  const { productKey, name, phone, stateCode } = parsed.data;
+  // The region comes from the profile, not from the browser, because it decides whether GST is charged.
+  const profile = await getProfile(user.id, req.headers);
+  const inIndia = profile.country ? isIndia(profile.country) : (parsed.data.inIndia ?? false);
 
   const product = getProduct(productKey);
   if (!product) return NextResponse.json({ error: "That product is not available." }, { status: 404 });
@@ -38,6 +44,10 @@ export async function POST(req: Request) {
       stateCode,
       sellerStateCode: env.sellerStateCode(),
     });
+
+    if (inIndia && stateCode && stateCode !== profile.state_code) {
+      await admin().from("profiles").update({ state_code: stateCode } as never).eq("id", user.id);
+    }
 
     const id = randomUUID();
     const order = await createOrder({

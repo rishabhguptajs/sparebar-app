@@ -23,7 +23,9 @@ type Activity = { id: number; type: string; amount: number; note: string | null;
 type Props = {
   base: string;
   balance: number;
-  /** Rupees per dollar, or null when Indian checkout is off. */
+  /** Detected payment region, or null when it could not be detected. */
+  region?: "IN" | "OTHER" | null;
+  savedStateCode?: string | null;
   sellerStateCode: string | null;
   payments: Payment[];
   activity: Activity[];
@@ -48,14 +50,14 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
+export function CreditsView({ balance, region = null, savedStateCode = null, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [inIndia, setInIndia] = useState(false);
-  const [stateCode, setStateCode] = useState("");
+  const [inIndia, setInIndia] = useState(region === "IN");
+  const [stateCode, setStateCode] = useState(savedStateCode ?? "");
   const [busy, setBusy] = useState(false);
   // While the payment window is open our modal dialog is closed: an open modal makes the rest of the page inert and covers it.
   const paying = useRef(false);
@@ -71,6 +73,12 @@ export function CreditsView({ balance, sellerStateCode, payments, activity, invo
         }
       })()
     : null;
+
+  async function changeRegion() {
+    const next = !inIndia;
+    setInIndia(next);
+    if (!demo) await fetch("/api/profile/region", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ india: next }) });
+  }
 
   function open(p: Product) {
     setProduct(p);
@@ -285,31 +293,34 @@ export function CreditsView({ balance, sellerStateCode, payments, activity, invo
               <p className="text-xs text-ink-2">Your card network needs a real number to approve the payment.</p>
             </div>
 
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Where are you paying from?</legend>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { v: false, label: "Outside India" },
-                  { v: true, label: "India" },
-                ].map((o) => (
-                  <label
-                    key={o.label}
-                    className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-sm ${
-                      inIndia === o.v ? "border-accent" : "border-line text-ink-2"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="where"
-                      className="sr-only"
-                      checked={inIndia === o.v}
-                      onChange={() => setInIndia(o.v)}
-                    />
-                    {o.label}
-                  </label>
-                ))}
+            {region ? (
+              <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
+                <p>{inIndia ? "Paying from India, in rupees with GST." : "Paying from outside India, in US dollars."}</p>
+                <button type="button" onClick={changeRegion} className="shrink-0 text-xs text-ink-2 underline hover:text-ink">
+                  Not right?
+                </button>
               </div>
-            </fieldset>
+            ) : (
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">Where are you paying from?</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { v: false, label: "Outside India" },
+                    { v: true, label: "India" },
+                  ].map((o) => (
+                    <label
+                      key={o.label}
+                      className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-sm ${
+                        inIndia === o.v ? "border-accent" : "border-line text-ink-2"
+                      }`}
+                    >
+                      <input type="radio" name="where" className="sr-only" checked={inIndia === o.v} onChange={() => setInIndia(o.v)} />
+                      {o.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
 
             {inIndia && (
               <div className="space-y-2">

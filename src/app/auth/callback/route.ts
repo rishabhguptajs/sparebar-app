@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { DEVICE_COOKIE } from "@/config/free-tier";
 import { claimFreeCredits } from "@/lib/free-tier";
+import { recordProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
 // Two ways in. The email link lands here with ?code=..., and the 6 digit code form sends people here
@@ -20,6 +21,8 @@ export async function GET(req: Request) {
     user = (await supabase.auth.getUser()).data.user;
   }
   if (!user) return NextResponse.redirect(new URL("/login?error=link", url.origin));
+
+  await recordProfile(user, req.headers);
 
   // The email proves the address, so this is the moment to offer free credits.
   const free = await claimFreeCredits(user, req.headers);
