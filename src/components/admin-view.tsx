@@ -34,17 +34,35 @@ const REASONS: Record<string, string> = {
   paused: "Refused: free credits paused",
 };
 
-export function AdminView({ base, labs, margins, days, modelNames, free, payments, demo }: Props) {
+/** Only the labs that serve models now. The old direct adapters stay in code as fallbacks but need no tracking. */
+const ACTIVE_LABS = ["openrouter", "google"];
+
+export function AdminView({
+  base,
+  labs,
+  margins,
+  days,
+  modelNames,
+  free,
+  payments,
+  demo,
+}: Props) {
+  const shown = ACTIVE_LABS.flatMap((l) => labs.filter((s) => s.lab === l));
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
-      <h1 className="font-display text-3xl font-semibold tracking-tight">Admin</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">
+        Admin
+      </h1>
 
       <h2 className="mt-8 font-display text-xl font-semibold">Lab balances</h2>
       <p className="mt-1 max-w-xl text-sm text-ink-2">
-        Labs do not report their balance, so enter it from each lab console after a top-up. The estimate below subtracts the lab cost logged on every job since then.
+        OpenRouter runs nearly every model and reports its own balance, so it
+        needs no entry. Other labs do not report theirs: enter it from their
+        console after a top-up and the estimate subtracts the lab cost logged on
+        each job since.
       </p>
       <ul className="mt-4 grid gap-4 md:grid-cols-2">
-        {labs.map((s) => (
+        {shown.map((s) => (
           <LabCard key={s.lab} stat={s} demo={demo} />
         ))}
       </ul>
@@ -69,17 +87,32 @@ export function AdminView({ base, labs, margins, days, modelNames, free, payment
         </div>
       </div>
       <p className="mt-1 text-sm text-ink-2">
-        Revenue counts each credit at the base price of $0.10. Plans and packs sell credits for less, so real margin is lower. Target is {Math.round(TARGET_MARGIN * 100)}%.
+        Revenue counts each credit at the base price of $0.10. Plans and packs
+        sell credits for less, so real margin is lower. Target is{" "}
+        {Math.round(TARGET_MARGIN * 100)}%.
       </p>
       {margins.length === 0 ? (
-        <p className="mt-4 text-sm text-ink-2">No generations in this period.</p>
+        <p className="mt-4 text-sm text-ink-2">
+          No generations in this period.
+        </p>
       ) : (
         <div className="mt-4 overflow-x-auto rounded-2xl bg-panel">
           <table className="w-full min-w-[40rem] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-ink-2">
-                {["Model", "Done", "Failed", "Credits", "Lab cost", "Per job", "Margin"].map((h, i) => (
-                  <th key={h} className={`px-4 py-3 font-medium ${i > 0 ? "text-right" : ""}`}>
+                {[
+                  "Model",
+                  "Done",
+                  "Failed",
+                  "Credits",
+                  "Lab cost",
+                  "Per job",
+                  "Margin",
+                ].map((h, i) => (
+                  <th
+                    key={h}
+                    className={`px-4 py-3 font-medium ${i > 0 ? "text-right" : ""}`}
+                  >
                     {h}
                   </th>
                 ))}
@@ -89,18 +122,39 @@ export function AdminView({ base, labs, margins, days, modelNames, free, payment
               {margins.map((r) => {
                 const m = marginFor(r);
                 return (
-                  <tr key={r.model_key} className="border-b border-line last:border-0">
-                    <td className="px-4 py-3 font-medium">{modelNames[r.model_key] ?? r.model_key}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.ok_jobs}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.failed_jobs}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.credits}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{usd(r.lab_cost_micros)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {m.avgCostMicros !== null ? usd(m.avgCostMicros, 3) : "none"}
-                      {r.ok_jobs > 0 && r.actual_cost_jobs < r.ok_jobs && <span className="text-ink-2"> est</span>}
+                  <tr
+                    key={r.model_key}
+                    className="border-b border-line last:border-0"
+                  >
+                    <td className="px-4 py-3 font-medium">
+                      {modelNames[r.model_key] ?? r.model_key}
                     </td>
-                    <td className={`px-4 py-3 text-right font-medium tabular-nums ${m.belowTarget ? "text-danger" : ""}`}>
-                      {m.margin !== null ? `${(m.margin * 100).toFixed(1)}%` : "none"}
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.ok_jobs}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.failed_jobs}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.credits}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {usd(r.lab_cost_micros)}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {m.avgCostMicros !== null
+                        ? usd(m.avgCostMicros, 3)
+                        : "none"}
+                      {r.ok_jobs > 0 && r.actual_cost_jobs < r.ok_jobs && (
+                        <span className="text-ink-2"> est</span>
+                      )}
+                    </td>
+                    <td
+                      className={`px-4 py-3 text-right font-medium tabular-nums ${m.belowTarget ? "text-danger" : ""}`}
+                    >
+                      {m.margin !== null
+                        ? `${(m.margin * 100).toFixed(1)}%`
+                        : "none"}
                     </td>
                   </tr>
                 );
@@ -112,7 +166,9 @@ export function AdminView({ base, labs, margins, days, modelNames, free, payment
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         <section>
-          <h2 className="font-display text-xl font-semibold">Free credits, last 30 days</h2>
+          <h2 className="font-display text-xl font-semibold">
+            Free credits, last 30 days
+          </h2>
           {free.length === 0 ? (
             <p className="mt-3 text-sm text-ink-2">No signups yet.</p>
           ) : (
@@ -127,7 +183,9 @@ export function AdminView({ base, labs, margins, days, modelNames, free, payment
           )}
         </section>
         <section>
-          <h2 className="font-display text-xl font-semibold">Payments, last 30 days</h2>
+          <h2 className="font-display text-xl font-semibold">
+            Payments, last 30 days
+          </h2>
           {payments.length === 0 ? (
             <p className="mt-3 text-sm text-ink-2">No paid orders yet.</p>
           ) : (
@@ -135,9 +193,14 @@ export function AdminView({ base, labs, margins, days, modelNames, free, payment
               {payments.map((p) => (
                 <li key={p.currency} className="flex justify-between px-4 py-3">
                   <span>
-                    {p.count} {p.count === 1 ? "order" : "orders"} in {p.currency}
+                    {p.count} {p.count === 1 ? "order" : "orders"} in{" "}
+                    {p.currency}
                   </span>
-                  <span className="tabular-nums">{(p.total_minor / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+                  <span className="tabular-nums">
+                    {(p.total_minor / 100).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -170,7 +233,11 @@ function LabCard({ stat, demo }: { stat: LabStat; demo?: boolean }) {
     const res = await fetch("/api/admin/labs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lab: stat.lab, balanceUsd: Number(balance), note: note || undefined }),
+      body: JSON.stringify({
+        lab: stat.lab,
+        balanceUsd: Number(balance),
+        note: note || undefined,
+      }),
     });
     const body = await res.json();
     setBusy(false);
@@ -185,25 +252,39 @@ function LabCard({ stat, demo }: { stat: LabStat; demo?: boolean }) {
     <li className="rounded-2xl bg-panel p-5">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-display text-lg font-semibold">{r.name}</h3>
-        <span className={`text-sm font-medium ${level.cls}`}>{level.label}</span>
+        <span className={`text-sm font-medium ${level.cls}`}>
+          {level.label}
+        </span>
       </div>
       {r.remainingMicros !== null ? (
         <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
           <div>
             <dt className="text-xs text-ink-2">Estimated left</dt>
-            <dd className="mt-0.5 font-medium tabular-nums">{usd(Math.max(0, r.remainingMicros))}</dd>
+            <dd className="mt-0.5 font-medium tabular-nums">
+              {usd(Math.max(0, r.remainingMicros))}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-ink-2">Spend per day</dt>
-            <dd className="mt-0.5 font-medium tabular-nums">{usd(r.burnPerDayMicros)}</dd>
+            <dd className="mt-0.5 font-medium tabular-nums">
+              {usd(r.burnPerDayMicros)}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-ink-2">Runway</dt>
-            <dd className="mt-0.5 font-medium tabular-nums">{r.runwayDays !== null ? `${r.runwayDays.toFixed(1)} days` : "none"}</dd>
+            <dd className="mt-0.5 font-medium tabular-nums">
+              {r.runwayDays !== null
+                ? `${r.runwayDays.toFixed(1)} days`
+                : "none"}
+            </dd>
           </div>
         </dl>
       ) : (
-        <p className="mt-3 text-sm text-ink-2">Enter the balance from the {r.name} console to start tracking.</p>
+        <p className="mt-3 text-sm text-ink-2">
+          {stat.lab === "openrouter"
+            ? "Could not read the balance from OpenRouter. Enter it from the console to track it by hand."
+            : `Enter the balance from the ${r.name} console to start tracking.`}
+        </p>
       )}
       {r.note && <p className="mt-2 text-xs text-ink-2">{r.note}</p>}
 
@@ -231,7 +312,10 @@ function LabCard({ stat, demo }: { stat: LabStat; demo?: boolean }) {
             className="mt-1 w-full rounded-xl border border-line bg-bg px-3 py-2 text-sm text-ink"
           />
         </label>
-        <button disabled={busy} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
+        <button
+          disabled={busy}
+          className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50"
+        >
           Record
         </button>
       </form>
@@ -273,8 +357,12 @@ function GrantForm({ demo }: { demo?: boolean }) {
 
   return (
     <section className="mt-12">
-      <h2 className="font-display text-xl font-semibold">Add credits to a user</h2>
-      <p className="mt-1 text-sm text-ink-2">For support and testing. The user needs to have signed in once.</p>
+      <h2 className="font-display text-xl font-semibold">
+        Add credits to a user
+      </h2>
+      <p className="mt-1 text-sm text-ink-2">
+        For support and testing. The user needs to have signed in once.
+      </p>
       <form onSubmit={submit} className="mt-4 flex flex-wrap items-end gap-3">
         <label className="min-w-56 flex-1 text-xs text-ink-2">
           Email
@@ -298,7 +386,10 @@ function GrantForm({ demo }: { demo?: boolean }) {
             className="mt-1 w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm text-ink"
           />
         </label>
-        <button disabled={busy} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50">
+        <button
+          disabled={busy}
+          className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-50"
+        >
           Add credits
         </button>
       </form>

@@ -2,10 +2,34 @@ import "server-only";
 import { alertText, assessLab, labPaused, looksLikeBillingError, shouldAlert, type LabReport, type LabStat } from "@/lib/labs";
 import { admin } from "@/lib/supabase/admin";
 
+/** OpenRouter reports its own balance: credits bought minus credits used. Null when it cannot be read. */
+export async function getOpenRouterBalanceMicros(): Promise<number | null> {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/credits", {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(5000),
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const { data } = (await res.json()) as { data?: { total_credits?: number; total_usage?: number } };
+    if (typeof data?.total_credits !== "number" || typeof data.total_usage !== "number") return null;
+    return Math.round((data.total_credits - data.total_usage) * 1_000_000);
+  } catch {
+    return null;
+  }
+}
+
 export async function getLabStats(): Promise<LabStat[]> {
-  const { data, error } = await admin().rpc("lab_stats");
+  const [{ data, error }, live] = await Promise.all([admin().rpc("lab_stats"), getOpenRouterBalanceMicros()]);
   if (error) throw error;
-  return data as LabStat[];
+  // The live OpenRouter balance replaces the hand-entered one, so there is nothing to subtract.
+  return (data as LabStat[]).map((s) =>
+    s.lab === "openrouter" && live !== null
+      ? { ...s, has_balance: true, balance_micros: live, spent_since_micros: 0, recorded_at: new Date().toISOString(), note: "Read live from OpenRouter" }
+      : s,
+  );
 }
 
 export async function getLabReports(): Promise<LabReport[]> {
