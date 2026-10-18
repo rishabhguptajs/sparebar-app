@@ -57,7 +57,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
   const [product, setProduct] = useState<Product | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [inIndia, setInIndia] = useState(region === "IN");
+  const inIndia = region === "IN";
   const [stateCode, setStateCode] = useState(savedStateCode ?? "");
   const [busy, setBusy] = useState(false);
   // While the payment window is open our modal dialog is closed: an open modal makes the rest of the page inert and covers it.
@@ -74,12 +74,6 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
         }
       })()
     : null;
-
-  async function changeRegion() {
-    const next = !inIndia;
-    setInIndia(next);
-    if (!demo) await fetch("/api/profile/region", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ india: next }) });
-  }
 
   // What the price cards show: rupees for buyers in India, dollars for everyone else.
   const price = (p: Product) => (inIndia ? `₹${p.priceInr.toLocaleString("en-IN")}` : `$${p.priceUsdCents / 100}`);
@@ -102,7 +96,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
       const res = await fetch("/api/billing/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productKey: product.key, name, phone, inIndia, stateCode: inIndia ? stateCode : undefined }),
+        body: JSON.stringify({ productKey: product.key, name, phone, stateCode: inIndia ? stateCode : undefined }),
       });
       const order = await res.json();
       if (!res.ok) throw new Error(order.error ?? "Could not start the payment.");
@@ -171,13 +165,6 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
           <span className="ml-2 text-sm text-ink-2">credits left</span>
         </p>
       </div>
-
-      <p className="mt-6 text-sm text-ink-2">
-        {inIndia ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}{" "}
-        <button type="button" onClick={changeRegion} className="underline underline-offset-4 hover:text-ink">
-          {inIndia ? "Not in India?" : "In India?"}
-        </button>
-      </p>
 
       <h2 className="mt-10 font-display text-xl font-semibold">Monthly plans</h2>
       <p className="mt-1 text-sm text-ink-2">Paid month by month. Buy a plan again whenever you want another month of credits.</p>
@@ -307,9 +294,6 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
 
             <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
               <p>{inIndia ? (gstRegistered ? "Paying from India, in rupees with GST." : "Paying from India, in rupees.") : "Paying from outside India, in US dollars."}</p>
-              <button type="button" onClick={changeRegion} className="shrink-0 text-xs text-ink-2 underline hover:text-ink">
-                {inIndia ? "Not in India?" : "In India?"}
-              </button>
             </div>
 
             {inIndia && (

@@ -15,8 +15,6 @@ const Body = z.object({
   name: z.string().trim().min(2, "Enter your full name.").max(100),
   // Razorpay needs a real phone number on international payments.
   phone: z.string().trim().regex(/^\+?[0-9][0-9\s-]{7,16}$/, "Enter a valid phone number."),
-  /** Only used when the buyer's country is not known (local development). */
-  inIndia: z.boolean().optional(),
   stateCode: z.string().optional(),
 });
 
@@ -29,7 +27,7 @@ export async function POST(req: Request) {
   const { productKey, name, phone, stateCode } = parsed.data;
   // The region comes from the profile, not from the browser, because it decides whether GST is charged.
   const profile = await getProfile(user.id, req.headers);
-  const inIndia = profile.country ? isIndia(profile.country) : (parsed.data.inIndia ?? false);
+  const inIndia = isIndia(profile.country);
 
   const product = getProduct(productKey);
   if (!product) return NextResponse.json({ error: "That product is not available." }, { status: 404 });

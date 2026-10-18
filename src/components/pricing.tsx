@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { PACKS, PLANS, perCredit, type Product } from "@/config/plans";
 
 export type Region = "IN" | "OTHER";
 
-// Rupees for visitors in India, dollars for everyone else. The starting region comes from the server.
+// Rupees for visitors in India, dollars for everyone else. The region comes from the server.
 export function Pricing({ initialRegion, gstRegistered }: { initialRegion: Region; gstRegistered: boolean }) {
-  const [region, setRegion] = useState<Region>(initialRegion);
-  const india = region === "IN";
+  const india = initialRegion === "IN";
   const price = (p: Product) => (india ? `₹${p.priceInr.toLocaleString("en-IN")}` : `$${p.priceUsdCents / 100}`);
   const rate = (p: Product) => (india ? `₹${(p.priceInr / p.credits).toFixed(2)}` : `$${perCredit(p).toFixed(3)}`);
 
@@ -44,10 +42,7 @@ export function Pricing({ initialRegion, gstRegistered }: { initialRegion: Regio
         ))}
       </ul>
       <p className="mt-6 text-sm text-ink-2">
-        {india ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}{" "}
-        <button type="button" onClick={() => setRegion(india ? "OTHER" : "IN")} className="underline underline-offset-4 hover:text-ink">
-          {india ? "Not in India?" : "In India?"}
-        </button>
+        {india ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}
       </p>
     </>
   );
