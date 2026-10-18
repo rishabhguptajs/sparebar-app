@@ -81,6 +81,10 @@ export function CreditsView({ balance, region = null, savedStateCode = null, gst
     if (!demo) await fetch("/api/profile/region", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ india: next }) });
   }
 
+  // What the price cards show: rupees for buyers in India, dollars for everyone else.
+  const price = (p: Product) => (inIndia ? `₹${p.priceInr.toLocaleString("en-IN")}` : `$${p.priceUsdCents / 100}`);
+  const rate = (p: Product) => (inIndia ? `₹${(p.priceInr / p.credits).toFixed(2)}` : `$${perCredit(p).toFixed(3)}`);
+
   function open(p: Product) {
     setProduct(p);
     setError(null);
@@ -168,15 +172,24 @@ export function CreditsView({ balance, region = null, savedStateCode = null, gst
         </p>
       </div>
 
+      {region && (
+        <p className="mt-6 text-sm text-ink-2">
+          {inIndia ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}{" "}
+          <button type="button" onClick={changeRegion} className="underline underline-offset-4 hover:text-ink">
+            {inIndia ? "Not in India?" : "In India?"}
+          </button>
+        </p>
+      )}
+
       <h2 className="mt-10 font-display text-xl font-semibold">Monthly plans</h2>
       <p className="mt-1 text-sm text-ink-2">Paid month by month. Buy a plan again whenever you want another month of credits.</p>
       <ul className="mt-4 grid gap-4 md:grid-cols-3">
         {PLANS.map((p, i) => (
           <li key={p.key} className="flex flex-col rounded-3xl bg-panel p-6">
             <p className="text-sm font-medium text-ink-2">{p.label}</p>
-            <p className="mt-3 font-display text-4xl font-semibold tabular-nums">${p.priceUsdCents / 100}</p>
+            <p className="mt-3 font-display text-4xl font-semibold tabular-nums">{price(p)}</p>
             <p className="mt-1 text-sm">{p.credits} credits</p>
-            <p className="text-xs text-ink-2">${perCredit(p).toFixed(3)} per credit{i === PLANS.length - 1 ? ", the lowest rate" : ""}</p>
+            <p className="text-xs text-ink-2">{rate(p)} per credit{i === PLANS.length - 1 ? ", the lowest rate" : ""}</p>
             <button
               onClick={() => open(p)}
               className="mt-6 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
@@ -194,10 +207,10 @@ export function CreditsView({ balance, region = null, savedStateCode = null, gst
           <li key={p.key} className="flex items-center justify-between gap-3 rounded-2xl bg-panel p-4">
             <div>
               <p className="text-sm font-medium">{p.credits} credits</p>
-              <p className="text-xs text-ink-2">${perCredit(p).toFixed(3)} per credit</p>
+              <p className="text-xs text-ink-2">{rate(p)} per credit</p>
             </div>
             <button onClick={() => open(p)} className="rounded-xl bg-panel-2 px-4 py-2 text-sm font-semibold tabular-nums hover:bg-line/60">
-              ${p.priceUsdCents / 100}
+              {price(p)}
             </button>
           </li>
         ))}
