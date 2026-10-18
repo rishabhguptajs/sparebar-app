@@ -1,6 +1,6 @@
 "use client";
 
-import { useJobs, useRefreshData } from "@/lib/queries";
+import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { CloseIcon, DownloadIcon, PlayIcon, RerunIcon, TrashIcon } from "@/components/icons";
@@ -11,8 +11,7 @@ type Props = { base: string; jobs: PresentedJob[]; demo?: boolean };
 type Tab = "gallery" | "history";
 type Filter = "all" | "image" | "video";
 
-export function LibraryView({ base, jobs: jobsProp, demo }: Props) {
-  const jobs = useJobs(jobsProp, demo);
+export function LibraryView({ base, jobs, demo }: Props) {
   const refresh = useRefreshData();
   const lightbox = useRef<HTMLDialogElement>(null);
   const [tab, setTab] = useState<Tab>("gallery");

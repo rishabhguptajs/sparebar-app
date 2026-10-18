@@ -1,8 +1,5 @@
-import { LibraryView } from "@/components/library-view";
-import { getJobs, requireSession } from "@/lib/data";
+import { LibraryLoader } from "@/components/loaders";
 
-export default async function LibraryPage() {
-  const { supabase } = await requireSession();
-  const jobs = await getJobs(supabase, { limit: 120 });
-  return <LibraryView base="/app" jobs={jobs} />;
+export default function LibraryPage() {
+  return <LibraryLoader />;
 }

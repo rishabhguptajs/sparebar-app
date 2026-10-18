@@ -1,10 +1,10 @@
 "use client";
 
+import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CloseIcon, PlusIcon, TrashIcon, UploadIcon } from "@/components/icons";
 import { Thumb } from "@/components/media";
-import { useCharacters, useRefreshData } from "@/lib/queries";
 import { resizeImage } from "@/lib/resize-image";
 import type { CharacterCard } from "@/lib/ui-types";
 
@@ -16,8 +16,7 @@ type Props = {
   demo?: boolean;
 };
 
-export function CharactersView({ base, characters: charactersProp, portraitCredits, openNew, demo }: Props) {
-  const characters = useCharacters(charactersProp, demo);
+export function CharactersView({ base, characters, portraitCredits, openNew, demo }: Props) {
   const refresh = useRefreshData();
   const dialog = useRef<HTMLDialogElement>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);

@@ -1,25 +1,5 @@
-import { headers } from "next/headers";
-import { getProfile } from "@/lib/profile";
-import { regionOf } from "@/lib/country";
-import { CreditsView } from "@/components/credits-view";
-import { env } from "@/lib/env";
-import { getActivity, getBalance, getPayments, requireSession } from "@/lib/data";
+import { CreditsLoader } from "@/components/loaders";
 
-export default async function CreditsPage() {
-  const { supabase, user } = await requireSession();
-  const [balance, payments, activity] = await Promise.all([getBalance(supabase, user.id), getPayments(supabase), getActivity(supabase)]);
-  const profile = await getProfile(user.id, await headers());
-  return (
-    <CreditsView
-      base="/app"
-      balance={balance}
-      region={regionOf(profile.country)}
-      savedStateCode={profile.state_code}
-      gstRegistered={env.gstRegistered()}
-      sellerStateCode={env.sellerStateCode() ?? null}
-      payments={payments}
-      activity={activity}
-      invoiceBase="/invoice"
-    />
-  );
+export default function CreditsPage() {
+  return <CreditsLoader />;
 }

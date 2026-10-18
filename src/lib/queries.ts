@@ -1,15 +1,8 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import type { CharacterCard, PresentedJob } from "@/lib/ui-types";
-
-export const keys = {
-  balance: ["balance"] as const,
-  jobs: ["jobs"] as const,
-  characters: ["characters"] as const,
-  credits: ["credits"] as const,
-};
+import type { ActivityRow, PaymentRow } from "@/lib/data";
+import type { CharacterCard, ModelOption, PresentedJob } from "@/lib/ui-types";
 
 async function get<T>(url: string): Promise<T> {
   const res = await fetch(url, { cache: "no-store" });
@@ -17,30 +10,41 @@ async function get<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// Each hook starts from what the server rendered, then keeps the data fresh in the background.
-// In the previews (demo) nothing is fetched.
-export function useBalance(initial: number, demo = false) {
-  return useQuery({ queryKey: keys.balance, queryFn: async () => (await get<{ balance: number }>("/api/balance")).balance, initialData: initial, enabled: !demo }).data;
-}
+// Pages load as an empty shell and fill in from these calls. The cache keeps the last answer, so a page you
+// have seen shows at once and refreshes in the background.
+export const useMe = (demo = false) => useQuery({ queryKey: ["me"], queryFn: () => get<{ balance: number; isAdmin: boolean }>("/api/me"), enabled: !demo });
 
-export function useJobs(initial: PresentedJob[], demo = false) {
-  return useQuery({ queryKey: keys.jobs, queryFn: async () => (await get<{ jobs: PresentedJob[] }>("/api/jobs")).jobs, initialData: initial, enabled: !demo }).data;
-}
+export const useJobs = () => useQuery({ queryKey: ["jobs"], queryFn: async () => (await get<{ jobs: PresentedJob[] }>("/api/jobs")).jobs });
 
-export function useCharacters(initial: CharacterCard[], demo = false) {
-  return useQuery({ queryKey: keys.characters, queryFn: async () => (await get<{ characters: CharacterCard[] }>("/api/characters")).characters, initialData: initial, enabled: !demo }).data;
-}
+export const useCharacters = () => useQuery({ queryKey: ["characters"], queryFn: async () => (await get<{ characters: CharacterCard[] }>("/api/characters")).characters });
 
-export function useCreditsData<P, A>(initial: { payments: P[]; activity: A[] }, demo = false) {
-  return useQuery({ queryKey: keys.credits, queryFn: () => get<{ payments: P[]; activity: A[] }>("/api/credits"), initialData: initial, enabled: !demo }).data;
-}
+export type CreditsPageData = {
+  balance: number;
+  payments: PaymentRow[];
+  activity: ActivityRow[];
+  region: "IN" | "OTHER";
+  savedStateCode: string | null;
+  gstRegistered: boolean;
+  sellerStateCode: string | null;
+};
+export const useCreditsPage = () => useQuery({ queryKey: ["credits"], queryFn: () => get<CreditsPageData>("/api/credits") });
 
-/** After a change (a purchase, a new character, a finished job): refresh the cache and the server rendered parts. */
+export type StudioData = {
+  models: ModelOption[];
+  characters: CharacterCard[];
+  recent: PresentedJob[];
+  initial: { modelKey?: string; prompt?: string; characterId?: string; aspectRatio?: string };
+};
+export const useStudio = (rerun?: string, character?: string) =>
+  useQuery({
+    queryKey: ["studio", rerun ?? null, character ?? null],
+    queryFn: () => get<StudioData>(`/api/studio?${new URLSearchParams({ ...(rerun ? { rerun } : {}), ...(character ? { character } : {}) })}`),
+  });
+
+/** After a change (a purchase, a new character, a finished job): mark everything cached as stale so it refetches. */
 export function useRefreshData() {
   const client = useQueryClient();
-  const router = useRouter();
   return () => {
     client.invalidateQueries();
-    router.refresh();
   };
 }

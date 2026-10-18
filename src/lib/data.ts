@@ -122,9 +122,3 @@ export async function getAdminUser() {
   return (profile as { is_admin?: boolean } | null)?.is_admin ? data.user : null;
 }
 
-/** Whether to show the Admin link. Display only: every admin page and route re-checks with getAdminUser. */
-export async function isAdminHint() {
-  const { supabase, user } = await requireSession();
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-  return !!(profile as { is_admin?: boolean } | null)?.is_admin;
-}

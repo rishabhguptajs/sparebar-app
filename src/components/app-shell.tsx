@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/config/brand";
-import { useBalance } from "@/lib/queries";
+import { useMe } from "@/lib/queries";
 import { CoinIcon, GridIcon, PeopleIcon, ShieldIcon, SignOutIcon, StudioIcon } from "@/components/icons";
 
 type Props = {
   base: string;
-  balance: number;
+  /** Preview only. In the real app the balance comes from the cache. */
+  balance?: number;
   email: string | null;
   canSignOut: boolean;
   isAdmin?: boolean;
   children: React.ReactNode;
 };
 
-export function AppShell({ base, balance: balanceProp, email, canSignOut, isAdmin, children }: Props) {
-  const balance = useBalance(balanceProp, !canSignOut);
+export function AppShell({ base, balance: balanceProp = 0, email, canSignOut, isAdmin: adminProp, children }: Props) {
+  const me = useMe(!canSignOut);
+  const balance = canSignOut ? (me.data?.balance ?? 0) : balanceProp;
+  const isAdmin = canSignOut ? !!me.data?.isAdmin : adminProp;
   const path = usePathname();
   const nav = [
     { href: base, label: "Studio", icon: StudioIcon, active: path === base },

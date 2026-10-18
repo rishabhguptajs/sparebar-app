@@ -1,10 +1,10 @@
 "use client";
 
+import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { CloseIcon } from "@/components/icons";
 import { PACKS, PLANS, STATES, perCredit, type Product } from "@/config/plans";
-import { useBalance, useCreditsData, useRefreshData } from "@/lib/queries";
 import { formatMoney, quote } from "@/lib/tax";
 import { timeAgo } from "@/lib/ui-types";
 
@@ -51,9 +51,7 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance: balanceProp, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments: paymentsProp, activity: activityProp, invoiceBase, demo }: Props) {
-  const balance = useBalance(balanceProp, demo);
-  const { payments, activity } = useCreditsData({ payments: paymentsProp, activity: activityProp }, demo);
+export function CreditsView({ balance, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
   const refresh = useRefreshData();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
