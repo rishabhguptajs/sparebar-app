@@ -1,5 +1,6 @@
 "use client";
 
+import { ModelPicker } from "@/components/model-picker";
 import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -530,54 +531,21 @@ export function StudioView({
           </div>
 
           {open === "model" && (
-            <div
-              className="pop absolute inset-x-0 bottom-full mb-2 rounded-3xl border border-line bg-bg p-3 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]"
-              role="radiogroup"
-              aria-label="Model"
-            >
-              {kindModels.length === 0 && (
+            <div className="pop absolute inset-x-0 bottom-full mb-2 rounded-3xl border border-line bg-bg p-3 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]">
+              {kindModels.length === 0 ? (
                 <p className="p-3 text-sm text-ink-2">
                   No models are available for this type yet.
                 </p>
+              ) : (
+                <ModelPicker
+                  models={kindModels}
+                  selected={modelKey}
+                  onSelect={(key) => {
+                    setModelKey(key);
+                    setOpen(null);
+                  }}
+                />
               )}
-              <div className="grid max-h-[60vh] grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
-                {kindModels.map((m) => {
-                  const on = m.key === modelKey;
-                  return (
-                    <button
-                      key={m.key}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      disabled={m.paused}
-                      onClick={() => {
-                        setModelKey(m.key);
-                        setOpen(null);
-                      }}
-                      className={`group overflow-hidden rounded-2xl border text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                        on ? "border-accent" : "border-line hover:border-ink/30"
-                      }`}
-                    >
-                      <span
-                        className="relative block h-16 dark:brightness-[0.8]"
-                        style={{ background: swatch(m.key) }}
-                      >
-                        <span className="absolute bottom-1.5 right-1.5 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-medium tabular-nums text-[#0e1018] backdrop-blur">
-                          {m.credits} credits
-                        </span>
-                      </span>
-                      <span className="block px-3 py-2">
-                        <span className="block truncate text-sm font-medium">
-                          {m.label}
-                        </span>
-                        <span className="block truncate text-xs text-ink-2">
-                          {m.paused ? "Temporarily unavailable" : m.detail}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           )}
 
@@ -672,31 +640,6 @@ export function StudioView({
       />
     </div>
   );
-}
-
-/** A tint per model family, until real sample images exist. */
-function swatch(key: string) {
-  if (key.startsWith("veo")) return "linear-gradient(135deg,#bcd2ff,#d9c7ff)";
-  if (key.startsWith("nano-banana"))
-    return "linear-gradient(135deg,#ffe9a8,#ffc9b0)";
-  if (key.startsWith("gemini"))
-    return "linear-gradient(135deg,#c8e6ff,#c9f0e0)";
-  if (key.startsWith("grok")) return "linear-gradient(135deg,#dfe2ea,#f1f2f6)";
-  if (key.startsWith("seed")) return "linear-gradient(135deg,#c9d8ff,#b8e6ee)";
-  if (key.startsWith("kling")) return "linear-gradient(135deg,#ffd9b8,#ffb8c6)";
-  if (
-    key.startsWith("wan") ||
-    key.startsWith("happyhorse") ||
-    key.startsWith("qwen")
-  )
-    return "linear-gradient(135deg,#e2d4ff,#c7e0ff)";
-  if (key.startsWith("runway") || key.startsWith("flux"))
-    return "linear-gradient(135deg,#e6e6e6,#cfd8e8)";
-  if (key.startsWith("heygen"))
-    return "linear-gradient(135deg,#ffd0e8,#e0d0ff)";
-  if (key.startsWith("hailuo") || key.startsWith("minimax"))
-    return "linear-gradient(135deg,#ffc6d9,#ffd9c0)";
-  return "linear-gradient(135deg,#d6f0d2,#c9ecf0)";
 }
 
 function Pill({

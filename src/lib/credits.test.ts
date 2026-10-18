@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MODEL_META } from "@/config/model-meta";
 import {
   MODELS,
   currentPrice,
@@ -42,6 +43,26 @@ describe("credits", () => {
       "flux-3-video": 46,
       "heygen-video": 10,
       "heygen-avatar-iv": 14,
+      "seedream-5-lite": 2,
+      "seedream-5-flash": 1,
+      "seedream-4.5": 2,
+      "flux-3-image-klein": 1,
+      "flux-2-pro": 2,
+      "flux-2-max": 5,
+      "qwen-image-3-pro": 2,
+      "qwen-image-2.1-pro": 2,
+      "qwen-image-2.1-turbo": 1,
+      "grok-imagine-image-2": 2,
+      "recraft-v4.1": 2,
+      "recraft-v4.1-pro": 7,
+      "recraft-v4.1-flash": 1,
+      "recraft-v4-pro": 9,
+      "riverflow-v2.5-pro": 5,
+      "riverflow-v2.5-fast": 1,
+      "wan-2.7": 27,
+      "wan-2.6": 17,
+      "happyhorse-1.0": 27,
+      "kling-video-o1": 19,
     };
     for (const m of MODELS) {
       expect([m.key, creditsForModel(m)]).toEqual([m.key, expected[m.key]]);
@@ -71,6 +92,19 @@ describe("credits", () => {
     );
     expect(currentPrice(m, new Date("2026-12-01T00:00:00Z")).costMicros).toBe(
       60_000,
+    );
+  });
+
+  it("describes every model for the picker, with a distinct rank within images or videos", () => {
+    for (const kind of ["image", "video"] as const) {
+      const ranks = MODELS.filter((m) => m.kind === kind).map(
+        (m) => MODEL_META[m.key]?.rank,
+      );
+      expect(ranks.every((r) => typeof r === "number")).toBe(true);
+      expect(new Set(ranks).size).toBe(ranks.length);
+    }
+    expect(Object.keys(MODEL_META).sort()).toEqual(
+      MODELS.map((m) => m.key).sort(),
     );
   });
 });

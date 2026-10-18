@@ -6,6 +6,12 @@ export type ModelOption = {
   kind: "image" | "video";
   credits: number;
   detail: string;
+  maker: string;
+  /** Lower is better known or better quality; the picker lists by this. */
+  rank: number;
+  blurb: string;
+  tags: string[];
+  tier: "budget" | "standard" | "premium";
   /** Credits the user can spend on this model right now (free credits only count for eligible models). */
   available: number;
   /** The lab recently refused requests over billing, so this model is hidden for now. */
