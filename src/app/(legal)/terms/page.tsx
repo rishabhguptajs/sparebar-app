@@ -5,11 +5,12 @@ export const metadata = { title: "Terms of service" };
 
 export default function Terms() {
   const who = brand.company.legalName;
+  const what = brand.company.kind === "individual" ? "an individual based in India" : "a company registered in India";
   return (
     <LegalPage title="Terms of service" updated="18 October 2026">
       <Section title="Who we are">
         <p>
-          {brand.name} is operated by {who} ({brand.company.site.replace("https://", "")}). In these terms, &ldquo;we&rdquo; and &ldquo;us&rdquo; mean {who}. You can reach us at{" "}
+          {brand.name} is operated by {who}, {what}. In these terms, &ldquo;we&rdquo; and &ldquo;us&rdquo; mean {who}. You can reach us at{" "}
           <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.
         </p>
       </Section>
@@ -32,7 +33,7 @@ export default function Terms() {
           <li>Monthly plans are paid month by month and are not renewed automatically. Credit packs are one time purchases. Credits you buy do not expire.</li>
           <li>Free credits are for images only and expire. We may limit free credits to one grant per person.</li>
           <li>If a generation fails, the credits for it are returned automatically.</li>
-          <li>Payments are processed by Razorpay. Prices are in US dollars. Payments from India are charged in Indian rupees with 18% GST added. We issue an invoice for every payment.</li>
+          <li>Payments are processed by Razorpay. Prices are in US dollars. Payments from India are charged in Indian rupees, with GST added where it applies. We issue an invoice or receipt for every payment.</li>
         </ul>
       </Section>
 

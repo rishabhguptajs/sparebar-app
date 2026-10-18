@@ -24,9 +24,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
           <Link href="/refunds" className="hover:text-ink">
             Refunds
           </Link>
-          <a href={brand.company.site} className="hover:text-ink">
-            {brand.company.legalName}
-          </a>
+          <span>{brand.company.legalName}</span>
           <a href={`mailto:${brand.supportEmail}`} className="hover:text-ink">
             {brand.supportEmail}
           </a>

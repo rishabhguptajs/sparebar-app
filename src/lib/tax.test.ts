@@ -48,6 +48,14 @@ describe("quote", () => {
   });
 });
 
+describe("GST registration", () => {
+  it("charges no GST while the seller is not registered", () => {
+    const q = quote({ product: starter, inIndia: true, stateCode: "27", sellerStateCode: "27", gstRegistered: false });
+    expect(q.gstMinor).toBe(0);
+    expect(q.totalMinor).toBe(129900);
+  });
+});
+
 describe("catalog", () => {
   it("matches the brief", () => {
     expect(PLANS.map((p) => [p.priceUsdCents, p.credits])).toEqual([

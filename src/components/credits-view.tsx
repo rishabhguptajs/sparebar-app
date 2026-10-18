@@ -26,6 +26,7 @@ type Props = {
   /** Detected payment region, or null when it could not be detected. */
   region?: "IN" | "OTHER" | null;
   savedStateCode?: string | null;
+  gstRegistered?: boolean;
   sellerStateCode: string | null;
   payments: Payment[];
   activity: Activity[];
@@ -50,7 +51,7 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance, region = null, savedStateCode = null, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
+export function CreditsView({ balance, region = null, savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -67,7 +68,7 @@ export function CreditsView({ balance, region = null, savedStateCode = null, sel
   const q = product
     ? (() => {
         try {
-          return quote({ product, inIndia, stateCode, sellerStateCode: sellerStateCode ?? undefined });
+          return quote({ product, inIndia, stateCode, sellerStateCode: sellerStateCode ?? undefined, gstRegistered });
         } catch {
           return null;
         }
@@ -295,7 +296,7 @@ export function CreditsView({ balance, region = null, savedStateCode = null, sel
 
             {region ? (
               <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
-                <p>{inIndia ? "Paying from India, in rupees with GST." : "Paying from outside India, in US dollars."}</p>
+                <p>{inIndia ? gstRegistered ? "Paying from India, in rupees with GST." : "Paying from India, in rupees." : "Paying from outside India, in US dollars."}</p>
                 <button type="button" onClick={changeRegion} className="shrink-0 text-xs text-ink-2 underline hover:text-ink">
                   Not right?
                 </button>

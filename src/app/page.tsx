@@ -27,7 +27,7 @@ const FAQ = [
   { q: "Do credits expire?", a: "Credits you buy do not expire. Free credits do." },
   {
     q: "How do I pay?",
-    a: "By card. Prices are in US dollars. If you pay from India you are charged in rupees with 18% GST added, and every payment comes with an invoice.",
+    a: "By card. Prices are in US dollars. If you pay from India you are charged in rupees, with GST added where it applies, and every payment comes with an invoice.",
   },
   { q: "Who sees my photos?", a: "Your photos are used to make what you ask for and are sent to the model provider you choose for that. The privacy policy lists who processes your data." },
 ];
@@ -159,7 +159,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-sm text-ink-2">Prices are in US dollars. From India, you pay in rupees with 18% GST added.</p>
+            <p className="mt-6 text-sm text-ink-2">Prices are in US dollars. From India, you pay in rupees, with GST added where it applies.</p>
           </div>
         </section>
 
@@ -197,9 +197,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm text-ink-2 lg:px-10">
           <p>
             {brand.name} is made by{" "}
-            <a href={brand.company.site} className="underline underline-offset-4 hover:text-ink">
-              {brand.company.legalName}
-            </a>
+            {brand.company.legalName}
           </p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/terms" className="hover:text-ink">

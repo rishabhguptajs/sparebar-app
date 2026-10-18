@@ -4,9 +4,11 @@ export const brand = {
   domain: "sparebar.xyz",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://sparebar.xyz",
   supportEmail: "support@sparebar.xyz",
+  // Who operates the service. No company is registered yet, so this is an individual.
+  // When a company exists, change legalName and set kind to "company".
   company: {
-    legalName: "Raegent Private Limited",
-    site: "https://raegent.com",
+    legalName: "Rishabh Gupta",
+    kind: "individual" as "individual" | "company",
     country: "India",
   },
 } as const;

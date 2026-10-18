@@ -15,6 +15,7 @@ export default async function CreditsPage() {
       balance={balance}
       region={profile.country ? (isIndia(profile.country) ? "IN" : "OTHER") : null}
       savedStateCode={profile.state_code}
+      gstRegistered={env.gstRegistered()}
       sellerStateCode={env.sellerStateCode() ?? null}
       payments={payments}
       activity={activity}

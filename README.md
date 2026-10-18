@@ -90,5 +90,6 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 
 - Plans are monthly manual renewals. Paid credits do not expire. Free credits are 2, image only, expire in 14 days.
 - Refund policy: within 7 days if none of the credits are spent. Drafted in `src/app/(legal)/refunds`.
-- Rupee prices are fixed per plan and pack in `src/config/plans.ts` (`priceInr`, before GST), plus 18% GST. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
+- No company is registered yet, so the operator in `src/config/brand.ts` is an individual. GST is only charged once `SELLER_GSTIN` is set; until then Indian buyers pay the rupee price with no GST and invoices say "Invoice".
+- Rupee prices are fixed per plan and pack in `src/config/plans.ts` (`priceInr`, before GST), plus 18% GST once registered. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
 - Hosting: Vercel Hobby is for non-commercial use. Move to a paid plan or another host before taking payments.

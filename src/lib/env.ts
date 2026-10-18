@@ -17,6 +17,8 @@ export const env = {
   razorpayKeyId: () => need("RAZORPAY_KEY_ID"),
   razorpayKeySecret: () => need("RAZORPAY_KEY_SECRET"),
   razorpayWebhookSecret: () => need("RAZORPAY_WEBHOOK_SECRET"),
+  /** Set once the seller has a GSTIN. Until then no GST is charged. */
+  gstRegistered: () => !!process.env.SELLER_GSTIN,
   /** GST state code of the seller, for the CGST/SGST versus IGST split. */
   sellerStateCode: () => process.env.SELLER_STATE_CODE || undefined,
 };

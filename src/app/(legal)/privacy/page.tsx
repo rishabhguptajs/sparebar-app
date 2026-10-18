@@ -8,7 +8,7 @@ export default function Privacy() {
     <LegalPage title="Privacy policy" updated="18 October 2026">
       <Section title="Summary">
         <p>
-          {brand.company.legalName} runs {brand.name}. We collect what we need to sign you in, generate your content, take payment and keep the service safe. We do not sell your data.
+          {brand.name} is run by {brand.company.legalName}, based in {brand.company.country}. We collect what we need to sign you in, generate your content, take payment and keep the service safe. We do not sell your data.
         </p>
       </Section>
 

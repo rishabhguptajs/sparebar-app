@@ -106,9 +106,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           </tbody>
         </table>
 
-        {!p.in_india && (
+        {!p.in_india && lut && (
           <p className="mt-8 text-xs text-ink-2 print:text-neutral-600">
-            Export of services. Supply meant for export under Letter of Undertaking without payment of IGST{lut ? `, LUT ${lut}` : ""}.
+            Export of services. Supply meant for export under Letter of Undertaking without payment of IGST, LUT {lut}.
           </p>
         )}
         <p className="mt-4 text-xs text-ink-2 print:text-neutral-600">

@@ -43,6 +43,7 @@ export async function POST(req: Request) {
       inIndia,
       stateCode,
       sellerStateCode: env.sellerStateCode(),
+      gstRegistered: env.gstRegistered(),
     });
 
     if (inIndia && stateCode && stateCode !== profile.state_code) {
