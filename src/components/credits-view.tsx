@@ -292,10 +292,6 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
               <p className="text-xs text-ink-2">Your card network needs a real number to approve the payment.</p>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
-              <p>{inIndia ? (gstRegistered ? "Paying from India, in rupees with GST." : "Paying from India, in rupees.") : "Paying from outside India, in US dollars."}</p>
-            </div>
-
             {inIndia && (
               <div className="space-y-2">
                 <label htmlFor="b-state" className="text-sm font-medium">
@@ -320,20 +316,23 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
 
             {q && (
               <dl className="space-y-1.5 rounded-xl bg-panel-2 px-4 py-3 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-ink-2">Price</dt>
-                  <dd className="tabular-nums">{formatMoney(q.baseMinor, q.currency)}</dd>
-                </div>
-                {q.currency === "INR" && (
-                  <div className="flex justify-between">
-                    <dt className="text-ink-2">GST 18%</dt>
-                    <dd className="tabular-nums">{formatMoney(q.gstMinor, q.currency)}</dd>
-                  </div>
+                {q.currency === "INR" && gstRegistered && (
+                  <>
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">Price</dt>
+                      <dd className="tabular-nums">{formatMoney(q.baseMinor, q.currency)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">GST 18%</dt>
+                      <dd className="tabular-nums">{formatMoney(q.gstMinor, q.currency)}</dd>
+                    </div>
+                  </>
                 )}
-                <div className="flex justify-between border-t border-line pt-1.5 font-semibold">
+                <div className={`flex justify-between font-semibold ${q.currency === "INR" && gstRegistered ? "border-t border-line pt-1.5" : ""}`}>
                   <dt>Total</dt>
                   <dd className="tabular-nums">{formatMoney(q.totalMinor, q.currency)}</dd>
                 </div>
+                {!(q.currency === "INR" && gstRegistered) && <p className="text-xs text-ink-2">Inclusive of all taxes.</p>}
               </dl>
             )}
 
