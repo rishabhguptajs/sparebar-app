@@ -30,16 +30,12 @@ export async function POST(req: Request) {
   if (inIndia && !STATES.some((s) => s.code === stateCode)) {
     return NextResponse.json({ error: "Choose your state." }, { status: 400 });
   }
-  if (inIndia && !env.inrPerUsd()) {
-    return NextResponse.json({ error: "Payments from India are not open yet." }, { status: 503 });
-  }
 
   try {
     const q = quote({
       product,
       inIndia,
       stateCode,
-      inrPerUsd: env.inrPerUsd(),
       sellerStateCode: env.sellerStateCode(),
     });
 

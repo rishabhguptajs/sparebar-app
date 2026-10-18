@@ -9,7 +9,6 @@ export default async function CreditsPage() {
     <CreditsView
       base="/app"
       balance={balance}
-      inrPerUsd={env.inrPerUsd() ?? null}
       sellerStateCode={env.sellerStateCode() ?? null}
       payments={payments}
       activity={activity}

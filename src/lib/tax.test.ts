@@ -18,34 +18,33 @@ describe("quote", () => {
   });
 
   it("adds 18% IGST for another state", () => {
-    const q = quote({ product: starter, inIndia: true, stateCode: "29", inrPerUsd: 88, sellerStateCode: "27" });
-    expect(q.baseMinor).toBe(132000); // 15.00 USD x 88 = 1320.00 INR
-    expect(q.gstMinor).toBe(23760);
-    expect(q.igstMinor).toBe(23760);
+    const q = quote({ product: starter, inIndia: true, stateCode: "29", sellerStateCode: "27" });
+    expect(q.baseMinor).toBe(129900); // fixed price, 1299 rupees
+    expect(q.gstMinor).toBe(23382);
+    expect(q.igstMinor).toBe(23382);
     expect(q.cgstMinor + q.sgstMinor).toBe(0);
-    expect(q.totalMinor).toBe(155760);
+    expect(q.totalMinor).toBe(153282);
   });
 
   it("splits into CGST and SGST in the seller's state", () => {
-    const q = quote({ product: starter, inIndia: true, stateCode: "27", inrPerUsd: 88, sellerStateCode: "27" });
-    expect(q.cgstMinor).toBe(11880);
-    expect(q.sgstMinor).toBe(11880);
+    const q = quote({ product: starter, inIndia: true, stateCode: "27", sellerStateCode: "27" });
+    expect(q.cgstMinor).toBe(11691);
+    expect(q.sgstMinor).toBe(11691);
     expect(q.igstMinor).toBe(0);
   });
 
   it("keeps the parts equal to the whole when GST is an odd number of paise", () => {
     for (const p of PRODUCTS) {
-      for (const rate of [83.17, 88.33, 91.01]) {
-        const q = quote({ product: p, inIndia: true, stateCode: "27", inrPerUsd: rate, sellerStateCode: "27" });
+      {
+        const q = quote({ product: p, inIndia: true, stateCode: "27", sellerStateCode: "27" });
         expect(q.cgstMinor + q.sgstMinor).toBe(q.gstMinor);
         expect(q.baseMinor + q.gstMinor).toBe(q.totalMinor);
       }
     }
   });
 
-  it("refuses an Indian quote without a rate or a state", () => {
-    expect(() => quote({ product: starter, inIndia: true, stateCode: "27" })).toThrow();
-    expect(() => quote({ product: starter, inIndia: true, inrPerUsd: 88 })).toThrow();
+  it("refuses an Indian quote without a state", () => {
+    expect(() => quote({ product: starter, inIndia: true })).toThrow();
   });
 });
 

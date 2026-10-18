@@ -46,7 +46,6 @@ Nothing has run against a real Supabase, Razorpay, R2 or lab account yet. The fi
 | `ABUSE_SALT` | Free credits. They stay off until it is set |
 | `FREE_CREDITS_ENABLED` | Set to `false` to pause new free grants |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Payments |
-| `INR_PER_USD` | Indian checkout. Leave empty to switch it off |
 | `SELLER_STATE_CODE`, `SELLER_GSTIN`, `SELLER_ADDRESS`, `SELLER_LUT_NUMBER` | Invoices |
 | `ALERT_WEBHOOK_URL` | Low balance alerts (Slack or Discord webhook) |
 
@@ -91,5 +90,5 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 
 - Plans are monthly manual renewals. Paid credits do not expire. Free credits are 2, image only, expire in 14 days.
 - Refund policy: within 7 days if none of the credits are spent. Drafted in `src/app/(legal)/refunds`.
-- Rupee price is the dollar price times `INR_PER_USD`, plus 18% GST. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
+- Rupee prices are fixed per plan and pack in `src/config/plans.ts` (`priceInr`, before GST), plus 18% GST. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
 - Hosting: Vercel Hobby is for non-commercial use. Move to a paid plan or another host before taking payments.

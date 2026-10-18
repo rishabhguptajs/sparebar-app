@@ -7,7 +7,6 @@ export default function PreviewCredits() {
     <CreditsView
       base="/preview"
       balance={38}
-      inrPerUsd={88}
       sellerStateCode="27"
       invoiceBase="/invoice"
       demo

@@ -24,7 +24,6 @@ type Props = {
   base: string;
   balance: number;
   /** Rupees per dollar, or null when Indian checkout is off. */
-  inrPerUsd: number | null;
   sellerStateCode: string | null;
   payments: Payment[];
   activity: Activity[];
@@ -49,7 +48,7 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
+export function CreditsView({ balance, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -66,7 +65,7 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
   const q = product
     ? (() => {
         try {
-          return quote({ product, inIndia, stateCode, inrPerUsd: inrPerUsd ?? undefined, sellerStateCode: sellerStateCode ?? undefined });
+          return quote({ product, inIndia, stateCode, sellerStateCode: sellerStateCode ?? undefined });
         } catch {
           return null;
         }
@@ -297,21 +296,19 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
                     key={o.label}
                     className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-sm ${
                       inIndia === o.v ? "border-accent" : "border-line text-ink-2"
-                    } ${o.v && !inrPerUsd ? "cursor-not-allowed opacity-40" : ""}`}
+                    }`}
                   >
                     <input
                       type="radio"
                       name="where"
                       className="sr-only"
                       checked={inIndia === o.v}
-                      disabled={o.v && !inrPerUsd}
                       onChange={() => setInIndia(o.v)}
                     />
                     {o.label}
                   </label>
                 ))}
               </div>
-              {!inrPerUsd && <p className="text-xs text-ink-2">Rupee payments are not available right now.</p>}
             </fieldset>
 
             {inIndia && (
