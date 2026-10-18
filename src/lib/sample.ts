@@ -8,9 +8,9 @@ export const sampleModels: ModelOption[] = [
 ];
 
 export const sampleCharacters: CharacterCard[] = [
-  { id: "c1", name: "Maya", description: "Late twenties, shoulder length dark curls, warm brown skin, small gold hoops", coverUrl: art(3) },
-  { id: "c2", name: "Theo", description: "Early thirties, short sandy hair, light stubble, denim jacket", coverUrl: art(8) },
-  { id: "c3", name: "Ines", description: "Mid twenties, sleek black bob, round glasses, minimal makeup", coverUrl: art(13) },
+  { id: "c1", name: "Maya", niche: "Skincare", tone: "Warm and chatty", description: "Late twenties, shoulder length dark curls, warm brown skin, small gold hoops", coverUrl: art(3) },
+  { id: "c2", name: "Theo", niche: "Fitness", tone: "Direct and upbeat", description: "Early thirties, short sandy hair, light stubble, denim jacket", coverUrl: art(8) },
+  { id: "c3", name: "Ines", niche: "Fashion", tone: "Dry and funny", description: "Mid twenties, sleek black bob, round glasses, minimal makeup", coverUrl: art(13) },
 ];
 
 const mk = (

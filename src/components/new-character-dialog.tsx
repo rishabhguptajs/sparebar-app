@@ -20,6 +20,8 @@ export function NewCharacterDialog({ open, onClose, portraitCredits, onCreated, 
   const dialog = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [niche, setNiche] = useState("");
+  const [tone, setTone] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -41,6 +43,8 @@ export function NewCharacterDialog({ open, onClose, portraitCredits, onCreated, 
   function reset() {
     setName("");
     setDescription("");
+    setNiche("");
+    setTone("");
     setFiles([]);
     setError(null);
   }
@@ -74,6 +78,8 @@ export function NewCharacterDialog({ open, onClose, portraitCredits, onCreated, 
     const body = new FormData();
     body.set("name", name);
     body.set("description", description);
+    body.set("niche", niche);
+    body.set("tone", tone);
     files.forEach((f) => body.append("photos", f));
     try {
       const res = await fetch("/api/characters", { method: "POST", body });
@@ -132,6 +138,35 @@ export function NewCharacterDialog({ open, onClose, portraitCredits, onCreated, 
           placeholder="Late twenties, shoulder length dark curls, warm brown skin, small gold hoops"
           className="w-full resize-y rounded-xl border border-line bg-bg px-4 py-2.5 text-sm leading-relaxed"
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label htmlFor="c-niche" className="text-sm font-medium">
+            Niche <span className="font-normal text-ink-2">(optional)</span>
+          </label>
+          <input
+            id="c-niche"
+            maxLength={80}
+            value={niche}
+            onChange={(e) => setNiche(e.target.value)}
+            placeholder="Skincare"
+            className="w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="c-tone" className="text-sm font-medium">
+            Tone of voice <span className="font-normal text-ink-2">(optional)</span>
+          </label>
+          <input
+            id="c-tone"
+            maxLength={80}
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            placeholder="Warm and chatty"
+            className="w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

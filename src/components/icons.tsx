@@ -132,3 +132,11 @@ export const MoonIcon = (p: P) => (
     <path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z" />
   </svg>
 );
+
+export const WandIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M5 19L15.5 8.5" />
+    <path d="M14 7l3 3" />
+    <path d="M17.5 3.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM6.5 5l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z" />
+  </svg>
+);

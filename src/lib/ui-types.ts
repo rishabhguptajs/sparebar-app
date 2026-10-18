@@ -16,6 +16,8 @@ export type CharacterCard = {
   id: string;
   name: string;
   description: string;
+  niche: string;
+  tone: string;
   coverUrl: string | null;
 };
 

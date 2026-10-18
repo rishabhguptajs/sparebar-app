@@ -9,6 +9,8 @@ export type CharacterRow = {
   name: string;
   description: string;
   reference_keys: string[];
+  niche?: string;
+  tone?: string;
   created_at: string;
 };
 
@@ -18,6 +20,8 @@ export async function presentCharacter(row: CharacterRow): Promise<CharacterCard
     id: row.id,
     name: row.name,
     description: row.description,
+    niche: row.niche ?? "",
+    tone: row.tone ?? "",
     coverUrl: cover ? await signedUrl(cover) : null,
   };
 }

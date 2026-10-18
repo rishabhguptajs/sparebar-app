@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CloseIcon, DownloadIcon, ImageIcon, PlayIcon, PlusIcon, RerunIcon, VideoIcon } from "@/components/icons";
 import { Media, Thumb } from "@/components/media";
+import { PostKit } from "@/components/post-kit";
 import { NewCharacterDialog } from "@/components/new-character-dialog";
 import { RATIOS, cssRatio, type CharacterCard, type ModelOption, type PresentedJob } from "@/lib/ui-types";
 
@@ -259,6 +260,8 @@ export function StudioView({ base, models, characters: charactersProp, recent: r
             )}
           </div>
         )}
+
+        {job?.status === "succeeded" && !demo && <PostKit jobId={job.id} />}
 
         {recent.length > 0 && (
           <div className="w-full max-w-3xl">

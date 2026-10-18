@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { characterPrompt, loadReferences, type CharacterRow } from "@/lib/characters";
 import { getModel } from "@/config/models";
+import { getObjectBytes } from "@/lib/r2";
 import { startJob, UserFacingError } from "@/lib/jobs/run";
 import { presentJob } from "@/lib/jobs/present";
 import { createClient, getUser } from "@/lib/supabase/server";
@@ -14,6 +15,8 @@ const Body = z.object({
   prompt: z.string().trim().min(1).max(4000),
   aspectRatio: z.enum(["1:1", "9:16", "16:9", "4:5", "3:4", "4:3"]).optional(),
   characterId: z.string().uuid().optional(),
+  /** A product photo uploaded through /api/uploads/product. */
+  productKey: z.string().max(200).optional(),
 });
 
 export async function POST(req: Request) {
@@ -24,17 +27,26 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
   try {
-    const { characterId, ...rest } = parsed.data;
+    const { characterId, productKey, ...rest } = parsed.data;
     let providerPrompt: string | undefined;
-    let references;
+    let references: Awaited<ReturnType<typeof loadReferences>> | undefined;
     if (characterId) {
       const supabase = await createClient();
       const { data } = await supabase.from("characters").select("*").eq("id", characterId).is("deleted_at", null).maybeSingle();
       if (!data) return NextResponse.json({ error: "That character is no longer available." }, { status: 404 });
       const character = data as CharacterRow;
       // Video takes one reference photo, images take up to three.
-      references = await loadReferences(character, getModel(rest.modelKey)?.kind === "video" ? 1 : 3);
+      const isVideo = getModel(rest.modelKey)?.kind === "video";
+      // Leave room for the product photo on images.
+      references = await loadReferences(character, isVideo ? 1 : productKey ? 2 : 3);
       providerPrompt = characterPrompt(character, rest.prompt);
+    }
+    if (productKey && getModel(rest.modelKey)?.kind === "image") {
+      // Only the user's own uploads are allowed.
+      if (!productKey.startsWith(`u/${user.id}/products/`)) return NextResponse.json({ error: "Invalid product photo." }, { status: 400 });
+      const f = await getObjectBytes(productKey);
+      references = [...(references ?? []), { mime: f.mime, base64: Buffer.from(f.bytes).toString("base64") }];
+      providerPrompt = `${providerPrompt ?? rest.prompt}\nThe last reference image is the product. Show that exact product, unchanged, in the scene.`;
     }
     const job = await startJob({ userId: user.id, ...rest, characterId, providerPrompt, references });
     return NextResponse.json({ job: await presentJob(job) });

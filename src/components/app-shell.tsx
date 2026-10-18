@@ -10,6 +10,7 @@ import {
   GridIcon,
   PeopleIcon,
   SettingsIcon,
+  WandIcon,
   ShieldIcon,
   SignOutIcon,
   StudioIcon,
@@ -40,6 +41,12 @@ export function AppShell({
   const { theme, toggle } = useAppTheme();
   const nav = [
     { href: base, label: "Studio", icon: StudioIcon, active: path === base },
+    {
+      href: `${base}/create`,
+      label: "Create",
+      icon: WandIcon,
+      active: path.startsWith(`${base}/create`),
+    },
     {
       href: `${base}/characters`,
       label: "Characters",

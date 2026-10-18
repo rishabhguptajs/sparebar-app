@@ -18,6 +18,8 @@ const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp"]);
 const Fields = z.object({
   name: z.string().trim().min(1, "Give the character a name.").max(60),
   description: z.string().trim().max(1000),
+  niche: z.string().trim().max(80).default(""),
+  tone: z.string().trim().max(80).default(""),
 });
 
 export async function GET() {
@@ -34,7 +36,7 @@ export async function POST(req: Request) {
   const form = await req.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const fields = Fields.safeParse({ name: form.get("name") ?? "", description: form.get("description") ?? "" });
+  const fields = Fields.safeParse({ name: form.get("name") ?? "", description: form.get("description") ?? "", niche: form.get("niche") ?? "", tone: form.get("tone") ?? "" });
   if (!fields.success) return NextResponse.json({ error: fields.error.issues[0].message }, { status: 400 });
 
   const files = form.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await admin()
       .from("characters")
-      .insert({ id, user_id: user.id, name: fields.data.name, description: fields.data.description, reference_keys: keys } as never)
+      .insert({ id, user_id: user.id, name: fields.data.name, description: fields.data.description, niche: fields.data.niche, tone: fields.data.tone, reference_keys: keys } as never)
       .select("*")
       .single();
     if (error) throw error;

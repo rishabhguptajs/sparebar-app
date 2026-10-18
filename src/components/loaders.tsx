@@ -1,6 +1,7 @@
 "use client";
 
 import { CharactersView } from "@/components/characters-view";
+import { CreateView } from "@/components/create-view";
 import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -42,6 +43,11 @@ export function CreditsLoader() {
 export function SettingsLoader() {
   const { data } = useSettings();
   return data ? <SettingsView email={data.email} fullName={data.fullName} stateCode={data.stateCode} region={data.region} /> : <PageSkeleton />;
+}
+
+export function CreateLoader() {
+  const { data } = useStudio();
+  return data ? <CreateView base="/app" models={data.models} characters={data.characters} /> : <PageSkeleton />;
 }
 
 export function StudioLoader({ rerun, character, welcome }: { rerun?: string; character?: string; welcome?: string }) {
