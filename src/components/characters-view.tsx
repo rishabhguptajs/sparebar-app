@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { CloseIcon, PlusIcon, TrashIcon, UploadIcon } from "@/components/icons";
 import { Thumb } from "@/components/media";
+import { useCharacters, useRefreshData } from "@/lib/queries";
 import { resizeImage } from "@/lib/resize-image";
 import type { CharacterCard } from "@/lib/ui-types";
 
@@ -16,8 +16,9 @@ type Props = {
   demo?: boolean;
 };
 
-export function CharactersView({ base, characters, portraitCredits, openNew, demo }: Props) {
-  const router = useRouter();
+export function CharactersView({ base, characters: charactersProp, portraitCredits, openNew, demo }: Props) {
+  const characters = useCharacters(charactersProp, demo);
+  const refresh = useRefreshData();
   const dialog = useRef<HTMLDialogElement>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -71,7 +72,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
       close();
-      router.refresh();
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -82,7 +83,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
   async function remove(id: string) {
     setConfirmId(null);
     if (!demo) await fetch(`/api/characters/${id}`, { method: "DELETE" });
-    router.refresh();
+    refresh();
   }
 
   const generating = files.length === 0;

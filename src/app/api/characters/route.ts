@@ -5,7 +5,8 @@ import { presentCharacter, type CharacterRow } from "@/lib/characters";
 import { startJob, UserFacingError } from "@/lib/jobs/run";
 import { extFor, putObject } from "@/lib/r2";
 import { admin } from "@/lib/supabase/admin";
-import { getUser } from "@/lib/supabase/server";
+import { getCharacters } from "@/lib/data";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export const maxDuration = 60;
 
@@ -18,6 +19,12 @@ const Fields = z.object({
   name: z.string().trim().min(1, "Give the character a name.").max(60),
   description: z.string().trim().max(1000),
 });
+
+export async function GET() {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  return NextResponse.json({ characters: await getCharacters(await createClient()) });
+}
 
 // Creates a character from uploaded photos, or, with no photos, from a generated portrait.
 export async function POST(req: Request) {

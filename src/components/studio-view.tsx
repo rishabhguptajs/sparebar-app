@@ -1,7 +1,7 @@
 "use client";
 
+import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CloseIcon, DownloadIcon, ImageIcon, PlayIcon, PlusIcon, RerunIcon, VideoIcon } from "@/components/icons";
 import { Media, Thumb } from "@/components/media";
@@ -24,7 +24,7 @@ type Props = {
 const active = (j: PresentedJob | null) => j?.status === "queued" || j?.status === "running";
 
 export function StudioView({ base, models, characters, recent: recentProp, initial, notice, demo }: Props) {
-  const router = useRouter();
+  const refresh = useRefreshData();
   const startModel = models.find((m) => m.key === initial?.modelKey) ?? models[0];
 
   const [kind, setKind] = useState<"image" | "video">(startModel?.kind ?? "image");
@@ -62,7 +62,7 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
   function finish(next: PresentedJob) {
     setJob(next);
     if (next.status === "succeeded") setRecent((r) => [next, ...r.filter((x) => x.id !== next.id)].slice(0, 14));
-    router.refresh();
+    refresh();
   }
 
   async function generate(e?: React.FormEvent) {
@@ -90,7 +90,7 @@ export function StudioView({ base, models, characters, recent: recentProp, initi
       if (!res.ok) throw new Error(body.error ?? "Something went wrong.");
       if (active(body.job)) {
         setJob(body.job);
-        router.refresh();
+        refresh();
       } else {
         finish(body.job);
       }

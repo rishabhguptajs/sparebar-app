@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CloseIcon } from "@/components/icons";
 import { PACKS, PLANS, STATES, perCredit, type Product } from "@/config/plans";
+import { useBalance, useCreditsData, useRefreshData } from "@/lib/queries";
 import { formatMoney, quote } from "@/lib/tax";
 import { timeAgo } from "@/lib/ui-types";
 
@@ -51,8 +51,10 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
-  const router = useRouter();
+export function CreditsView({ balance: balanceProp, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments: paymentsProp, activity: activityProp, invoiceBase, demo }: Props) {
+  const balance = useBalance(balanceProp, demo);
+  const { payments, activity } = useCreditsData({ payments: paymentsProp, activity: activityProp }, demo);
+  const refresh = useRefreshData();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [name, setName] = useState("");
@@ -128,7 +130,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
             const out = await v.json();
             if (!v.ok) throw new Error(out.error ?? "We could not confirm the payment.");
             setDone(out.credits);
-            router.refresh();
+            refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "We could not confirm the payment.");
           } finally {

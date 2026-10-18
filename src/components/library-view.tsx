@@ -1,7 +1,7 @@
 "use client";
 
+import { useJobs, useRefreshData } from "@/lib/queries";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { CloseIcon, DownloadIcon, PlayIcon, RerunIcon, TrashIcon } from "@/components/icons";
 import { Media } from "@/components/media";
@@ -11,8 +11,9 @@ type Props = { base: string; jobs: PresentedJob[]; demo?: boolean };
 type Tab = "gallery" | "history";
 type Filter = "all" | "image" | "video";
 
-export function LibraryView({ base, jobs, demo }: Props) {
-  const router = useRouter();
+export function LibraryView({ base, jobs: jobsProp, demo }: Props) {
+  const jobs = useJobs(jobsProp, demo);
+  const refresh = useRefreshData();
   const lightbox = useRef<HTMLDialogElement>(null);
   const [tab, setTab] = useState<Tab>("gallery");
   const [filter, setFilter] = useState<Filter>("all");
@@ -29,7 +30,7 @@ export function LibraryView({ base, jobs, demo }: Props) {
     setOpen(null);
     lightbox.current?.close();
     if (!demo) await fetch(`/api/jobs/${id}`, { method: "DELETE" });
-    router.refresh();
+    refresh();
   }
 
   function view(j: PresentedJob) {
