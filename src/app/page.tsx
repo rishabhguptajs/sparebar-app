@@ -1,10 +1,13 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
 import { MODELS } from "@/config/models";
-import { PACKS, PLANS, perCredit } from "@/config/plans";
 import { HeroDemo } from "@/components/hero-demo";
 import { HeroField } from "@/components/hero-field";
+import { Pricing } from "@/components/pricing";
+import { countryFromHeaders, regionOf } from "@/lib/country";
+import { env } from "@/lib/env";
 import { creditsForModel } from "@/lib/credits";
 import { getAdapter } from "@/lib/providers";
 
@@ -32,7 +35,8 @@ const FAQ = [
   { q: "Who sees my photos?", a: "Your photos are used to make what you ask for and are sent to the model provider you choose for that. The privacy policy lists who processes your data." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const region = regionOf(countryFromHeaders(await headers()));
   const models = MODELS.filter((m) => m.enabled && getAdapter(m.lab)).map((m) => ({
     key: m.key,
     label: m.label,
@@ -131,35 +135,7 @@ export default function Home() {
               Pay for credits, use them on any model. Failed generations are refunded. Paid credits do not expire.
             </p>
 
-            <ul className="mt-14 grid border-y border-line md:grid-cols-3 md:divide-x md:divide-line">
-              {PLANS.map((p) => (
-                <li key={p.key} className="flex flex-col py-8 md:px-8 md:first:pl-0 md:last:pr-0">
-                  <h3 className="text-sm text-ink-2">{p.label}</h3>
-                  <p className="mt-6 text-7xl font-light tabular-nums tracking-[-0.06em]">${p.priceUsdCents / 100}</p>
-                  <p className="mt-1 text-sm text-ink-2">per month</p>
-                  <p className="mt-8">{p.credits} credits</p>
-                  <p className="text-sm text-ink-2">${perCredit(p).toFixed(3)} per credit</p>
-                  <Link href="/login" className="btn-ghost mt-8 px-4 py-3 text-center text-sm">
-                    Start with {p.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 text-sm text-ink-2">Plans are paid month by month. Buy again when you want another month of credits.</p>
-
-            <h3 className="mt-20 text-2xl font-light tracking-[-0.03em]">Or top up when you need to</h3>
-            <ul className="mt-6 divide-y divide-line border-y border-line">
-              {PACKS.map((p) => (
-                <li key={p.key} className="flex items-baseline justify-between gap-4 py-5">
-                  <p>
-                    {p.credits} credits
-                    <span className="ml-4 text-sm text-ink-2">${perCredit(p).toFixed(3)} per credit</span>
-                  </p>
-                  <p className="text-2xl font-light tabular-nums tracking-[-0.03em]">${p.priceUsdCents / 100}</p>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-sm text-ink-2">Prices are in US dollars. From India, you pay in rupees, with GST added where it applies.</p>
+            <Pricing initialRegion={region} gstRegistered={env.gstRegistered()} />
           </div>
         </section>
 

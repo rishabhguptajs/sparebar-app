@@ -16,3 +16,8 @@ export function countryFromHeaders(h: Headers): string | null {
 export function isIndia(country: string | null | undefined) {
   return country === "IN";
 }
+
+/** Payment region for display: India for Indian visitors, otherwise outside India. */
+export function regionOf(country: string | null | undefined): "IN" | "OTHER" {
+  return isIndia(country) ? "IN" : "OTHER";
+}

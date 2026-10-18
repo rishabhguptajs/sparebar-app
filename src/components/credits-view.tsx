@@ -24,7 +24,7 @@ type Props = {
   base: string;
   balance: number;
   /** Detected payment region, or null when it could not be detected. */
-  region?: "IN" | "OTHER" | null;
+  region?: "IN" | "OTHER";
   savedStateCode?: string | null;
   gstRegistered?: boolean;
   sellerStateCode: string | null;
@@ -51,7 +51,7 @@ function loadCheckout() {
   });
 }
 
-export function CreditsView({ balance, region = null, savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
+export function CreditsView({ balance, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -172,14 +172,12 @@ export function CreditsView({ balance, region = null, savedStateCode = null, gst
         </p>
       </div>
 
-      {region && (
-        <p className="mt-6 text-sm text-ink-2">
-          {inIndia ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}{" "}
-          <button type="button" onClick={changeRegion} className="underline underline-offset-4 hover:text-ink">
-            {inIndia ? "Not in India?" : "In India?"}
-          </button>
-        </p>
-      )}
+      <p className="mt-6 text-sm text-ink-2">
+        {inIndia ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}{" "}
+        <button type="button" onClick={changeRegion} className="underline underline-offset-4 hover:text-ink">
+          {inIndia ? "Not in India?" : "In India?"}
+        </button>
+      </p>
 
       <h2 className="mt-10 font-display text-xl font-semibold">Monthly plans</h2>
       <p className="mt-1 text-sm text-ink-2">Paid month by month. Buy a plan again whenever you want another month of credits.</p>
@@ -307,34 +305,12 @@ export function CreditsView({ balance, region = null, savedStateCode = null, gst
               <p className="text-xs text-ink-2">Your card network needs a real number to approve the payment.</p>
             </div>
 
-            {region ? (
-              <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
-                <p>{inIndia ? gstRegistered ? "Paying from India, in rupees with GST." : "Paying from India, in rupees." : "Paying from outside India, in US dollars."}</p>
-                <button type="button" onClick={changeRegion} className="shrink-0 text-xs text-ink-2 underline hover:text-ink">
-                  Not right?
-                </button>
-              </div>
-            ) : (
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium">Where are you paying from?</legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { v: false, label: "Outside India" },
-                    { v: true, label: "India" },
-                  ].map((o) => (
-                    <label
-                      key={o.label}
-                      className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-sm ${
-                        inIndia === o.v ? "border-accent" : "border-line text-ink-2"
-                      }`}
-                    >
-                      <input type="radio" name="where" className="sr-only" checked={inIndia === o.v} onChange={() => setInIndia(o.v)} />
-                      {o.label}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            )}
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-panel-2 px-4 py-2.5 text-sm">
+              <p>{inIndia ? (gstRegistered ? "Paying from India, in rupees with GST." : "Paying from India, in rupees.") : "Paying from outside India, in US dollars."}</p>
+              <button type="button" onClick={changeRegion} className="shrink-0 text-xs text-ink-2 underline hover:text-ink">
+                {inIndia ? "Not in India?" : "In India?"}
+              </button>
+            </div>
 
             {inIndia && (
               <div className="space-y-2">
