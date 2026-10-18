@@ -1,11 +1,11 @@
 import { AppShell } from "@/components/app-shell";
-import { getAdminUser, getBalance, requireSession } from "@/lib/data";
+import { getBalance, isAdminHint, requireSession } from "@/lib/data";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user } = await requireSession();
-  const [balance, adminUser] = await Promise.all([getBalance(supabase, user.id), getAdminUser()]);
+  const [balance, isAdmin] = await Promise.all([getBalance(supabase, user.id), isAdminHint()]);
   return (
-    <AppShell base="/app" balance={balance} email={user.email ?? null} canSignOut isAdmin={!!adminUser}>
+    <AppShell base="/app" balance={balance} email={user.email ?? null} canSignOut isAdmin={isAdmin}>
       {children}
     </AppShell>
   );

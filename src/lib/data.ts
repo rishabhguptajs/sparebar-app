@@ -114,7 +114,17 @@ export async function getActivity(supabase: Supabase) {
 
 /** The signed-in user if they are an admin. Admins are set by hand: update profiles set is_admin = true. */
 export async function getAdminUser() {
+  // Authorization for admin pages and routes: ask the auth server, so a revoked session stops working at once.
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return null;
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
+  return (profile as { is_admin?: boolean } | null)?.is_admin ? data.user : null;
+}
+
+/** Whether to show the Admin link. Display only: every admin page and route re-checks with getAdminUser. */
+export async function isAdminHint() {
   const { supabase, user } = await requireSession();
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-  return (profile as { is_admin?: boolean } | null)?.is_admin ? user : null;
+  return !!(profile as { is_admin?: boolean } | null)?.is_admin;
 }
