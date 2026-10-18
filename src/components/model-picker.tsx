@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { TOP_PICKS } from "@/config/model-meta";
-import { ModelArt } from "@/components/model-art";
+import { MakerMark } from "@/components/maker-mark";
 import type { ModelOption } from "@/lib/ui-types";
 
 type Props = {
@@ -18,7 +18,7 @@ const TIERS = [
   { id: "premium", label: "Top quality" },
 ] as const;
 
-/** The model list: top picks first, then everything else, with search and a price filter. */
+/** The model list: one quiet column, top picks first, with search and a price filter. */
 export function ModelPicker({ models, selected, onSelect }: Props) {
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<(typeof TIERS)[number]["id"]>("all");
@@ -45,23 +45,27 @@ export function ModelPicker({ models, selected, onSelect }: Props) {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 px-1 pb-3">
+      <div className="flex items-center gap-3 px-2 pb-2">
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search models"
+          placeholder="Search"
           aria-label="Search models"
-          className="bare-focus min-w-0 flex-1 rounded-full border border-line bg-panel px-4 py-2 text-sm"
+          className="bare-focus min-w-0 flex-1 bg-transparent py-1.5 text-[15px] placeholder:text-ink-2"
         />
-        <div className="flex gap-1" role="group" aria-label="Price">
+        <div
+          className="flex shrink-0 gap-3 text-xs"
+          role="group"
+          aria-label="Price"
+        >
           {TIERS.map((t) => (
             <button
               key={t.id}
               type="button"
               aria-pressed={tier === t.id}
               onClick={() => setTier(t.id)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${tier === t.id ? "bg-ink text-bg" : "bg-panel text-ink-2 hover:text-ink"}`}
+              className={`transition-colors ${tier === t.id ? "font-semibold text-ink" : "text-ink-2 hover:text-ink"}`}
             >
               {t.label}
             </button>
@@ -69,7 +73,7 @@ export function ModelPicker({ models, selected, onSelect }: Props) {
         </div>
       </div>
 
-      <div className="max-h-[58vh] space-y-4 overflow-y-auto px-1 pb-1">
+      <div className="max-h-[52vh] overflow-y-auto border-t border-line pt-2">
         {top.length > 0 && (
           <Section
             title="Top picks"
@@ -80,15 +84,15 @@ export function ModelPicker({ models, selected, onSelect }: Props) {
         )}
         {rest.length > 0 && (
           <Section
-            title={top.length > 0 ? "More models" : undefined}
+            title={top.length > 0 ? "More" : undefined}
             models={rest}
             selected={selected}
             onSelect={onSelect}
           />
         )}
         {top.length + rest.length === 0 && (
-          <p className="p-3 text-sm text-ink-2">
-            No models match. Clear the search or the price filter.
+          <p className="px-3 py-6 text-center text-sm text-ink-2">
+            Nothing matches. Clear the search or the price filter.
           </p>
         )}
       </div>
@@ -108,17 +112,12 @@ function Section({
   onSelect: (key: string) => void;
 }) {
   return (
-    <section>
-      {title && (
-        <h3 className="mb-2 text-xs font-medium text-ink-2">{title}</h3>
-      )}
-      <div
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-        role="radiogroup"
-        aria-label={title ?? "Models"}
-      >
+    <section className="pb-2">
+      {title && <h3 className="px-3 pb-1 pt-2 text-xs text-ink-2">{title}</h3>}
+      <div role="radiogroup" aria-label={title ?? "Models"}>
         {models.map((m) => {
           const on = m.key === selected;
+          const sound = m.tags.includes("Sound");
           return (
             <button
               key={m.key}
@@ -128,36 +127,39 @@ function Section({
               disabled={m.paused}
               title={m.tags.join(", ")}
               onClick={() => onSelect(m.key)}
-              className={`group overflow-hidden rounded-2xl border text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${on ? "border-accent" : "border-line hover:border-ink/30"}`}
+              className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${on ? "bg-panel" : "hover:bg-panel/60"}`}
             >
-              <span className="relative block h-16 dark:brightness-[0.8]">
-                <ModelArt
-                  modelKey={m.key}
-                  maker={m.maker}
-                  kind={m.kind}
-                  className="absolute inset-0 size-full"
-                />
-                <span className="absolute bottom-1.5 right-1.5 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-medium tabular-nums text-[#0e1018] backdrop-blur">
-                  {m.credits} credits
+              <MakerMark maker={m.maker} />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-1.5 text-[15px] font-medium">
+                  <span className="truncate">{m.label}</span>
+                  {sound && (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="size-3.5 shrink-0 text-ink-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-label="Makes sound"
+                    >
+                      <path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z" />
+                      <path d="M16 9a4 4 0 010 6" />
+                    </svg>
+                  )}
                 </span>
-              </span>
-              <span className="block px-3 py-2">
-                <span className="block truncate text-sm font-medium">
-                  {m.label}
-                </span>
-                <span className="line-clamp-2 min-h-8 text-xs text-ink-2">
+                <span className="block truncate text-[13px] text-ink-2">
                   {m.paused ? "Temporarily unavailable" : m.blurb}
                 </span>
-                <span className="mt-1.5 flex flex-wrap gap-1">
-                  {m.tags.slice(0, 3).map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-panel-2 px-1.5 py-0.5 text-[10px] text-ink-2"
-                    >
-                      {t}
-                    </span>
-                  ))}
+              </span>
+              <span className="shrink-0 text-right tabular-nums">
+                <span
+                  className={`block text-[15px] font-semibold ${on ? "text-accent" : ""}`}
+                >
+                  {m.credits}
                 </span>
+                <span className="block text-[11px] text-ink-2">credits</span>
               </span>
             </button>
           );

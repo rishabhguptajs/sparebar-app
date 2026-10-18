@@ -531,7 +531,7 @@ export function StudioView({
           </div>
 
           {open === "model" && (
-            <div className="pop absolute inset-x-0 bottom-full mb-2 rounded-3xl border border-line bg-bg p-3 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]">
+            <div className="pop absolute bottom-full left-0 mb-2 w-[min(32rem,100%)] rounded-3xl border border-line bg-bg p-2 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]">
               {kindModels.length === 0 ? (
                 <p className="p-3 text-sm text-ink-2">
                   No models are available for this type yet.
