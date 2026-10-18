@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MakerMark } from "@/components/maker-mark";
 import { Crumbs, SiteShell } from "@/components/site-shell";
 import { JsonLd } from "@/components/json-ld";
 import { FREE_TIER } from "@/config/free-tier";
@@ -39,6 +40,21 @@ export default async function ModelPage({
   const others = catalog()
     .filter((o) => o.kind === m.kind && o.key !== m.key)
     .slice(0, 6);
+  const top = (re: RegExp) => m.tags.find((t) => re.test(t));
+  const facts: [string, string][] = [
+    ["From", `${m.fromCredits} credits`],
+    ["Sound", m.sound ? "Yes" : "No"],
+    [
+      m.kind === "video" ? "Length" : "Output",
+      m.kind === "video"
+        ? (top(/^Up to \d+s$/)?.replace("Up to ", "Up to ") ?? "Short clips")
+        : "Image",
+    ],
+    [
+      "Resolution",
+      top(/^Up to (\d+K|\d+p)$/) ?? m.options.at(-1)?.value ?? "Standard",
+    ],
+  ];
   const faq = [
     {
       q: `What is ${m.label}?`,
@@ -89,19 +105,30 @@ export default async function ModelPage({
         ]}
       />
       <article className="mt-8 max-w-3xl">
-        <p className="text-sm text-ink-2">
-          {m.maker}, {noun(m.kind)} model
-        </p>
-        <h1 className="mt-2 text-4xl font-light leading-[1.05] tracking-[-0.045em] sm:text-6xl">
+        <div className="flex items-center gap-3">
+          <MakerMark maker={m.maker} className="size-12" />
+          <p className="text-sm text-ink-2">
+            {m.maker}, {noun(m.kind)} model
+          </p>
+        </div>
+        <h1 className="mt-5 text-[clamp(2.4rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.05em]">
           {m.label} AI {noun(m.kind)} generator
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-ink-2">
           {m.blurb} Use {m.label} in Sparebar to make UGC style {noun(m.kind)}s
-          of a character you saved, from {m.credits} credits.
+          of a character you saved.
         </p>
+        <dl className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {facts.map(([k, v]) => (
+            <div key={k} className="rounded-2xl bg-panel px-4 py-4">
+              <dt className="text-xs text-ink-2">{k}</dt>
+              <dd className="mt-1 text-xl tracking-[-0.02em]">{v}</dd>
+            </div>
+          ))}
+        </dl>
         <div className="mt-8 flex flex-wrap items-center gap-5">
           <Link href="/login" className="btn px-7 py-3.5 text-[15px]">
-            Start free
+            Try {m.label} free
           </Link>
           <p className="text-sm text-ink-2">
             {FREE_TIER.credits} free credits. No card.
@@ -131,30 +158,44 @@ export default async function ModelPage({
             {m.label} credit cost
           </h2>
           {m.options.length > 1 ? (
-            <table className="mt-5 w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-line text-ink-2">
-                  <th className="py-2 font-normal">Resolution</th>
-                  {m.kind === "video" && (
-                    <th className="py-2 font-normal">Length</th>
-                  )}
-                  <th className="py-2 text-right font-normal">Credits</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {m.options.map((o) => (
-                  <tr key={o.value}>
-                    <td className="py-3">{o.value}</td>
+            <div className="mt-5 overflow-hidden rounded-2xl bg-panel">
+              <table className="w-full text-left text-sm">
+                <caption className="sr-only">
+                  {m.label} credit cost by resolution
+                </caption>
+                <thead>
+                  <tr className="border-b border-line text-ink-2">
+                    <th scope="col" className="px-4 py-3 font-normal">
+                      Resolution
+                    </th>
                     {m.kind === "video" && (
-                      <td className="py-3">{o.seconds} seconds</td>
+                      <th scope="col" className="px-4 py-3 font-normal">
+                        Length
+                      </th>
                     )}
-                    <td className="py-3 text-right tabular-nums">
-                      {o.credits}
-                    </td>
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-right font-normal"
+                    >
+                      Credits
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {m.options.map((o) => (
+                    <tr key={o.value}>
+                      <td className="px-4 py-3">{o.value}</td>
+                      {m.kind === "video" && (
+                        <td className="px-4 py-3">{o.seconds} seconds</td>
+                      )}
+                      <td className="py-3 text-right tabular-nums">
+                        {o.credits}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="mt-4 text-ink-2">
               One {noun(m.kind)} costs {m.credits} credits.
@@ -175,7 +216,7 @@ export default async function ModelPage({
           <h2 className="text-2xl font-light tracking-[-0.03em] sm:text-3xl">
             Questions about {m.label}
           </h2>
-          <dl className="mt-6 divide-y divide-line border-y border-line">
+          <dl className="mt-6 divide-y divide-line rounded-2xl bg-panel px-5">
             {faq.map((f) => (
               <div key={f.q} className="py-5">
                 <dt className="text-lg tracking-[-0.01em]">{f.q}</dt>

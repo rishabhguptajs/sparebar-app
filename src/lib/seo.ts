@@ -42,6 +42,8 @@ export type CatalogModel = {
   tags: string[];
   rank: number;
   credits: number;
+  /** The lowest cost at any resolution the model offers. */
+  fromCredits: number;
   freeEligible: boolean;
   options: { value: string; credits: number; seconds?: number }[];
   durations: number[];
@@ -52,6 +54,14 @@ function describe(m: ModelConfig): CatalogModel {
   const meta = MODEL_META[m.key];
   const opts = OPTIONS[m.key];
   const secs = m.defaults.seconds ?? 8;
+  const options = (opts?.resolutions ?? []).map((r) => ({
+    value: r.value,
+    seconds: m.kind === "video" ? (r.seconds ?? secs) : undefined,
+    credits: creditsForCost(
+      r.costMicros * (m.kind === "video" ? (r.seconds ?? secs) : 1),
+    ),
+  }));
+  const credits = creditsForModel(m);
   return {
     key: m.key,
     label: m.label,
@@ -60,15 +70,10 @@ function describe(m: ModelConfig): CatalogModel {
     blurb: meta?.blurb ?? "",
     tags: meta?.tags ?? [],
     rank: meta?.rank ?? 99,
-    credits: creditsForModel(m),
+    credits,
+    fromCredits: Math.min(credits, ...options.map((o) => o.credits)),
     freeEligible: m.freeEligible,
-    options: (opts?.resolutions ?? []).map((r) => ({
-      value: r.value,
-      seconds: m.kind === "video" ? (r.seconds ?? secs) : undefined,
-      credits: creditsForCost(
-        r.costMicros * (m.kind === "video" ? (r.seconds ?? secs) : 1),
-      ),
-    })),
+    options,
     durations: opts?.durations ?? [],
     sound: (meta?.tags ?? []).includes("Sound"),
   };

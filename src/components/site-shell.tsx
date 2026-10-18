@@ -4,7 +4,13 @@ import { brand } from "@/config/brand";
 /** Header and footer for the public content pages. The footer links every section so crawlers reach each one. */
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh">
+    <div className="landing min-h-dvh">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Skip to content
+      </a>
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6">
         <Link href="/" className="text-[17px] font-semibold tracking-[-0.03em]">
           {brand.name}
@@ -24,7 +30,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           </Link>
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-5 pb-20">{children}</main>
+      <main id="main" className="mx-auto max-w-5xl px-5 pb-24">
+        {children}
+      </main>
       <footer className="border-t border-line">
         <div className="mx-auto grid max-w-5xl gap-8 px-5 py-10 text-sm text-ink-2 sm:grid-cols-3">
           <nav aria-label="Product" className="flex flex-col gap-2">

@@ -68,7 +68,7 @@ export default function Pricing() {
         )}
       />
       <Crumbs trail={[{ name: "Sparebar", href: "/" }, { name: "Pricing" }]} />
-      <h1 className="mt-8 max-w-3xl text-4xl font-light leading-[1.05] tracking-[-0.045em] sm:text-6xl">
+      <h1 className="mt-8 max-w-3xl text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-[1] tracking-[-0.05em]">
         Pricing
       </h1>
       <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-2">
@@ -81,10 +81,30 @@ export default function Pricing() {
       <h2 className="mt-14 text-2xl font-light tracking-[-0.03em] sm:text-3xl">
         Monthly plans
       </h2>
-      <table className="mt-5 w-full max-w-3xl text-left text-sm">
-        {head("Plan")}
-        <tbody className="divide-y divide-line">{PLANS.map(row)}</tbody>
-      </table>
+      <ul className="mt-5 grid gap-3 md:grid-cols-3">
+        {PLANS.map((p) => (
+          <li key={p.key} className="flex flex-col rounded-3xl bg-panel p-6">
+            <h3 className="text-sm text-ink-2">{p.label}</h3>
+            <p className="mt-4 text-5xl font-light tabular-nums tracking-[-0.05em]">
+              {usd(p.priceUsdCents)}
+            </p>
+            <p className="text-sm text-ink-2">per month</p>
+            <p className="mt-6">{p.credits} credits</p>
+            <p className="text-sm text-ink-2">
+              ${perCredit(p).toFixed(3)} per credit
+            </p>
+            <p className="mt-2 text-sm text-ink-2">
+              About {Math.floor(p.credits / 2)} images on a low cost model.
+            </p>
+            <Link
+              href="/login"
+              className="btn-ghost mt-6 px-4 py-3 text-center text-sm"
+            >
+              Start with {p.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
       <p className="mt-3 text-sm text-ink-2">
         Plans are paid month by month. Buy again when you want another month of
         credits.
@@ -94,6 +114,7 @@ export default function Pricing() {
         Credit packs
       </h2>
       <table className="mt-5 w-full max-w-3xl text-left text-sm">
+        <caption className="sr-only">Credit packs</caption>
         {head("Pack")}
         <tbody className="divide-y divide-line">{PACKS.map(row)}</tbody>
       </table>
@@ -112,7 +133,7 @@ export default function Pricing() {
       <h2 className="mt-14 text-2xl font-light tracking-[-0.03em] sm:text-3xl">
         Questions
       </h2>
-      <dl className="mt-6 max-w-3xl divide-y divide-line border-y border-line">
+      <dl className="mt-6 max-w-3xl divide-y divide-line rounded-2xl bg-panel px-5">
         {faq.map((f) => (
           <div key={f.q} className="py-5">
             <dt className="text-lg tracking-[-0.01em]">{f.q}</dt>
