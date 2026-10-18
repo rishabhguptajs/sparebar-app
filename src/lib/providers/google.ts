@@ -106,6 +106,34 @@ async function toResult(it: Interaction, model: ModelConfig): Promise<ProviderRe
   }
 }
 
+// Veo uses the long-running predict endpoint rather than Interactions.
+// Start: POST /models/{id}:predictLongRunning, which returns an operation. Poll GET /{operation name} until done.
+type VeoOperation = {
+  name: string;
+  done?: boolean;
+  error?: { message?: string };
+  response?: {
+    generateVideoResponse?: {
+      generatedSamples?: { video?: { uri?: string } }[];
+      raiMediaFilteredReasons?: string[];
+    };
+  };
+};
+
+const isVeo = (model: ModelConfig) => model.apiModel.startsWith("veo");
+
+async function veoResult(op: VeoOperation): Promise<ProviderResult> {
+  if (!op.done) return { status: "running", ref: op.name };
+  if (op.error) return { status: "failed", ref: op.name, error: op.error.message ?? "Video generation failed", permanent: true };
+  const out = op.response?.generateVideoResponse;
+  const uri = out?.generatedSamples?.[0]?.video?.uri;
+  if (!uri) {
+    const why = out?.raiMediaFilteredReasons?.join("; ");
+    return { status: "failed", ref: op.name, error: why ? `No video returned: ${why.slice(0, 300)}` : "No video returned", permanent: true };
+  }
+  return { status: "succeeded", ref: op.name, outputs: [{ mime: "video/mp4", bytes: await download(uri) }] };
+}
+
 export const google: ProviderAdapter = {
   lab: "google",
 
@@ -116,12 +144,29 @@ export const google: ProviderAdapter = {
     ];
     const ratio = aspectRatio ?? model.defaults.aspectRatio;
 
+    if (isVeo(model)) {
+      const first = references?.[0];
+      const op = await call<VeoOperation>(`/models/${model.apiModel}:predictLongRunning`, {
+        method: "POST",
+        body: JSON.stringify({
+          instances: [{ prompt, ...(first ? { image: { bytesBase64Encoded: first.base64, mimeType: first.mime } } : {}) }],
+          // Veo takes 16:9 or 9:16 only.
+          parameters: {
+            aspectRatio: ratio === "16:9" ? "16:9" : "9:16",
+            resolution: model.defaults.resolution ?? "720p",
+            durationSeconds: model.defaults.seconds ?? 8,
+          },
+        }),
+      });
+      return veoResult(op);
+    }
+
     const body =
       model.kind === "image"
         ? {
             model: model.apiModel,
             input,
-            response_format: { type: "image", aspect_ratio: ratio, image_size: model.defaults.imageSize ?? "1K" },
+            response_format: { type: "image", aspect_ratio: ratio, ...(model.defaults.imageSize ? { image_size: model.defaults.imageSize } : {}) },
           }
         : {
             model: model.apiModel,
@@ -137,6 +182,7 @@ export const google: ProviderAdapter = {
   },
 
   async poll(ref, model) {
+    if (isVeo(model)) return veoResult(await call<VeoOperation>(`/${ref}`));
     const it = await call<Interaction>(`/interactions/${interactionId(ref)}`);
     return toResult(it, model);
   },

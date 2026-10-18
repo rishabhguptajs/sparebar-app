@@ -7,6 +7,12 @@ describe("credits", () => {
     const expected: Record<string, number> = {
       "nano-banana-2.1": 2,
       "grok-imagine-image": 2,
+      "nano-banana": 2,
+      "nano-banana-2-lite": 2,
+      "veo-3.1": 107,
+      "veo-3.1-fast": 40,
+      "veo-3.1-lite": 14,
+      "nano-banana-2": 3,
       "nano-banana-pro": 5,
       "grok-imagine-video-1.5-lite": 8,
       "grok-imagine-video": 19,
