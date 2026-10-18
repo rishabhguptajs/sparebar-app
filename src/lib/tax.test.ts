@@ -19,17 +19,17 @@ describe("quote", () => {
 
   it("adds 18% IGST for another state", () => {
     const q = quote({ product: starter, inIndia: true, stateCode: "29", sellerStateCode: "27" });
-    expect(q.baseMinor).toBe(129900); // fixed price, 1299 rupees
-    expect(q.gstMinor).toBe(23382);
-    expect(q.igstMinor).toBe(23382);
+    expect(q.baseMinor).toBe(149900); // fixed price, 1499 rupees
+    expect(q.gstMinor).toBe(26982);
+    expect(q.igstMinor).toBe(26982);
     expect(q.cgstMinor + q.sgstMinor).toBe(0);
-    expect(q.totalMinor).toBe(153282);
+    expect(q.totalMinor).toBe(176882);
   });
 
   it("splits into CGST and SGST in the seller's state", () => {
     const q = quote({ product: starter, inIndia: true, stateCode: "27", sellerStateCode: "27" });
-    expect(q.cgstMinor).toBe(11691);
-    expect(q.sgstMinor).toBe(11691);
+    expect(q.cgstMinor).toBe(13491);
+    expect(q.sgstMinor).toBe(13491);
     expect(q.igstMinor).toBe(0);
   });
 
@@ -52,7 +52,7 @@ describe("GST registration", () => {
   it("charges no GST while the seller is not registered", () => {
     const q = quote({ product: starter, inIndia: true, stateCode: "27", sellerStateCode: "27", gstRegistered: false });
     expect(q.gstMinor).toBe(0);
-    expect(q.totalMinor).toBe(129900);
+    expect(q.totalMinor).toBe(149900);
   });
 });
 

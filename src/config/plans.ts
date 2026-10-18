@@ -15,15 +15,15 @@ export type Product = {
 // Plans are paid month by month and renewed by buying again. Automatic renewal can be added once
 // Razorpay confirms that subscriptions work on international cards.
 export const PLANS: Product[] = [
-  { key: "starter", kind: "plan", label: "Starter", priceUsdCents: 1500, priceInr: 1299, credits: 150 },
-  { key: "creator", kind: "plan", label: "Creator", priceUsdCents: 3900, priceInr: 3399, credits: 420 },
-  { key: "studio", kind: "plan", label: "Studio", priceUsdCents: 9900, priceInr: 8699, credits: 1200 },
+  { key: "starter", kind: "plan", label: "Starter", priceUsdCents: 1500, priceInr: 1499, credits: 150 },
+  { key: "creator", kind: "plan", label: "Creator", priceUsdCents: 3900, priceInr: 3699, credits: 420 },
+  { key: "studio", kind: "plan", label: "Studio", priceUsdCents: 9900, priceInr: 9499, credits: 1200 },
 ];
 
 export const PACKS: Product[] = [
-  { key: "pack-100", kind: "pack", label: "100 credits", priceUsdCents: 1000, priceInr: 899, credits: 100 },
-  { key: "pack-270", kind: "pack", label: "270 credits", priceUsdCents: 2500, priceInr: 2199, credits: 270 },
-  { key: "pack-560", kind: "pack", label: "560 credits", priceUsdCents: 5000, priceInr: 4399, credits: 560 },
+  { key: "pack-100", kind: "pack", label: "100 credits", priceUsdCents: 1000, priceInr: 949, credits: 100 },
+  { key: "pack-270", kind: "pack", label: "270 credits", priceUsdCents: 2500, priceInr: 2399, credits: 270 },
+  { key: "pack-560", kind: "pack", label: "560 credits", priceUsdCents: 5000, priceInr: 4799, credits: 560 },
 ];
 
 export const PRODUCTS = [...PLANS, ...PACKS];
