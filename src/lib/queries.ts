@@ -29,6 +29,9 @@ export type CreditsPageData = {
 };
 export const useCreditsPage = () => useQuery({ queryKey: ["credits"], queryFn: () => get<CreditsPageData>("/api/credits") });
 
+export type SettingsData = { email: string | null; fullName: string; stateCode: string; region: "IN" | "OTHER" };
+export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: () => get<SettingsData>("/api/settings") });
+
 export type StudioData = {
   models: ModelOption[];
   characters: CharacterCard[];

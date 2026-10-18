@@ -4,9 +4,10 @@ import { CharactersView } from "@/components/characters-view";
 import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
+import { SettingsView } from "@/components/settings-view";
 import { StudioView } from "@/components/studio-view";
 import { FREE_TIER } from "@/config/free-tier";
-import { useCharacters, useCreditsPage, useJobs, useStudio } from "@/lib/queries";
+import { useCharacters, useCreditsPage, useJobs, useSettings, useStudio } from "@/lib/queries";
 
 // Each page is an empty shell that asks the API for its data. The cache shows the last answer straight away.
 
@@ -36,6 +37,11 @@ export function CreditsLoader() {
       invoiceBase="/invoice"
     />
   );
+}
+
+export function SettingsLoader() {
+  const { data } = useSettings();
+  return data ? <SettingsView email={data.email} fullName={data.fullName} stateCode={data.stateCode} region={data.region} /> : <PageSkeleton />;
 }
 
 export function StudioLoader({ rerun, character, welcome }: { rerun?: string; character?: string; welcome?: string }) {
