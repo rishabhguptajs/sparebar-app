@@ -3,6 +3,7 @@ import Link from "next/link";
 import { brand } from "@/config/brand";
 import { FAQ } from "@/config/faq";
 import { FREE_TIER } from "@/config/free-tier";
+import { MODEL_META } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
 import { HeroDemo } from "@/components/hero-demo";
 import { HeroField } from "@/components/hero-field";
@@ -30,6 +31,14 @@ export default async function Home() {
     kind: m.kind,
     credits: creditsForModel(m),
   }));
+
+  // Only the best few of each kind. The full list lives on /models so the home page stays short.
+  const top = (kind: "image" | "video") =>
+    models
+      .filter((m) => m.kind === kind)
+      .sort((a, b) => (MODEL_META[a.key]?.rank ?? 99) - (MODEL_META[b.key]?.rank ?? 99))
+      .slice(0, 3);
+  const featured = [...top("video"), ...top("image")];
 
   return (
     <div className="landing min-h-dvh">
@@ -103,7 +112,7 @@ export default async function Home() {
               <h2 className="max-w-3xl text-4xl font-light leading-none tracking-[-0.045em] sm:text-6xl">Pick the model for the job</h2>
               <p className="mt-5 max-w-lg text-ink-2">Every model has a fixed credit cost, shown before you run it.</p>
               <ul className="mt-14 divide-y divide-line border-y border-line">
-                {models.map((m) => (
+                {featured.map((m) => (
                   <li key={m.key} className="group flex items-baseline justify-between gap-4 py-6 transition-colors hover:bg-ink/[0.03]">
                     <p className="text-2xl font-light tracking-[-0.035em] sm:text-5xl">{m.label}</p>
                     <p className="text-right text-sm text-ink-2">
@@ -112,6 +121,9 @@ export default async function Home() {
                   </li>
                 ))}
               </ul>
+              <Link href="/models" className="btn-ghost mt-8 px-6 py-3 text-sm">
+                See all {models.length} models
+              </Link>
             </div>
           </section>
         )}
