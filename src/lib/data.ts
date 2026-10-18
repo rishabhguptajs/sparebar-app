@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { MODELS } from "@/config/models";
 import { creditsForModel } from "@/lib/credits";
@@ -11,12 +12,15 @@ import { createClient } from "@/lib/supabase/server";
 import type { ModelOption } from "@/lib/ui-types";
 
 /** Signed-in user plus a Supabase client that acts as them. Redirects to login otherwise. */
-export async function requireSession() {
+// Reads the user from the signed token, which avoids a round trip to the auth server on every page.
+// Cached per request, so the layout and the page share one check.
+export const requireSession = cache(async () => {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) redirect("/login");
-  return { supabase, user: data.user };
-}
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) redirect("/login");
+  return { supabase, user: { id: claims.sub, email: (claims.email as string | undefined) ?? null } };
+});
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -110,9 +114,7 @@ export async function getActivity(supabase: Supabase) {
 
 /** The signed-in user if they are an admin. Admins are set by hand: update profiles set is_admin = true. */
 export async function getAdminUser() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) return null;
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
-  return (profile as { is_admin?: boolean } | null)?.is_admin ? data.user : null;
+  const { supabase, user } = await requireSession();
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+  return (profile as { is_admin?: boolean } | null)?.is_admin ? user : null;
 }
