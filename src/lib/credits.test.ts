@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { OPTIONS, defaultResolution, quote } from "@/config/model-options";
 import { MODEL_META } from "@/config/model-meta";
 import {
   MODELS,
@@ -106,5 +107,39 @@ describe("credits", () => {
     expect(Object.keys(MODEL_META).sort()).toEqual(
       MODELS.map((m) => m.key).sort(),
     );
+  });
+
+  it("offers the model's own default among its choices, and prices it like the default", () => {
+    for (const m of MODELS) {
+      const opts = OPTIONS[m.key];
+      if (!opts) continue;
+      expect(
+        opts.resolutions.map((r) => r.value),
+        m.key,
+      ).toContain(defaultResolution(m));
+      if (m.kind === "video")
+        expect(opts.durations, m.key).toContain(m.defaults.seconds);
+      expect(quote(m), m.key).not.toBeNull();
+    }
+  });
+
+  it("prices by resolution and length, and refuses what is not offered", () => {
+    const veo = getModel("veo-3.1-fast")!;
+    expect(quote(veo, { resolution: "720p", seconds: 4 })?.costMicros).toBe(
+      400_000,
+    );
+    expect(quote(veo, { resolution: "4K" })).toMatchObject({
+      costMicros: 2_400_000,
+      seconds: 8,
+    });
+    expect(quote(veo, { resolution: "4K", seconds: 4 })).toBeNull(); // Veo 4K is 8 seconds only
+    expect(quote(veo, { resolution: "480p" })).toBeNull();
+    const nano = getModel("nano-banana-2.1")!;
+    expect(creditsForModel(nano, { resolution: "4K" })).toBe(3);
+    expect(quote(nano, { seconds: 8 })).toBeNull();
+    // Models without choices keep their one price.
+    const omni = getModel("gemini-omni-flash")!;
+    expect(quote(omni)?.costMicros).toBe(800_000);
+    expect(quote(omni, { resolution: "1080p" })).toBeNull();
   });
 });

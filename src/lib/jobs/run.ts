@@ -1,5 +1,6 @@
 import "server-only";
-import { currentPrice, getModel } from "@/config/models";
+import { getModel } from "@/config/models";
+import { quote } from "@/config/model-options";
 import { creditsForCost } from "@/lib/credits";
 import { getAdapter, ProviderError, type OutputFile, type ProviderResult, type ReferenceImage } from "@/lib/providers";
 import { extFor, putObject } from "@/lib/r2";
@@ -48,6 +49,9 @@ type StartInput = {
   /** Text actually sent to the lab (prompt plus character details). Defaults to prompt. */
   providerPrompt?: string;
   aspectRatio?: string;
+  /** Chosen resolution (for example "2K" or "1080p") and video length. Model defaults when left out. */
+  resolution?: string;
+  seconds?: number;
   references?: ReferenceImage[];
   characterId?: string;
 };
@@ -62,8 +66,14 @@ export async function startJob(input: StartInput): Promise<JobRow> {
     throw new UserFacingError("This model is temporarily unavailable. Try another model or come back soon.", 503);
   }
 
-  const price = currentPrice(model);
-  const credits = creditsForCost(price.costMicros);
+  const q = quote(model, { resolution: input.resolution, seconds: input.seconds });
+  if (!q) throw new UserFacingError("That quality or length is not offered for this model.", 400);
+  const credits = creditsForCost(q.costMicros);
+  // The lab is called with the chosen settings in place of the model's defaults.
+  const chosen = {
+    ...model,
+    defaults: { ...model.defaults, ...(model.kind === "video" ? { resolution: q.resolution, seconds: q.seconds } : { imageSize: q.resolution }) },
+  };
   const db = admin();
 
   const { data: jobId, error } = await db.rpc("start_job", {
@@ -72,9 +82,9 @@ export async function startJob(input: StartInput): Promise<JobRow> {
     p_lab: model.lab,
     p_kind: model.kind,
     p_prompt: input.prompt,
-    p_params: { aspectRatio: input.aspectRatio ?? model.defaults.aspectRatio, defaults: model.defaults },
+    p_params: { aspectRatio: input.aspectRatio ?? model.defaults.aspectRatio, defaults: chosen.defaults },
     p_credits: credits,
-    p_lab_cost_micros: price.costMicros,
+    p_lab_cost_micros: q.costMicros,
     p_free_ok: model.freeEligible,
     p_character_id: input.characterId ?? null,
   } as never);
@@ -86,7 +96,7 @@ export async function startJob(input: StartInput): Promise<JobRow> {
   let result: ProviderResult;
   try {
     result = await adapter.submit({
-      model,
+      model: chosen,
       prompt: input.providerPrompt ?? input.prompt,
       aspectRatio: input.aspectRatio,
       references: input.references,

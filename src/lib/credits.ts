@@ -1,4 +1,5 @@
-import { currentPrice, type ModelConfig } from "@/config/models";
+import type { ModelConfig } from "@/config/models";
+import { quote, type Selection } from "@/config/model-options";
 
 /** Retail value of one credit at the base plan, in micro-USD ($0.10). */
 export const CREDIT_VALUE_MICROS = 100_000;
@@ -16,6 +17,9 @@ export function creditsForCost(costMicros: number): number {
   return Math.max(1, Math.ceil(costMicros / MICROS_PER_CREDIT));
 }
 
-export function creditsForModel(model: ModelConfig, at: Date = new Date()): number {
-  return creditsForCost(currentPrice(model, at).costMicros);
+/** Credits for a model at a chosen resolution and length. Defaults when nothing is chosen. */
+export function creditsForModel(model: ModelConfig, sel: Selection = {}, at: Date = new Date()): number {
+  const q = quote(model, sel, at);
+  if (!q) throw new Error(`${model.key} does not offer ${JSON.stringify(sel)}`);
+  return creditsForCost(q.costMicros);
 }

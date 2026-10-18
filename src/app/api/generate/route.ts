@@ -14,6 +14,8 @@ const Body = z.object({
   modelKey: z.string().min(1),
   prompt: z.string().trim().min(1).max(4000),
   aspectRatio: z.enum(["1:1", "9:16", "16:9", "4:5", "3:4", "4:3"]).optional(),
+  resolution: z.string().max(10).optional(),
+  seconds: z.number().int().min(1).max(60).optional(),
   characterId: z.string().uuid().optional(),
   /** A product photo uploaded through /api/uploads/product. */
   productKey: z.string().max(200).optional(),

@@ -11,6 +11,12 @@ export type ModelOption = {
   rank: number;
   blurb: string;
   tags: string[];
+  /** Resolutions on offer. costMicros is per second for video, per image otherwise. */
+  resolutions: { value: string; costMicros: number; seconds?: number }[];
+  /** Video lengths on offer. Empty when the model does not take a length. */
+  durations: number[];
+  defaultResolution: string | null;
+  defaultSeconds: number | null;
   tier: "budget" | "standard" | "premium";
   /** Credits the user can spend on this model right now (free credits only count for eligible models). */
   available: number;

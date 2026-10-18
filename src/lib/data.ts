@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { OPTIONS, defaultResolution } from "@/config/model-options";
 import { MODEL_META, tierFor } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
 import { creditsForModel } from "@/lib/credits";
@@ -77,6 +78,10 @@ export async function getModelOptions(
       rank: meta.rank,
       blurb: meta.blurb,
       tags: meta.tags,
+      resolutions: OPTIONS[m.key]?.resolutions ?? [],
+      durations: OPTIONS[m.key]?.durations ?? [],
+      defaultResolution: defaultResolution(m) ?? null,
+      defaultSeconds: m.kind === "video" ? (m.defaults.seconds ?? null) : null,
       tier: tierFor(m.kind, credits),
       available: cache.get(k) ?? 0,
       paused: paused.has(m.lab),

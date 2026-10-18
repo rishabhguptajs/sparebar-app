@@ -1,5 +1,6 @@
 "use client";
 
+import { creditsFor, resolutionHint } from "@/lib/options";
 import { ModelPicker } from "@/components/model-picker";
 import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
@@ -80,6 +81,12 @@ export function StudioView({
   );
   const [prompt, setPrompt] = useState(initial?.prompt ?? "");
   const [ratio, setRatio] = useState<string>(initial?.aspectRatio ?? "9:16");
+  const [resolution, setResolution] = useState<string | null>(
+    startModel?.defaultResolution ?? null,
+  );
+  const [seconds, setSeconds] = useState<number | null>(
+    startModel?.defaultSeconds ?? null,
+  );
   const [job, setJob] = useState<PresentedJob | null>(null);
   const [recent, setRecent] = useState(recentProp);
   const [busy, setBusy] = useState(false);
@@ -92,8 +99,15 @@ export function StudioView({
     () => models.filter((m) => m.kind === kind),
     [models, kind],
   );
+  // Each model starts at its own default quality and length.
+  useEffect(() => {
+    const m = models.find((x) => x.key === modelKey);
+    setResolution(m?.defaultResolution ?? null);
+    setSeconds(m?.defaultSeconds ?? null);
+  }, [modelKey, models]);
   const character = characters.find((c) => c.id === characterId) ?? null;
-  const short = !!model && model.credits > model.available;
+  const cost = model ? creditsFor(model, resolution, seconds) : 0;
+  const short = !!model && cost > model.available;
   const running = active(job);
   const canRun =
     !!model &&
@@ -170,6 +184,8 @@ export function StudioView({
           modelKey,
           prompt,
           aspectRatio: ratio,
+          resolution: resolution ?? undefined,
+          seconds: model.kind === "video" ? (seconds ?? undefined) : undefined,
           characterId: characterId ?? undefined,
         }),
       });
@@ -224,9 +240,9 @@ export function StudioView({
         maxWidth: "100%",
       };
 
-  const [open, setOpen] = useState<"model" | "character" | "ratio" | null>(
-    null,
-  );
+  const [open, setOpen] = useState<
+    "model" | "character" | "ratio" | "quality" | "length" | null
+  >(null);
   const bar = useRef<HTMLDivElement>(null);
   const promptBox = useRef<HTMLTextAreaElement>(null);
 
@@ -253,8 +269,9 @@ export function StudioView({
     el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
   }, [prompt]);
 
-  const toggle = (name: "model" | "character" | "ratio") =>
-    setOpen((o) => (o === name ? null : name));
+  const toggle = (
+    name: "model" | "character" | "ratio" | "quality" | "length",
+  ) => setOpen((o) => (o === name ? null : name));
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -438,7 +455,7 @@ export function StudioView({
           <p className="mb-2 rounded-xl bg-bg px-4 py-2.5 text-sm text-ink-2 shadow-[0_0_0_1px_var(--line)]">
             {model?.kind === "video" && model.available === 0
               ? "Free credits work for images only. Add credits to make video."
-              : `You need ${model?.credits} credits for this and have ${model?.available}.`}{" "}
+              : `You need ${cost} credits for this and have ${model?.available}.`}{" "}
             <Link
               href={`${base}/credits`}
               className="font-medium text-accent hover:underline"
@@ -469,64 +486,84 @@ export function StudioView({
             className="block w-full resize-none bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-ink-2/70 bare-focus"
           />
 
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <div
-              className="flex rounded-full bg-panel p-0.5"
-              role="radiogroup"
-              aria-label="Type"
-            >
-              {(["image", "video"] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  role="radio"
-                  aria-checked={kind === k}
-                  onClick={() => pickKind(k)}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                    kind === k
-                      ? "bg-bg text-ink shadow-[0_1px_0_var(--line)]"
-                      : "text-ink-2 hover:text-ink"
-                  }`}
-                >
-                  {k === "image" ? (
-                    <ImageIcon width={16} height={16} />
-                  ) : (
-                    <VideoIcon width={16} height={16} />
-                  )}
-                  {k === "image" ? "Image" : "Video"}
-                </button>
-              ))}
-            </div>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none]">
+              <div
+                className="flex shrink-0 rounded-full bg-panel p-0.5"
+                role="radiogroup"
+                aria-label="Type"
+              >
+                {(["image", "video"] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="radio"
+                    aria-checked={kind === k}
+                    onClick={() => pickKind(k)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                      kind === k
+                        ? "bg-bg text-ink shadow-[0_1px_0_var(--line)]"
+                        : "text-ink-2 hover:text-ink"
+                    }`}
+                  >
+                    {k === "image" ? (
+                      <ImageIcon width={16} height={16} />
+                    ) : (
+                      <VideoIcon width={16} height={16} />
+                    )}
+                    {k === "image" ? "Image" : "Video"}
+                  </button>
+                ))}
+              </div>
 
-            <Pill
-              active={open === "model"}
-              onClick={() => toggle("model")}
-              label="Model"
-            >
-              {model ? model.label : "Choose model"}
-            </Pill>
-            <Pill
-              active={open === "character"}
-              onClick={() => toggle("character")}
-              label="Character"
-            >
-              {character ? character.name : "No character"}
-            </Pill>
-            <Pill
-              active={open === "ratio"}
-              onClick={() => toggle("ratio")}
-              label="Shape"
-            >
-              {ratio}
-            </Pill>
+              <Pill
+                active={open === "model"}
+                onClick={() => toggle("model")}
+                label="Model"
+              >
+                {model ? model.label : "Choose model"}
+              </Pill>
+              <Pill
+                active={open === "character"}
+                onClick={() => toggle("character")}
+                label="Character"
+              >
+                {character ? character.name : "No character"}
+              </Pill>
+              <Pill
+                active={open === "ratio"}
+                onClick={() => toggle("ratio")}
+                label="Shape"
+              >
+                {ratio}
+              </Pill>
+              {model && model.resolutions.length > 1 && (
+                <Pill
+                  active={open === "quality"}
+                  onClick={() => toggle("quality")}
+                  label="Quality"
+                >
+                  {resolution}
+                </Pill>
+              )}
+              {model && model.durations.length > 1 && (
+                <Pill
+                  active={open === "length"}
+                  onClick={() => toggle("length")}
+                  label="Length"
+                >
+                  {seconds}s
+                </Pill>
+              )}
+            </div>
 
             <button
               disabled={!canRun}
-              className="ml-auto rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink transition-[opacity,transform] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 rounded-full bg-accent max-sm:w-full px-5 py-2.5 text-sm font-semibold text-accent-ink transition-[opacity,transform] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy || running
                 ? "Generating"
-                : `Generate${model ? ` · ${model.credits}` : ""}`}
+                : `Generate${model ? ` · ${cost}` : ""}`}
             </button>
           </div>
 
@@ -588,6 +625,100 @@ export function StudioView({
                 </span>
                 New character
               </button>
+            </div>
+          )}
+
+          {open === "quality" && model && (
+            <div
+              className="pop absolute bottom-full left-0 mb-2 w-[min(20rem,100%)] rounded-3xl border border-line bg-bg p-2 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]"
+              role="radiogroup"
+              aria-label="Quality"
+            >
+              {model.resolutions.map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={resolution === r.value}
+                  onClick={() => {
+                    setResolution(r.value);
+                    // Some resolutions only work at one length.
+                    if (r.seconds) setSeconds(r.seconds);
+                    setOpen(null);
+                  }}
+                  className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors ${resolution === r.value ? "bg-panel" : "hover:bg-panel/60"}`}
+                >
+                  <span className="flex-1">
+                    <span className="block text-[15px] font-medium">
+                      {r.value}
+                    </span>
+                    <span className="block text-[13px] text-ink-2">
+                      {resolutionHint(r.value)}
+                      {r.seconds
+                        ? `${resolutionHint(r.value) ? ", " : ""}${r.seconds} seconds only`
+                        : ""}
+                    </span>
+                  </span>
+                  <span className="text-right tabular-nums">
+                    <span
+                      className={`block text-[15px] font-semibold ${resolution === r.value ? "text-accent" : ""}`}
+                    >
+                      {creditsFor(model, r.value, seconds)}
+                    </span>
+                    <span className="block text-[11px] text-ink-2">
+                      credits
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {open === "length" && model && (
+            <div
+              className="pop absolute bottom-full left-0 mb-2 w-[min(20rem,100%)] rounded-3xl border border-line bg-bg p-2 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]"
+              role="radiogroup"
+              aria-label="Length"
+            >
+              {model.durations.map((d) => {
+                const locked = model.resolutions.find(
+                  (r) => r.value === resolution,
+                )?.seconds;
+                const blocked = !!locked && locked !== d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    role="radio"
+                    aria-checked={seconds === d}
+                    disabled={blocked}
+                    title={
+                      blocked
+                        ? "This quality only makes 8 second clips. Pick a lower quality for other lengths."
+                        : undefined
+                    }
+                    onClick={() => {
+                      setSeconds(d);
+                      setOpen(null);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${seconds === d ? "bg-panel" : "hover:bg-panel/60"}`}
+                  >
+                    <span className="flex-1 text-[15px] font-medium">
+                      {d} seconds
+                    </span>
+                    <span className="text-right tabular-nums">
+                      <span
+                        className={`block text-[15px] font-semibold ${seconds === d ? "text-accent" : ""}`}
+                      >
+                        {creditsFor(model, resolution, d)}
+                      </span>
+                      <span className="block text-[11px] text-ink-2">
+                        credits
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -660,7 +791,7 @@ function Pill({
       aria-haspopup="true"
       aria-expanded={active}
       title={label}
-      className={`max-w-[11rem] truncate rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+      className={`max-w-[11rem] shrink-0 truncate rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
         active
           ? "border-accent bg-panel text-ink"
           : "border-line text-ink hover:bg-panel"

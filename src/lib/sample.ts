@@ -1,5 +1,6 @@
 // Sample content for the dev-only /preview routes. Never used by the real app.
 import { art } from "@/lib/art";
+import { OPTIONS, defaultResolution } from "@/config/model-options";
 import { MODEL_META, tierFor } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
 import { creditsForModel } from "@/lib/credits";
@@ -19,6 +20,10 @@ export const sampleModels: ModelOption[] = MODELS.filter((m) => m.enabled)
           ? `Around ${m.defaults.seconds ?? 8} seconds, ${m.defaults.resolution ?? "720p"}`
           : `${m.defaults.imageSize ?? "1K"} image`,
       ...meta,
+    resolutions: OPTIONS[m.key]?.resolutions ?? [],
+    durations: OPTIONS[m.key]?.durations ?? [],
+    defaultResolution: defaultResolution(m) ?? null,
+    defaultSeconds: m.kind === "video" ? (m.defaults.seconds ?? null) : null,
       tier: tierFor(m.kind, credits),
       available: 38,
       paused: false,
