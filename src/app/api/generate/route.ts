@@ -42,8 +42,8 @@ export async function POST(req: Request) {
       providerPrompt = characterPrompt(character, rest.prompt);
     }
     if (productKey && getModel(rest.modelKey)?.kind === "image") {
-      // Only the user's own uploads are allowed.
-      if (!productKey.startsWith(`u/${user.id}/products/`)) return NextResponse.json({ error: "Invalid product photo." }, { status: 400 });
+      // Only the exact key shape the upload route makes, under the user's own folder.
+      if (!new RegExp(`^u/${user.id}/products/[0-9a-f-]{36}\\.(png|jpg|webp)$`).test(productKey)) return NextResponse.json({ error: "Invalid product photo." }, { status: 400 });
       const f = await getObjectBytes(productKey);
       references = [...(references ?? []), { mime: f.mime, base64: Buffer.from(f.bytes).toString("base64") }];
       providerPrompt = `${providerPrompt ?? rest.prompt}\nThe last reference image is the product. Show that exact product, unchanged, in the scene.`;
