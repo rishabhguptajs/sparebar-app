@@ -2,6 +2,7 @@
 // balance after each top-up and spend is estimated from the lab cost logged on every job.
 
 export const LAB_NAMES: Record<string, string> = {
+  openrouter: "OpenRouter",
   google: "Google",
   xai: "xAI",
   minimax: "MiniMax",

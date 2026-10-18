@@ -4,7 +4,7 @@ import { getAdminUser } from "@/lib/data";
 import { admin } from "@/lib/supabase/admin";
 
 const Body = z.object({
-  lab: z.enum(["google", "xai", "minimax", "alibaba"]),
+  lab: z.enum(["openrouter", "google", "xai", "minimax", "alibaba"]),
   /** Balance shown in the lab console right now, in US dollars. */
   balanceUsd: z.number().min(0).max(100000),
   lowRunwayDays: z.number().min(0).max(60).optional(),

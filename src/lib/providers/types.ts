@@ -17,8 +17,18 @@ export type OutputFile = { mime: string; bytes: Uint8Array };
 /** What the lab told us, normalised. */
 export type ProviderResult =
   | { status: "running"; ref: string }
-  | { status: "succeeded"; ref?: string; outputs: OutputFile[]; actualCostMicros?: number }
-  | { status: "failed"; ref?: string; error: string; /** true when retrying could not help */ permanent: boolean };
+  | {
+      status: "succeeded";
+      ref?: string;
+      outputs: OutputFile[];
+      actualCostMicros?: number;
+    }
+  | {
+      status: "failed";
+      ref?: string;
+      error: string;
+      /** true when retrying could not help */ permanent: boolean;
+    };
 
 export interface ProviderAdapter {
   lab: Lab;

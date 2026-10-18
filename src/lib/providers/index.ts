@@ -1,5 +1,6 @@
 import type { Lab } from "@/config/models";
 import { alibaba } from "./alibaba";
+import { openrouter } from "./openrouter";
 import { google } from "./google";
 import { minimax } from "./minimax";
 import { xai } from "./xai";
@@ -7,6 +8,7 @@ import type { ProviderAdapter } from "./types";
 
 // Register a lab here once its adapter exists. Models for unregistered labs stay unavailable.
 const ADAPTERS: Partial<Record<Lab, ProviderAdapter>> = {
+  openrouter,
   google,
   xai,
   minimax,
