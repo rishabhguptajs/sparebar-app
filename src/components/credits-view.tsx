@@ -58,6 +58,8 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
   const [inIndia, setInIndia] = useState(false);
   const [stateCode, setStateCode] = useState("");
   const [busy, setBusy] = useState(false);
+  // While the payment window is open our modal dialog is closed: an open modal makes the rest of the page inert and covers it.
+  const paying = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<number | null>(null);
 
@@ -102,8 +104,14 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
         name: "Sparebar",
         description: order.description,
         prefill: order.prefill,
-        theme: { color: "#ff4a17" },
-        modal: { ondismiss: () => setBusy(false) },
+        theme: { color: "#e5247a" },
+        modal: {
+          ondismiss: () => {
+            paying.current = false;
+            setBusy(false);
+            if (!dialog.current?.open) dialog.current?.showModal();
+          },
+        },
         handler: async (r: Record<string, string>) => {
           try {
             const v = await fetch("/api/billing/verify", {
@@ -118,7 +126,9 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
           } catch (err) {
             setError(err instanceof Error ? err.message : "We could not confirm the payment.");
           } finally {
+            paying.current = false;
             setBusy(false);
+            if (!dialog.current?.open) dialog.current?.showModal();
           }
         },
       });
@@ -126,6 +136,8 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
         setError("The payment did not go through. You have not been charged. Try again or use another method.");
         setBusy(false);
       });
+      paying.current = true;
+      dialog.current?.close();
       rzp.open();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -231,6 +243,7 @@ export function CreditsView({ balance, inrPerUsd, sellerStateCode, payments, act
       <dialog
         ref={dialog}
         onClose={() => {
+          if (paying.current) return;
           setBusy(false);
           setError(null);
         }}
