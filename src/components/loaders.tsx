@@ -5,6 +5,7 @@ import { CreateView } from "@/components/create-view";
 import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
+import { AdsView } from "@/components/ads-view";
 import { ProductsView } from "@/components/products-view";
 import { SettingsView } from "@/components/settings-view";
 import { StudioView } from "@/components/studio-view";
@@ -54,6 +55,11 @@ export function SettingsLoader() {
 export function CreateLoader() {
   const { data } = useStudio();
   return data ? <CreateView base="/app" models={data.models} characters={data.characters} products={data.products} /> : <PageSkeleton />;
+}
+
+export function AdsLoader() {
+  const { data } = useStudio();
+  return data ? <AdsView base="/app" models={data.models} characters={data.characters} products={data.products} /> : <PageSkeleton />;
 }
 
 export function StudioLoader({ rerun, character, welcome }: { rerun?: string; character?: string; welcome?: string }) {

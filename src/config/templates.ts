@@ -15,6 +15,8 @@ export type Template = {
   modelKey: string;
   /** Takes an optional product photo. */
   product?: boolean;
+  /** A product ad style. Offered on the Ads page, not in Create. */
+  ad?: boolean;
   /** How much of the person is in frame. Decides which reference photo of them goes first. */
   framing: Framing;
   blanks: Blank[];
@@ -170,6 +172,32 @@ export const TEMPLATES: Template[] = [
   },
 ];
 
+
+// Product ad styles. Each is one still ad image of the character with a saved product. The product blank holds its name and pitch.
+const ad = (id: string, title: string, blurb: string, framing: Framing, scene: (product: string, hook: string, name: string) => string): Template => ({
+  id,
+  title,
+  blurb,
+  kind: "image",
+  aspectRatio: "4:5",
+  framing,
+  modelKey: "nano-banana-2.1",
+  product: true,
+  ad: true,
+  blanks: [
+    { key: "product", label: "Product", placeholder: "" },
+    { key: "hook", label: "What to highlight", placeholder: "Brightens skin in two weeks", optional: true },
+  ],
+  scene: (b, name) => scene(v(b.product, "the product"), v(b.hook, ""), name),
+});
+
+export const AD_STYLES: Template[] = [
+  ad("ad-hold", "Hold it up", "Holds the product next to their face, smiling.", "close", (p, h, n) => `${n} holds ${p} up next to their face, smiling at the camera, the label clearly facing the camera and easy to read.${h ? ` The ad is about: ${h}.` : ""} Clean bright background, polished product advertisement photo.`),
+  ad("ad-use", "Using it", "Using the product in an everyday moment.", "half", (p, h, n) => `${n} using ${p} in an everyday moment, natural and happy, the product clearly visible in frame with its label readable.${h ? ` The ad is about: ${h}.` : ""} Soft natural light, lifestyle advertisement photo.`),
+  ad("ad-show", "Showing it off", "Presents the product with both hands to the camera.", "half", (p, h, n) => `${n} presenting ${p} to the camera with both hands, product centred and sharp, label facing the camera, confident friendly expression.${h ? ` The ad is about: ${h}.` : ""} Styled simple backdrop, studio quality advertisement photo.`),
+  ad("ad-home", "At home", "A relaxed home scene with the product.", "full", (p, h, n) => `${n} in a cosy modern home with ${p} close at hand on a table, relaxed pose, the product clearly visible with its label readable.${h ? ` The ad is about: ${h}.` : ""} Warm daylight, lifestyle advertisement photo.`),
+];
+
 export function getTemplate(id: string) {
-  return TEMPLATES.find((t) => t.id === id);
+  return [...TEMPLATES, ...AD_STYLES].find((t) => t.id === id);
 }

@@ -8,6 +8,7 @@ import { useMe } from "@/lib/queries";
 import {
   CoinIcon,
   GridIcon,
+  ImageIcon,
   PeopleIcon,
   SettingsIcon,
   WandIcon,
@@ -46,6 +47,12 @@ export function AppShell({
       label: "Create",
       icon: WandIcon,
       active: path.startsWith(`${base}/create`),
+    },
+    {
+      href: `${base}/ads`,
+      label: "Ads",
+      icon: ImageIcon,
+      active: path.startsWith(`${base}/ads`),
     },
     {
       href: `${base}/characters`,
