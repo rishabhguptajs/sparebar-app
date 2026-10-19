@@ -1,5 +1,4 @@
 import "server-only";
-import sharp from "sharp";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/lib/env";
@@ -34,6 +33,8 @@ export async function putObject(key: string, bytes: Uint8Array, mime: string) {
 export async function makeThumb(bytes: Uint8Array, mime: string): Promise<Uint8Array | null> {
   if (!mime.startsWith("image/")) return null;
   try {
+    // Loaded on use, so a host where sharp cannot start only loses thumbnails instead of breaking every route.
+    const { default: sharp } = await import("sharp");
     return new Uint8Array(await sharp(bytes).rotate().resize({ width: 480, withoutEnlargement: true }).webp({ quality: 74 }).toBuffer());
   } catch {
     return null;
