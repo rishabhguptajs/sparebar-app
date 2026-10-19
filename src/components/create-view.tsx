@@ -158,11 +158,15 @@ export function CreateView({ base, models, characters: charactersProp, products 
   useEffect(() => {
     if (!animated || !active(animated)) return;
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/jobs/${animated.id}`);
-      if (!res.ok) return;
-      const next = (await res.json()).job as PresentedJob;
-      setAnimated(next);
-      if (!active(next)) refresh();
+      try {
+        const res = await fetch(`/api/jobs/${animated.id}`);
+        if (!res.ok) throw new Error("poll failed");
+        const next = (await res.json()).job as PresentedJob;
+        setAnimated(next);
+        if (!active(next)) refresh();
+      } catch {
+        setAnimated((j) => (j ? { ...j } : j));
+      }
     }, 4000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,11 +176,16 @@ export function CreateView({ base, models, characters: charactersProp, products 
   useEffect(() => {
     if (!job || !active(job)) return;
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/jobs/${job.id}`);
-      if (!res.ok) return;
-      const next = (await res.json()).job as PresentedJob;
-      setJob(next);
-      if (!active(next)) refresh();
+      try {
+        const res = await fetch(`/api/jobs/${job.id}`);
+        if (!res.ok) throw new Error("poll failed");
+        const next = (await res.json()).job as PresentedJob;
+        setJob(next);
+        if (!active(next)) refresh();
+      } catch {
+        // A failed check must not end the polling. Try again shortly.
+        setJob((j) => (j ? { ...j } : j));
+      }
     }, 4000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
