@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/config/brand";
+import { MobileMenu } from "@/components/mobile-menu";
 
 /** Header and footer for the public content pages. The footer links every section so crawlers reach each one. */
 export function SiteShell({ children }: { children: React.ReactNode }) {
@@ -19,12 +20,30 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           aria-label="Main"
           className="flex items-center gap-1 text-sm text-ink-2 sm:gap-2"
         >
-          <Link href="/models" className="px-3 py-2 hover:text-ink">
+          <Link href="/features" className="hidden px-3 py-2 hover:text-ink md:block">
+            Features
+          </Link>
+          <Link href="/consistent-character-ai" className="hidden px-3 py-2 hover:text-ink md:block">
+            Consistency
+          </Link>
+          <Link href="/ai-product-ads" className="hidden px-3 py-2 hover:text-ink md:block">
+            Ads
+          </Link>
+          <Link href="/models" className="hidden px-3 py-2 hover:text-ink md:block">
             Models
           </Link>
-          <Link href="/pricing" className="px-3 py-2 hover:text-ink">
+          <Link href="/pricing" className="hidden px-3 py-2 hover:text-ink md:block">
             Pricing
           </Link>
+          <MobileMenu
+            items={[
+              { href: "/features", label: "Features" },
+              { href: "/consistent-character-ai", label: "Consistency" },
+              { href: "/ai-product-ads", label: "Product ads" },
+              { href: "/models", label: "Models" },
+              { href: "/pricing", label: "Pricing" },
+            ]}
+          />
           <Link href="/login" className="btn-ghost px-4 py-2 text-ink">
             Sign in
           </Link>
@@ -57,6 +76,12 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link href="/consistent-character-ai" className="hover:text-ink">
               Consistent character AI
+            </Link>
+            <Link href="/ai-product-ads" className="hover:text-ink">
+              AI product ads
+            </Link>
+            <Link href="/features" className="hover:text-ink">
+              All features
             </Link>
           </nav>
           <nav aria-label="Legal" className="flex flex-col gap-2">

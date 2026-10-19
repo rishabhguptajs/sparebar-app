@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/config/brand";
 import { ThemeToggle, useAppTheme } from "@/components/theme";
 import { useMe } from "@/lib/queries";
 import {
+  CloseIcon,
   CoinIcon,
   GridIcon,
   ImageIcon,
@@ -15,6 +17,7 @@ import {
   ShieldIcon,
   SignOutIcon,
   StudioIcon,
+  MoreIcon,
 } from "@/components/icons";
 
 type Props = {
@@ -40,6 +43,9 @@ export function AppShell({
   const isAdmin = canSignOut ? !!me.data?.isAdmin : adminProp;
   const path = usePathname();
   const { theme, toggle } = useAppTheme();
+  const [more, setMore] = useState(false);
+  // The sheet closes whenever you move to another page.
+  useEffect(() => setMore(false), [path]);
   const nav = [
     { href: base, label: "Studio", icon: StudioIcon, active: path === base },
     {
@@ -89,6 +95,10 @@ export function AppShell({
         ]
       : []),
   ];
+
+  // Library is the last of the everyday places. Credits, settings and admin go in the More sheet on phones.
+  const primary = nav.slice(0, 5);
+  const secondary = nav.slice(5);
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[220px_minmax(0,1fr)]">
@@ -175,22 +185,65 @@ export function AppShell({
         <main>{children}</main>
       </div>
 
+      {/* Phone navigation: the five everyday places, then a sheet for the rest. */}
+      {more && (
+        <>
+          <button type="button" aria-label="Close menu" onClick={() => setMore(false)} className="fixed inset-0 z-20 bg-black/30 md:hidden" />
+          <div role="menu" aria-label="More" className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 rounded-3xl border border-line bg-bg p-2 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.35)] md:hidden">
+            <div className="flex items-center justify-between px-3 pb-1 pt-2">
+              <p className="min-w-0 truncate text-xs text-ink-2">{email ?? "Signed in"}</p>
+              <button type="button" onClick={() => setMore(false)} aria-label="Close" className="rounded-lg p-1.5 text-ink-2">
+                <CloseIcon />
+              </button>
+            </div>
+            {secondary.map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                role="menuitem"
+                aria-current={n.active ? "page" : undefined}
+                className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-[15px] font-medium ${n.active ? "bg-panel text-ink" : "text-ink-2"}`}
+              >
+                <n.icon className={n.active ? "text-accent" : ""} />
+                {n.label}
+              </Link>
+            ))}
+            {canSignOut && (
+              <form action="/auth/signout" method="post">
+                <button className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-[15px] font-medium text-ink-2">
+                  <SignOutIcon />
+                  Sign out
+                </button>
+              </form>
+            )}
+          </div>
+        </>
+      )}
+
       <nav
         aria-label="Main"
-        style={{ gridTemplateColumns: `repeat(${nav.length}, minmax(0, 1fr))` }}
-        className="fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-bg/90 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        {nav.map((n) => (
+        {primary.map((n) => (
           <Link
             key={n.href}
             href={n.href}
             aria-current={n.active ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 py-2.5 text-xs font-medium ${n.active ? "text-ink" : "text-ink-2"}`}
+            className={`flex min-w-0 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${n.active ? "text-ink" : "text-ink-2"}`}
           >
             <n.icon className={n.active ? "text-accent" : ""} />
-            {n.label}
+            <span className="max-w-full truncate">{n.label}</span>
           </Link>
         ))}
+        <button
+          type="button"
+          onClick={() => setMore((m) => !m)}
+          aria-expanded={more}
+          className={`flex min-w-0 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${more || secondary.some((n) => n.active) ? "text-ink" : "text-ink-2"}`}
+        >
+          <MoreIcon className={secondary.some((n) => n.active) ? "text-accent" : ""} />
+          More
+        </button>
       </nav>
     </div>
   );

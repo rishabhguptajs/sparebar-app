@@ -4,14 +4,49 @@ import { JsonLd } from "@/components/json-ld";
 import { breadcrumbLd, faqLd, graph } from "@/lib/seo";
 import { FREE_TIER } from "@/config/free-tier";
 
+export type Media = {
+  /** File name in /public/showcase without the extension. */
+  src: string;
+  alt: string;
+  caption?: string;
+  /** Shape of the tile. Defaults to a tall phone photo. */
+  ratio?: "tall" | "photo" | "portrait";
+  video?: boolean;
+};
+
 export type Guide = {
   path: string;
   name: string;
   h1: string;
   intro: string;
-  sections: { h: string; p: string[]; list?: string[] }[];
+  sections: { h: string; p: string[]; list?: string[]; media?: Media[]; cols?: 2 | 3 | 4; after?: string[] }[];
   faq: { q: string; a: string }[];
 };
+
+const RATIO = { tall: "aspect-[9/16]", photo: "aspect-[4/5]", portrait: "aspect-[3/4]" } as const;
+
+function MediaGrid({ media, cols = 3 }: { media: Media[]; cols?: 2 | 3 | 4 }) {
+  const grid = cols === 2 ? "grid-cols-2" : cols === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3";
+  return (
+    <ul className={`mt-6 grid gap-3 sm:gap-4 ${grid}`}>
+      {media.map((m) => (
+        <li key={m.src}>
+          <figure>
+            <div className={`overflow-hidden rounded-2xl bg-panel-2 ${RATIO[m.ratio ?? "tall"]}`}>
+              {m.video ? (
+                <video src={`/showcase/${m.src}.mp4`} poster={`/showcase/${m.src}-poster.webp`} className="size-full object-cover" controls muted loop playsInline preload="none" aria-label={m.alt} />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`/showcase/${m.src}.webp`} alt={m.alt} loading="lazy" decoding="async" className="size-full object-cover" />
+              )}
+            </div>
+            {m.caption && <figcaption className="mt-2 text-xs leading-snug text-ink-2">{m.caption}</figcaption>}
+          </figure>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const slug = (h: string) =>
   h
@@ -82,6 +117,12 @@ export function GuidePage({ guide }: { guide: Guide }) {
                 ))}
               </ul>
             )}
+            {s.media && <MediaGrid media={s.media} cols={s.cols} />}
+            {s.after?.map((t) => (
+              <p key={t} className="mt-4 leading-relaxed text-ink-2">
+                {t}
+              </p>
+            ))}
           </section>
         ))}
 
@@ -113,7 +154,13 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </Link>
         </div>
 
-        <p className="mt-10 text-ink-2">
+        <nav aria-label="More guides" className="mt-10 flex flex-wrap gap-2 text-sm">
+          <Link href="/consistent-character-ai" className="btn-ghost px-4 py-2">Consistency</Link>
+          <Link href="/features" className="btn-ghost px-4 py-2">Every feature</Link>
+          <Link href="/ai-product-ads" className="btn-ghost px-4 py-2">Product ads</Link>
+        </nav>
+
+        <p className="mt-6 text-ink-2">
           See every{" "}
           <Link
             href="/models"

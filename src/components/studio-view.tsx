@@ -516,11 +516,11 @@ export function StudioView({
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
             }}
             placeholder="Unboxing a skincare set on a bright bathroom counter, handheld, natural light"
-            className="block w-full resize-none bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-ink-2/70 bare-focus"
+            className="block max-h-32 w-full resize-none overflow-y-auto bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-ink-2/70 bare-focus sm:max-h-48"
           />
 
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none]">
+            <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pr-6 [mask-image:linear-gradient(to_right,black_88%,transparent)] [scrollbar-width:none] sm:pr-0 sm:[mask-image:none]">
               <div
                 className="flex shrink-0 rounded-full bg-panel p-0.5"
                 role="radiogroup"

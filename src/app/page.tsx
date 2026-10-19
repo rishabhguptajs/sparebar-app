@@ -5,9 +5,12 @@ import { FAQ } from "@/config/faq";
 import { FREE_TIER } from "@/config/free-tier";
 import { MODEL_META } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
+import { MobileMenu } from "@/components/mobile-menu";
 import { HeroDemo } from "@/components/hero-demo";
 import { HeroField } from "@/components/hero-field";
 import { Pricing } from "@/components/pricing";
+import { AdShowcase } from "@/components/ad-showcase";
+import { Showcase } from "@/components/showcase";
 import { countryFromHeaders, regionOf } from "@/lib/country";
 import { env } from "@/lib/env";
 import { creditsForModel } from "@/lib/credits";
@@ -51,15 +54,35 @@ export default async function Home() {
             {brand.name}
           </Link>
           <nav aria-label="Main" className="flex items-center gap-1 text-sm text-ink-2 sm:gap-2">
-            <a href="#how" className="hidden px-3 py-2 transition-colors hover:text-ink sm:block">
+            <a href="#how" className="hidden px-3 py-2 transition-colors hover:text-ink lg:block">
               How it works
             </a>
-            <a href="#pricing" className="hidden px-3 py-2 transition-colors hover:text-ink sm:block">
+            <Link href="/features" className="hidden px-3 py-2 transition-colors hover:text-ink md:block">
+              Features
+            </Link>
+            <Link href="/consistent-character-ai" className="hidden px-3 py-2 transition-colors hover:text-ink md:block">
+              Consistency
+            </Link>
+            <Link href="/ai-product-ads" className="hidden px-3 py-2 transition-colors hover:text-ink md:block">
+              Ads
+            </Link>
+            <a href="#pricing" className="hidden px-3 py-2 transition-colors hover:text-ink md:block">
               Pricing
             </a>
-            <a href="#faq" className="hidden px-3 py-2 transition-colors hover:text-ink sm:block">
+            <a href="#faq" className="hidden px-3 py-2 transition-colors hover:text-ink md:block">
               FAQ
             </a>
+            <MobileMenu
+              items={[
+                { href: "#how", label: "How it works" },
+                { href: "/features", label: "Features" },
+                { href: "/consistent-character-ai", label: "Consistency" },
+                { href: "/ai-product-ads", label: "Product ads" },
+                { href: "/models", label: "Models" },
+                { href: "#pricing", label: "Pricing" },
+                { href: "#faq", label: "FAQ" },
+              ]}
+            />
             <Link href="/login" className="btn-ghost px-4 py-2 text-ink">
               Sign in
             </Link>
@@ -105,6 +128,9 @@ export default async function Home() {
             </ol>
           </div>
         </section>
+
+        <Showcase />
+        <AdShowcase />
 
         {models.length > 0 && (
           <section className="border-t border-line">

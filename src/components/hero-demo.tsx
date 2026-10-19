@@ -3,18 +3,18 @@
 import { useEffect, useState } from "react";
 
 // A small replay of the studio: pick a character, type a scene, get shots back.
-// Photos are read from /hero/<scene>-<shot>.jpg. A missing photo shows a plain tinted frame.
+// Photos are read from /hero/<scene>-<shot>.webp. A missing photo shows a plain tinted frame.
 
 const SCENES = [
-  { prompt: "Maya unboxing a skincare set at a bright bathroom counter, phone flash", tint: ["#ffd9e4", "#f6a6c1"] },
-  { prompt: "Maya at a cafe window seat in golden hour, holding a coffee", tint: ["#ffe7c2", "#f2b878"] },
-  { prompt: "Maya mirror selfie in a sunlit hallway, linen shirt", tint: ["#dfe4ff", "#a9b4f2"] },
+  { prompt: "Tara's morning: skincare at the bathroom mirror, then coffee at the cafe", tint: ["#ffd9e4", "#f6a6c1"] },
+  { prompt: "Tara in the monsoon, a grey saree on the balcony and a selfie in the rain", tint: ["#dfe4ff", "#a9b4f2"] },
+  { prompt: "Tara's weekend: yoga at home, a night out in the city, an iced coffee", tint: ["#ffe7c2", "#f2b878"] },
 ];
 
-const SHOTS = ["Image", "Image", "Video"] as const;
+const SHOTS = [0, 1, 2];
 
 function Frame({ scene, shot, ready }: { scene: number; shot: number; ready: boolean }) {
-  const src = `/hero/${scene + 1}-${shot + 1}.jpg`;
+  const src = `/hero/${scene + 1}-${shot + 1}.webp`;
   const [found, setFound] = useState<string | null>(null);
   // Probe first, so a missing photo never renders as a broken image.
   useEffect(() => {
@@ -23,7 +23,6 @@ function Frame({ scene, shot, ready }: { scene: number; shot: number; ready: boo
     img.src = src;
   }, [src]);
   const t = SCENES[scene].tint;
-  const video = SHOTS[shot] === "Video";
   return (
     <div
       className="relative aspect-[9/16] overflow-hidden rounded-2xl"
@@ -38,14 +37,6 @@ function Frame({ scene, shot, ready }: { scene: number; shot: number; ready: boo
         />
       )}
       {!ready && <div className="demo-shimmer absolute inset-0" />}
-      {ready && video && (
-        <span className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
-          <svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-            <path d="M2 1l7 4-7 4z" />
-          </svg>
-          0:08
-        </span>
-      )}
     </div>
   );
 }
@@ -91,9 +82,9 @@ export function HeroDemo({ imageCredits }: { imageCredits: number }) {
     <div className="w-full max-w-[34rem] rounded-[28px] border border-line bg-white/85 p-4 shadow-[0_40px_90px_-30px_rgb(60_40_120/0.35)] backdrop-blur-xl sm:p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[#ff7aa8] to-[#ffb36b] text-sm font-semibold text-white">M</span>
+          <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[#ff7aa8] to-[#ffb36b] text-sm font-semibold text-white">T</span>
           <div className="leading-tight">
-            <p className="text-sm font-medium">Maya</p>
+            <p className="text-sm font-medium">Tara</p>
             <p className="text-xs text-ink-2">Character, same face every shot</p>
           </div>
         </div>

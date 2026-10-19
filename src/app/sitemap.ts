@@ -21,6 +21,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/ai-ugc-generator", 0.9),
     page("/ai-influencer-generator", 0.8),
     page("/consistent-character-ai", 0.8),
+    page("/ai-product-ads", 0.8),
+    page("/features", 0.8),
     page("/about", 0.5),
     ...catalog().map((m) => page(`/models/${m.key}`, 0.7)),
     page("/terms", 0.2, "yearly"),

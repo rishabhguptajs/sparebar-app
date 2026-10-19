@@ -140,3 +140,11 @@ export const WandIcon = (p: P) => (
     <path d="M17.5 3.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM6.5 5l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z" />
   </svg>
 );
+
+export const MoreIcon = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="5.5" cy="12" r="1.3" />
+    <circle cx="12" cy="12" r="1.3" />
+    <circle cx="18.5" cy="12" r="1.3" />
+  </svg>
+);
