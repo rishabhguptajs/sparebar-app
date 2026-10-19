@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyCheckoutSignature } from "@/lib/razorpay";
 import { admin } from "@/lib/supabase/admin";
+import { track } from "@/lib/analytics";
 import { getUser } from "@/lib/supabase/server";
 
 const Body = z.object({
@@ -39,5 +40,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Payment received but credits are delayed. They will appear shortly." }, { status: 500 });
   }
   const row = (data as { credits: number }[] | null)?.[0];
+  track(user.id, "credits_purchased", { credits: row?.credits ?? 0 });
   return NextResponse.json({ ok: true, credits: row?.credits ?? 0 });
 }

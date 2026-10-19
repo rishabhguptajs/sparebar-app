@@ -83,7 +83,7 @@ export default async function Home() {
                 { href: "#faq", label: "FAQ" },
               ]}
             />
-            <Link href="/login" className="btn-ghost px-4 py-2 text-ink">
+            <Link href="/login" data-attr="nav-sign-in" className="btn-ghost px-4 py-2 text-ink">
               Sign in
             </Link>
           </nav>
@@ -101,7 +101,7 @@ export default async function Home() {
               Create a character once, type a scene, and get UGC style photos and videos with the same face every time.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-5">
-              <Link href="/login" className="btn px-7 py-3.5 text-[15px]">
+              <Link href="/login" data-attr="cta-hero-start" className="btn px-7 py-3.5 text-[15px]">
                 Start free
               </Link>
               <p className="text-sm text-ink-2">{FREE_TIER.credits} free credits. No card.</p>
@@ -188,7 +188,7 @@ export default async function Home() {
           <HeroField light seed={3} className="absolute inset-0 -z-10" />
           <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-10 px-5 py-28 lg:px-10 lg:py-44">
             <h2 className="max-w-4xl text-[clamp(3rem,9vw,8.5rem)] font-light leading-[0.92] tracking-[-0.055em]">Make the first one.</h2>
-            <Link href="/login" className="btn px-7 py-3.5 text-[15px]">
+            <Link href="/login" data-attr="cta-footer-start" className="btn px-7 py-3.5 text-[15px]">
               Start free
             </Link>
           </div>

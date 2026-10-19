@@ -44,7 +44,16 @@ export default function Privacy() {
       </Section>
 
       <Section title="Cookies">
-        <p>We use cookies only to keep you signed in. We do not use advertising cookies.</p>
+        <p>We use cookies to keep you signed in. We do not use advertising cookies.</p>
+      </Section>
+
+      <Section title="Analytics">
+        <p>
+          With your permission we use PostHog to see how people use Sparebar: which pages are visited, where visitors come from, which buttons are clicked and which features are used. This is set by the banner you see on your first visit, and you can change your choice by clearing this site&apos;s data in your browser. We do not record your screen, and we do not send the photos or prompts you create to PostHog.
+        </p>
+        <p>
+          We also use Vercel Analytics, which counts visits and pages without cookies or personal data. Our servers send PostHog a small record when something happens in the service, such as signing in, starting a generation, running out of credits or buying credits. We use this only to improve the product and never sell it.
+        </p>
       </Section>
 
       <Section title="How long we keep it">

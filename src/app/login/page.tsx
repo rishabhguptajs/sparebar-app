@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { track } from "@/components/analytics";
 import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
 import { createClient } from "@/lib/supabase/client";
@@ -37,10 +38,12 @@ export default function LoginPage() {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next())}`,
       },
     });
+    track(error ? "login_code_failed" : "login_code_requested", { method: "email" });
     setState(error ? "error" : "sent");
   }
 
   async function google() {
+    track("login_google_clicked");
     setGoogleBusy(true);
     const { error } = await createClient().auth.signInWithOAuth({
       provider: "google",
@@ -63,6 +66,7 @@ export default function LoginPage() {
       token: code.trim(),
       type: "email",
     });
+    track(error ? "login_code_wrong" : "login_code_verified");
     if (error) return setCodeState("error");
     window.location.assign(
       `/auth/callback?session=1&next=${encodeURIComponent(next())}`,

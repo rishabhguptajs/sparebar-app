@@ -12,7 +12,7 @@ async function get<T>(url: string): Promise<T> {
 
 // Pages load as an empty shell and fill in from these calls. The cache keeps the last answer, so a page you
 // have seen shows at once and refreshes in the background.
-export const useMe = (demo = false) => useQuery({ queryKey: ["me"], queryFn: () => get<{ balance: number; isAdmin: boolean }>("/api/me"), enabled: !demo });
+export const useMe = (demo = false) => useQuery({ queryKey: ["me"], queryFn: () => get<{ id: string; balance: number; isAdmin: boolean }>("/api/me"), enabled: !demo });
 
 export const useJobs = () => useQuery({ queryKey: ["jobs"], queryFn: async () => (await get<{ jobs: PresentedJob[] }>("/api/jobs")).jobs });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/components/analytics";
 import { Select } from "@/components/select";
 import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
@@ -81,6 +82,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
   const rate = (p: Product) => (inIndia ? `₹${(p.priceInr / p.credits).toFixed(2)}` : `$${perCredit(p).toFixed(3)}`);
 
   function open(p: Product) {
+    track("plan_clicked", { product: p.key, credits: p.credits });
     setProduct(p);
     setError(null);
     setDone(null);
@@ -140,9 +142,11 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
         },
       });
       rzp.on("payment.failed", () => {
+        track("payment_failed", { product: product.key });
         setError("The payment did not go through. You have not been charged. Try again or use another method.");
         setBusy(false);
       });
+      track("checkout_opened", { product: product.key, credits: product.credits, currency: order.currency });
       paying.current = true;
       dialog.current?.close();
       rzp.open();

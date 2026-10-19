@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { track } from "@/components/analytics";
 import { PACKS, PLANS, perCredit, type Product } from "@/config/plans";
 
 export type Region = "IN" | "OTHER";
@@ -21,7 +22,7 @@ export function Pricing({ initialRegion, gstRegistered }: { initialRegion: Regio
             <p className="mt-1 text-sm text-ink-2">per month</p>
             <p className="mt-8">{p.credits} credits</p>
             <p className="text-sm text-ink-2">{rate(p)} per credit</p>
-            <Link href="/login" className="btn-ghost mt-8 px-4 py-3 text-center text-sm">
+            <Link href="/login" onClick={() => track("pricing_clicked", { plan: p.key })} className="btn-ghost mt-8 px-4 py-3 text-center text-sm">
               Start with {p.label}
             </Link>
           </li>

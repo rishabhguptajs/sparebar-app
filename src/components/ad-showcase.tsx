@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedVideo } from "@/components/tracked-video";
 
 // Finished ads made in Sparebar: one character (Tara), four different products. The headline, badge and
 // button on each are part of the generated image. Files live in /public/showcase.
@@ -32,7 +33,8 @@ export function AdShowcase() {
             </div>
           ))}
           <div className={`${tile} relative`} style={grow(3 / 4)}>
-            <video
+            <TrackedVideo
+              name="tara-lip-tint"
               src="/showcase/tara-lip-tint.mp4"
               poster="/showcase/tara-lip-tint-poster.webp"
               className="size-full object-cover"

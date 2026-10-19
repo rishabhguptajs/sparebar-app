@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedVideo } from "@/components/tracked-video";
 import { Crumbs, SiteShell } from "@/components/site-shell";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbLd, faqLd, graph } from "@/lib/seo";
@@ -34,7 +35,7 @@ function MediaGrid({ media, cols = 3 }: { media: Media[]; cols?: 2 | 3 | 4 }) {
           <figure>
             <div className={`overflow-hidden rounded-2xl bg-panel-2 ${RATIO[m.ratio ?? "tall"]}`}>
               {m.video ? (
-                <video src={`/showcase/${m.src}.mp4`} poster={`/showcase/${m.src}-poster.webp`} className="size-full object-cover" controls muted loop playsInline preload="none" aria-label={m.alt} />
+                <TrackedVideo name={m.src} src={`/showcase/${m.src}.mp4`} poster={`/showcase/${m.src}-poster.webp`} className="size-full object-cover" controls muted loop playsInline preload="none" aria-label={m.alt} />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={`/showcase/${m.src}.webp`} alt={m.alt} loading="lazy" decoding="async" className="size-full object-cover" />

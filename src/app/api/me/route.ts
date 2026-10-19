@@ -11,5 +11,5 @@ export async function GET() {
     getBalance(supabase, data.user.id),
     supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle(),
   ]);
-  return NextResponse.json({ balance, isAdmin: !!(profile.data as { is_admin?: boolean } | null)?.is_admin });
+  return NextResponse.json({ id: data.user.id, balance, isAdmin: !!(profile.data as { is_admin?: boolean } | null)?.is_admin });
 }

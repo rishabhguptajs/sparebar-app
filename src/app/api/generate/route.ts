@@ -7,6 +7,7 @@ import { getObjectBytes } from "@/lib/r2";
 import { startJob, UserFacingError, type JobRow } from "@/lib/jobs/run";
 import { presentJob } from "@/lib/jobs/present";
 import { buildAnimatePrompt, buildProductPrompt } from "@/lib/prompts/build";
+import { track } from "@/lib/analytics";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 // Image models answer inside this request. Video returns at once with status "running".
@@ -55,8 +56,21 @@ export async function POST(req: Request) {
     if (!model) throw new UserFacingError("This model is not available.");
     const supabase = await createClient();
     const job = body.sourceJobId ? await animate(supabase, body, user.id) : await create(supabase, body, user.id);
+    // Which parts of the app get used. Deliberately no model, cost or result: this is about features, not outcomes.
+    track(user.id, "feature_used", {
+      area: body.sourceJobId ? "animate" : body.templateId ? (body.templateId.startsWith("ad-") ? "ads" : "create") : "studio",
+      template: body.templateId ?? null,
+      kind: model.kind,
+      has_character: !!body.characterId,
+      has_product: !!(body.productId || body.productKey),
+      saved_product: !!body.productId,
+      has_outfit: !!(body.outfit || body.outfitId),
+      via_still: !!body.asStill,
+      aspect_ratio: body.aspectRatio ?? null,
+    });
     return NextResponse.json({ job: await presentJob(job) });
   } catch (e) {
+    if (e instanceof UserFacingError && e.status === 402) track(user.id, "out_of_credits", { kind: getModel(body.modelKey)?.kind ?? null });
     if (e instanceof UserFacingError) return NextResponse.json({ error: e.message }, { status: e.status });
     console.error("generate failed", e);
     return NextResponse.json({ error: "Something went wrong. Your credits were not used." }, { status: 500 });

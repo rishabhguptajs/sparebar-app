@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/config/brand";
+import { identify } from "@/components/analytics";
 import { ThemeToggle, useAppTheme } from "@/components/theme";
 import { useMe } from "@/lib/queries";
 import {
@@ -42,6 +43,10 @@ export function AppShell({
   const balance = canSignOut ? (me.data?.balance ?? 0) : balanceProp;
   const isAdmin = canSignOut ? !!me.data?.isAdmin : adminProp;
   const path = usePathname();
+  const userId = me.data?.id;
+  useEffect(() => {
+    if (userId) identify(userId);
+  }, [userId]);
   const { theme, toggle } = useAppTheme();
   const [more, setMore] = useState(false);
   // The sheet closes whenever you move to another page.
