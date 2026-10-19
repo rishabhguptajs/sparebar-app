@@ -36,7 +36,8 @@ export async function makeThumb(bytes: Uint8Array, mime: string): Promise<Uint8A
     // Loaded on use, so a host where sharp cannot start only loses thumbnails instead of breaking every route.
     const { default: sharp } = await import("sharp");
     return new Uint8Array(await sharp(bytes).rotate().resize({ width: 480, withoutEnlargement: true }).webp({ quality: 74 }).toBuffer());
-  } catch {
+  } catch (e) {
+    console.error("thumbnail skipped", e instanceof Error ? e.message.slice(0, 200) : e);
     return null;
   }
 }
