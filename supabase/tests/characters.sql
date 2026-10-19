@@ -20,3 +20,25 @@ select 'client cannot write characters', true;
 reset role;
 update jobs set deleted_at = now() where true;
 select 'soft delete column works', count(*) > 0 from jobs where deleted_at is not null;
+
+-- profile and tags (migration 0010)
+select 'profile defaults to empty', profile = '{}'::jsonb from characters where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+select 'tags default to empty', reference_tags = '{}' from characters where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+
+-- products and outfits (migration 0011)
+insert into products (id, user_id, name, photo_keys) values ('bbbbbbbb-0000-0000-0000-000000000001', :'u', 'Serum', '{a,b}');
+insert into outfits (id, user_id, character_id, name) values ('cccccccc-0000-0000-0000-000000000001', :'u', 'aaaaaaaa-0000-0000-0000-000000000001', 'Brunch');
+do $$ begin insert into products (user_id, name, photo_keys) values ('11111111-1111-1111-1111-111111111111', 'x', '{a,b,c,d}'); raise exception 'should have failed'; exception when check_violation then null; end $$;
+select 'a product holds at most three photos', true;
+do $$ begin insert into outfits (user_id, character_id, name) values ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000001', ''); raise exception 'should have failed'; exception when check_violation then null; end $$;
+select 'an outfit needs a name', true;
+set role authenticated;
+select set_config('request.jwt.claim.sub', :'v', false) is not null;
+select 'other user sees no products or outfits', (select count(*) from products) = 0 and (select count(*) from outfits) = 0;
+select set_config('request.jwt.claim.sub', :'u', false) is not null;
+select 'owner sees own products and outfits', (select count(*) from products) = 1 and (select count(*) from outfits) = 1;
+do $$ begin update products set name = 'x'; if found then raise exception 'update allowed'; end if; exception when insufficient_privilege then null; end $$;
+select 'clients cannot write products', true;
+reset role;
+delete from characters where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+select 'deleting a character removes its outfits', count(*) = 0 from outfits;

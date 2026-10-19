@@ -3,8 +3,10 @@ import { art } from "@/lib/art";
 import { OPTIONS, defaultResolution } from "@/config/model-options";
 import { MODEL_META, tierFor } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
+import { refsFor } from "@/config/model-refs";
+import { EMPTY_PROFILE } from "@/lib/prompts/profile";
 import { creditsForModel } from "@/lib/credits";
-import type { CharacterCard, ModelOption, PresentedJob } from "@/lib/ui-types";
+import type { CharacterCard, ModelOption, PresentedJob, ProductCard } from "@/lib/ui-types";
 
 export const sampleModels: ModelOption[] = MODELS.filter((m) => m.enabled)
   .map((m) => {
@@ -27,9 +29,15 @@ export const sampleModels: ModelOption[] = MODELS.filter((m) => m.enabled)
       tier: tierFor(m.kind, credits),
       available: 38,
       paused: false,
+      maxRefs: refsFor(m).maxRefs,
     };
   })
   .sort((x, y) => x.rank - y.rank);
+
+export const sampleProducts: ProductCard[] = [
+  { id: "p1", name: "Glow vitamin C serum", pitch: "A lightweight serum that brightens skin in two weeks", photoUrl: art(21), labelUrl: art(22) },
+  { id: "p2", name: "Daily water bottle", pitch: "", photoUrl: art(24), labelUrl: null },
+];
 
 export const sampleCharacters: CharacterCard[] = [
   {
@@ -40,6 +48,12 @@ export const sampleCharacters: CharacterCard[] = [
     description:
       "Late twenties, shoulder length dark curls, warm brown skin, small gold hoops",
     coverUrl: art(3),
+    profile: { ...EMPTY_PROFILE, gender: "woman", ageRange: "late 20s", skinTone: "brown", hairLength: "shoulder length", hairColor: "dark brown", hairStyle: "curly", features: "small gold hoops", wardrobe: "Neutral knitwear" },
+    profileFilled: 6,
+    photoCount: 3,
+    angleTags: ["front", "angle", "full"],
+    photoUrls: [art(3), art(4), art(5)],
+    outfits: [{ id: "o1", name: "Brunch", description: "Linen shirt and high waisted jeans", photoUrl: null }],
   },
   {
     id: "c2",
@@ -49,6 +63,12 @@ export const sampleCharacters: CharacterCard[] = [
     description:
       "Early thirties, short sandy hair, light stubble, denim jacket",
     coverUrl: art(8),
+    profile: EMPTY_PROFILE,
+    profileFilled: 0,
+    photoCount: 1,
+    angleTags: ["photo"],
+    photoUrls: [art(8)],
+    outfits: [],
   },
   {
     id: "c3",
@@ -57,6 +77,12 @@ export const sampleCharacters: CharacterCard[] = [
     tone: "Dry and funny",
     description: "Mid twenties, sleek black bob, round glasses, minimal makeup",
     coverUrl: art(13),
+    profile: EMPTY_PROFILE,
+    profileFilled: 0,
+    photoCount: 1,
+    angleTags: ["photo"],
+    photoUrls: [art(13)],
+    outfits: [],
   },
 ];
 

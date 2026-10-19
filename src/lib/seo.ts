@@ -1,7 +1,7 @@
 import { brand } from "@/config/brand";
 import { FAQ } from "@/config/faq";
 import { FREE_TIER } from "@/config/free-tier";
-import { MODEL_META } from "@/config/model-meta";
+import { MODEL_META, tagsOf } from "@/config/model-meta";
 import { OPTIONS } from "@/config/model-options";
 import { MODELS, type ModelConfig } from "@/config/models";
 import { PACKS, PLANS } from "@/config/plans";
@@ -68,7 +68,7 @@ function describe(m: ModelConfig): CatalogModel {
     kind: m.kind,
     maker: meta?.maker ?? "",
     blurb: meta?.blurb ?? "",
-    tags: meta?.tags ?? [],
+    tags: tagsOf(meta),
     rank: meta?.rank ?? 99,
     credits,
     fromCredits: Math.min(credits, ...options.map((o) => o.credits)),

@@ -1,5 +1,7 @@
 // Post types for the guided creator. A template is data: a scene written around a few blanks the user fills in.
-// Adding one is an edit here.
+// Adding one is an edit here. Prompt text around the scene (identity, outfit, rules) is added in src/lib/prompts.
+
+import type { Framing } from "@/lib/prompts/refs";
 
 export type Blank = { key: string; label: string; placeholder: string; optional?: boolean };
 
@@ -13,8 +15,16 @@ export type Template = {
   modelKey: string;
   /** Takes an optional product photo. */
   product?: boolean;
+  /** How much of the person is in frame. Decides which reference photo of them goes first. */
+  framing: Framing;
   blanks: Blank[];
   scene: (v: Record<string, string>, name: string) => string;
+  /** Videos only. The still the clip starts from: the same moment as a photo, before anything moves. */
+  stillScene?: (v: Record<string, string>, name: string) => string;
+  /** Videos only. What happens once the still is animated. */
+  motion?: (v: Record<string, string>, name: string) => string;
+  /** Videos only. Key of the blank holding the line the character says out loud. */
+  speechKey?: string;
 };
 
 const v = (x: string | undefined, fallback: string) => (x?.trim() ? x.trim() : fallback);
@@ -26,6 +36,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Mirror selfie while getting ready.",
     kind: "image",
     aspectRatio: "9:16",
+    framing: "half",
     modelKey: "nano-banana-2.1",
     blanks: [
       { key: "outfit", label: "Outfit or occasion", placeholder: "Linen shirt and jeans, brunch with friends", optional: true },
@@ -40,6 +51,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Holds a product up and shows it to the camera.",
     kind: "image",
     aspectRatio: "9:16",
+    framing: "close",
     modelKey: "nano-banana-2.1",
     product: true,
     blanks: [
@@ -55,6 +67,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Opening a package, excited reaction.",
     kind: "image",
     aspectRatio: "9:16",
+    framing: "half",
     modelKey: "nano-banana-2.1",
     product: true,
     blanks: [
@@ -70,6 +83,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Close, calm bathroom routine shot.",
     kind: "image",
     aspectRatio: "4:5",
+    framing: "close",
     modelKey: "nano-banana-2.1",
     product: true,
     blanks: [{ key: "product", label: "Product", placeholder: "Moisturiser in a white jar", optional: true }],
@@ -82,6 +96,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Full body outfit shot outdoors.",
     kind: "image",
     aspectRatio: "4:5",
+    framing: "full",
     modelKey: "nano-banana-2.1",
     blanks: [
       { key: "outfit", label: "Outfit", placeholder: "Oversized blazer, white tee, wide leg trousers", optional: true },
@@ -96,6 +111,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Relaxed shot at a table with a drink.",
     kind: "image",
     aspectRatio: "1:1",
+    framing: "half",
     modelKey: "nano-banana-2.1",
     blanks: [{ key: "mood", label: "Mood", placeholder: "Reading a book, rainy day", optional: true }],
     scene: (b) => `Sitting at a small table in a coffee shop with a latte. Mood: ${v(b.mood, "relaxed, cosy afternoon")}. Soft window light, candid lifestyle photo.`,
@@ -106,6 +122,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Speaks to the camera with a quick tip.",
     kind: "video",
     aspectRatio: "9:16",
+    framing: "close",
     modelKey: "veo-3.1-lite",
     blanks: [
       { key: "line", label: "What they say", placeholder: "Three tips for a calmer morning. Number one: no phone for the first ten minutes." },
@@ -113,6 +130,10 @@ export const TEMPLATES: Template[] = [
     ],
     scene: (b, name) =>
       `${name} speaks directly to the camera in a selfie style video, natural expressions, steady handheld framing. Setting: ${v(b.setting, "a bright living room")}. ${name} says: "${v(b.line, "Here is a quick tip that changed my mornings.")}"`,
+    stillScene: (b, name) =>
+      `${name} looking straight at the camera, about to speak, selfie style framing at arm's length. Setting: ${v(b.setting, "a bright living room")}. Natural expression, soft light, shot on a phone.`,
+    motion: () => "Speaks directly to the camera in a selfie style video, natural expressions, steady handheld framing.",
+    speechKey: "line",
   },
   {
     id: "product-pitch",
@@ -120,6 +141,7 @@ export const TEMPLATES: Template[] = [
     blurb: "Shows a product and says why they like it.",
     kind: "video",
     aspectRatio: "9:16",
+    framing: "close",
     modelKey: "veo-3.1-lite",
     product: true,
     blanks: [
@@ -128,6 +150,10 @@ export const TEMPLATES: Template[] = [
     ],
     scene: (b, name) =>
       `${name} holds up ${v(b.product, "the product")} to the camera in a selfie style video and talks about it, smiling, natural handheld motion. ${name} says: "${v(b.line, "I have used this every day and love it.")}"`,
+    stillScene: (b, name) =>
+      `${name} holds up ${v(b.product, "the product")} toward the camera with a genuine smile, product clearly visible and label facing the camera, selfie style framing. Soft light, shot on a phone.`,
+    motion: () => "Holds the product up to the camera and talks about it, smiling, natural handheld motion.",
+    speechKey: "line",
   },
   {
     id: "day-in-life",
@@ -135,9 +161,12 @@ export const TEMPLATES: Template[] = [
     blurb: "A short moving moment from a daily routine.",
     kind: "video",
     aspectRatio: "9:16",
+    framing: "half",
     modelKey: "veo-3.1-lite",
     blanks: [{ key: "moment", label: "Moment", placeholder: "Pouring coffee and opening the curtains", optional: true }],
     scene: (b, name) => `${name} in a short candid day in the life clip: ${v(b.moment, "making coffee in the morning")}. Natural movement, handheld phone footage, soft light.`,
+    stillScene: (b, name) => `${name} in a candid day in the life moment: ${v(b.moment, "making coffee in the morning")}. Natural light, handheld phone photo.`,
+    motion: (b) => `${v(b.moment, "Making coffee in the morning")}. Natural movement, handheld phone footage, soft light.`,
   },
 ];
 

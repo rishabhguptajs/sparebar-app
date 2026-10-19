@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/select";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CloseIcon, DownloadIcon, PlusIcon, UploadIcon } from "@/components/icons";
@@ -9,15 +10,15 @@ import { PostKit } from "@/components/post-kit";
 import { TEMPLATES, type Template } from "@/config/templates";
 import { useRefreshData } from "@/lib/queries";
 import { resizeImage } from "@/lib/resize-image";
-import { cssRatio, type CharacterCard, type ModelOption, type PresentedJob } from "@/lib/ui-types";
+import { cssRatio, type CharacterCard, type ModelOption, type PresentedJob, type ProductCard } from "@/lib/ui-types";
 
-type Props = { base: string; models: ModelOption[]; characters: CharacterCard[] };
+type Props = { base: string; models: ModelOption[]; characters: CharacterCard[]; products?: ProductCard[] };
 
 const active = (j: PresentedJob | null) => j?.status === "queued" || j?.status === "running";
 const field = "w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm";
 
 /** Guided flow: pick an influencer, pick a post type, fill a few blanks, generate. */
-export function CreateView({ base, models, characters: charactersProp }: Props) {
+export function CreateView({ base, models, characters: charactersProp, products = [] }: Props) {
   const refresh = useRefreshData();
   const [added, setAdded] = useState<CharacterCard[]>([]);
   const characters = useMemo(() => [...charactersProp, ...added.filter((a) => !charactersProp.some((c) => c.id === a.id))], [charactersProp, added]);
@@ -29,6 +30,12 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [modelKey, setModelKey] = useState("");
+  const [videoKey, setVideoKey] = useState("");
+  const [outfitId, setOutfitId] = useState("");
+  const [outfitText, setOutfitText] = useState("");
+  const [productId, setProductId] = useState("");
+  const [animated, setAnimated] = useState<PresentedJob | null>(null);
+  const [animating, setAnimating] = useState(false);
   const [product, setProduct] = useState<{ key: string; preview: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [job, setJob] = useState<PresentedJob | null>(null);
@@ -39,8 +46,17 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
 
   const character = characters.find((c) => c.id === (characterId ?? characters[0]?.id)) ?? null;
   const template = TEMPLATES.find((t) => t.id === templateId) ?? null;
-  const kindModels = models.filter((m) => template && m.kind === template.kind);
-  const model = models.find((m) => m.key === modelKey) ?? kindModels.find((m) => m.key === template?.modelKey) ?? kindModels[0];
+  // A video starts as a photo of the same moment. The photo is approved first, then animated.
+  const stillFirst = template?.kind === "video" && !!template.stillScene;
+  const genKind = stillFirst ? "image" : template?.kind;
+  const kindModels = models.filter((m) => template && m.kind === genKind);
+  const model = models.find((m) => m.key === modelKey && m.kind === genKind) ?? kindModels.find((m) => m.key === template?.modelKey) ?? kindModels[0];
+  const videoModels = models.filter((m) => m.kind === "video");
+  const videoModel = videoModels.find((m) => m.key === videoKey) ?? videoModels.find((m) => m.key === template?.modelKey) ?? videoModels[0];
+  const outfits = character?.outfits ?? [];
+  const savedProduct = products.find((p) => p.id === productId) ?? null;
+  const refSlots = model?.maxRefs ?? 3;
+  const productFits = refSlots > 1;
   const short = !!model && model.credits > model.available;
   const running = active(job);
   const missing = template?.blanks.some((b) => !b.optional && !(values[b.key] ?? "").trim());
@@ -49,8 +65,11 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
   function pickTemplate(t: Template) {
     setTemplateId(t.id);
     setValues({});
-    setModelKey(models.find((m) => m.key === t.modelKey && m.kind === t.kind)?.key ?? models.find((m) => m.kind === t.kind)?.key ?? "");
+    setModelKey(models.find((m) => m.key === t.modelKey && m.kind === t.kind)?.key ?? models.find((m) => m.kind === (t.kind === "video" && t.stillScene ? "image" : t.kind))?.key ?? "");
+    setVideoKey(models.find((m) => m.key === t.modelKey && m.kind === "video")?.key ?? "");
     setProduct(null);
+    setProductId("");
+    setAnimated(null);
     setJob(null);
     setError(null);
   }
@@ -79,16 +98,22 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
     setBusy(true);
     setError(null);
     setJob(null);
+    setAnimated(null);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           modelKey: model.key,
-          prompt: template.scene(values, character.name),
+          templateId: template.id,
+          blanks: values,
+          asStill: stillFirst || undefined,
           aspectRatio: template.aspectRatio,
           characterId: character.id,
-          productKey: template.kind === "image" ? product?.key : undefined,
+          outfitId: outfitId || undefined,
+          outfit: !outfitId && outfitText.trim() ? outfitText.trim() : undefined,
+          productId: productId || undefined,
+          productKey: !productId && template.product ? product?.key : undefined,
         }),
       });
       const body = await res.json();
@@ -102,6 +127,46 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
       setBusy(false);
     }
   }
+
+  async function animate() {
+    if (!job || !template || !character || !videoModel) return;
+    setAnimating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelKey: videoModel.key,
+          sourceJobId: job.id,
+          motion: template.motion?.(values, character.name),
+          line: template.speechKey ? values[template.speechKey]?.trim() || undefined : undefined,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Something went wrong.");
+      setAnimated(body.job);
+      refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setAnimating(false);
+    }
+  }
+
+  // Poll the clip while it renders.
+  useEffect(() => {
+    if (!animated || !active(animated)) return;
+    const t = setTimeout(async () => {
+      const res = await fetch(`/api/jobs/${animated.id}`);
+      if (!res.ok) return;
+      const next = (await res.json()).job as PresentedJob;
+      setAnimated(next);
+      if (!active(next)) refresh();
+    }, 4000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animated]);
 
   // Poll a running job. Each poll can also move the job forward on the server.
   useEffect(() => {
@@ -203,46 +268,69 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
                 </div>
               ))}
 
-              {template.product && template.kind === "image" && (
+              <div className="space-y-2">
+                <label htmlFor="c-outfit" className="text-sm font-medium">
+                  Outfit <span className="font-normal text-ink-2">(optional)</span>
+                </label>
+                {outfits.length > 0 && (
+                  <Select id="c-outfit" value={outfitId} onChange={setOutfitId} options={[{ value: "", label: "Let the scene decide" }, ...outfits.map((o) => ({ value: o.id, label: o.name }))]} />
+                )}
+                {!outfitId && <input aria-label="Describe the outfit" value={outfitText} onChange={(e) => setOutfitText(e.target.value)} maxLength={200} placeholder="Cream linen shirt, high waisted jeans" className={field} />}
+                <p className="text-xs text-ink-2">Same face, new clothes. Save outfits on the character to reuse them.</p>
+                {!productFits && outfits.find((o) => o.id === outfitId)?.photoUrl && <p className="text-xs text-danger">This model uses one photo at a time, so it cannot use an outfit photo and keep your influencer. Pick another model, or an outfit without a photo.</p>}
+              </div>
+
+              {template.product && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    Product photo <span className="font-normal text-ink-2">(optional)</span>
+                    Product <span className="font-normal text-ink-2">(optional)</span>
                   </p>
-                  {product ? (
-                    <div className="relative size-20 overflow-hidden rounded-xl bg-panel-2">
-                      <Thumb src={product.preview} alt="Product" className="size-full object-cover" />
-                      <button type="button" aria-label="Remove product photo" onClick={() => setProduct(null)} className="absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-black/60 text-white">
-                        <CloseIcon width={12} height={12} />
-                      </button>
-                    </div>
+                  {!productFits ? (
+                    <p className="text-xs text-ink-2">This model uses one photo at a time, so it cannot hold a product and keep your influencer. Pick another model to add one.</p>
                   ) : (
-                    <label className="grid size-20 cursor-pointer place-items-center rounded-xl border border-dashed border-line text-ink-2 hover:text-ink">
-                      <span className="flex flex-col items-center gap-1 text-xs">
-                        <UploadIcon width={18} height={18} />
-                        {uploading ? "Adding" : "Add"}
-                      </span>
-                      <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => { addProduct(e.target.files?.[0]); e.target.value = ""; }} />
-                    </label>
+                    <>
+                      {products.length > 0 && (
+                        <Select ariaLabel="Saved product" value={productId} onChange={(v) => { setProductId(v); setProduct(null); }} options={[{ value: "", label: "No saved product" }, ...products.map((p) => ({ value: p.id, label: p.name }))]} />
+                      )}
+                      {savedProduct ? (
+                        <div className="flex items-center gap-3 text-xs text-ink-2">
+                          {savedProduct.photoUrl && <Thumb src={savedProduct.photoUrl} alt={savedProduct.name} className="size-14 rounded-xl object-cover" />}
+                          <span>{savedProduct.pitch || savedProduct.name}</span>
+                        </div>
+                      ) : product ? (
+                        <div className="relative size-20 overflow-hidden rounded-xl bg-panel-2">
+                          <Thumb src={product.preview} alt="Product" className="size-full object-cover" />
+                          <button type="button" aria-label="Remove product photo" onClick={() => setProduct(null)} className="absolute right-1 top-1 grid size-5 place-items-center rounded-full bg-black/60 text-white">
+                            <CloseIcon width={12} height={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="grid size-20 cursor-pointer place-items-center rounded-xl border border-dashed border-line text-ink-2 hover:text-ink">
+                          <span className="flex flex-col items-center gap-1 text-xs">
+                            <UploadIcon width={18} height={18} />
+                            {uploading ? "Adding" : "Add"}
+                          </span>
+                          <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => { addProduct(e.target.files?.[0]); e.target.value = ""; }} />
+                        </label>
+                      )}
+                      <p className="text-xs text-ink-2">
+                        Shown as it is, so the label stays right. <Link href={`${base}/products`} className="text-accent hover:underline">Manage products</Link>
+                      </p>
+                    </>
                   )}
-                  <p className="text-xs text-ink-2">Shown in the photo as it is, so the label stays right.</p>
                 </div>
               )}
-              {template.product && template.kind === "video" && <p className="text-xs text-ink-2">Videos start from your influencer&apos;s photo. Describe the product in words.</p>}
             </div>
 
             <div className="flex flex-col gap-4">
               <div className="space-y-2">
                 <label htmlFor="c-model" className="text-sm font-medium">
-                  Model
+                  {stillFirst ? "Photo model" : "Model"}
                 </label>
-                <select id="c-model" value={model?.key ?? ""} onChange={(e) => setModelKey(e.target.value)} className={field}>
-                  {kindModels.map((m) => (
-                    <option key={m.key} value={m.key} disabled={m.paused}>
-                      {m.label}, {m.credits} credits
-                    </option>
-                  ))}
-                </select>
+                <Select id="c-model" value={model?.key ?? ""} onChange={setModelKey} options={kindModels.map((m) => ({ value: m.key, label: `${m.label}, ${m.credits} credits`, disabled: m.paused }))} />
               </div>
+
+              {stillFirst && <p className="text-xs text-ink-2">Videos start as a photo of the same moment. You approve the photo, then animate it, so the face and product stay as you saw them.</p>}
 
               <div className="mt-auto space-y-3">
                 {error && (
@@ -259,7 +347,7 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
                   </p>
                 )}
                 <button type="button" onClick={generate} disabled={!canRun} className="w-full rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink transition-[opacity,transform] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
-                  {busy || running ? "Generating" : character ? `Generate for ${model?.credits ?? 0} credits` : "Pick an influencer first"}
+                  {busy || running ? "Generating" : character ? `${stillFirst ? "Make the first frame" : "Generate"} for ${model?.credits ?? 0} credits` : "Pick an influencer first"}
                 </button>
               </div>
             </div>
@@ -301,7 +389,37 @@ export function CreateView({ base, models, characters: charactersProp }: Props) 
                   New post
                 </button>
               </div>
-              <PostKit jobId={job.id} />
+              {stillFirst && (
+                <div className="w-full max-w-md space-y-3 rounded-2xl border border-line bg-panel p-4">
+                  <p className="text-sm font-medium">Happy with the first frame?</p>
+                  <p className="text-xs text-ink-2">Animate it into a clip. Video models need a 9:16 or 16:9 photo, which this one is.</p>
+                  <Select ariaLabel="Video model" value={videoModel?.key ?? ""} onChange={setVideoKey} options={videoModels.map((m) => ({ value: m.key, label: `${m.label}, ${m.credits} credits`, disabled: m.paused }))} />
+                  {!animated || animated.status === "failed" ? (
+                    <button type="button" onClick={animate} disabled={animating || !videoModel || videoModel.paused || videoModel.credits > videoModel.available} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-40">
+                      {animating ? "Starting" : `Animate it for ${videoModel?.credits ?? 0} credits`}
+                    </button>
+                  ) : null}
+                  {videoModel && videoModel.credits > videoModel.available && (
+                    <p className="text-xs text-ink-2">
+                      {videoModel.available === 0 ? "Free credits work for images only. " : `You need ${videoModel.credits} credits and have ${videoModel.available}. `}
+                      <Link href={`${base}/credits`} className="font-medium text-accent hover:underline">Add credits</Link>
+                    </p>
+                  )}
+                  {animated?.status === "failed" && <p className="text-xs text-danger">{animated.error ?? "The clip failed. Your credits were refunded."}</p>}
+                  {animated && active(animated) && <p className="text-xs text-ink-2">Rendering the clip. You can leave this page and find it in your library.</p>}
+                  {animated?.status === "succeeded" && animated.outputs[0] && (
+                    <div className="space-y-2">
+                      <div style={{ aspectRatio: cssRatio(template.aspectRatio) }} className="mx-auto max-h-[60vh] overflow-hidden rounded-2xl border border-line bg-panel-2">
+                        <Media output={animated.outputs[0]} alt={animated.prompt} controls className="size-full object-cover" />
+                      </div>
+                      <a href={animated.outputs[0].downloadUrl} className="flex items-center justify-center gap-2 rounded-xl bg-panel-2 px-4 py-2.5 text-sm font-medium">
+                        <DownloadIcon width={18} height={18} /> Download clip
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+              <PostKit jobId={animated?.status === "succeeded" ? animated.id : job.id} />
             </>
           )}
         </section>

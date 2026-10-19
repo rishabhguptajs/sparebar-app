@@ -7,7 +7,14 @@ export type ModelMeta = {
   rank: number;
   blurb: string;
   tags: string[];
+  /** Set to true only after the consistency test set (scripts/consistency-eval.ts) shows this model keeps a face and a product the same. Left unset until then. */
+  consistent?: boolean;
 };
+
+export const CONSISTENT_TAG = "Best for consistency";
+
+/** Tags shown for a model, with the consistency tag added only when it has been earned. */
+export const tagsOf = (meta?: ModelMeta) => (meta ? [...meta.tags, ...(meta.consistent ? [CONSISTENT_TAG] : [])] : []);
 
 /** Ranks up to this are shown first as top picks. */
 export const TOP_PICKS = 6;

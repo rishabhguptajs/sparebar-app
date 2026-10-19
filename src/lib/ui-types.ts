@@ -1,3 +1,5 @@
+import type { CharacterProfile } from "@/lib/prompts/profile";
+
 export type { PresentedJob } from "@/lib/jobs/present";
 
 export type ModelOption = {
@@ -22,6 +24,8 @@ export type ModelOption = {
   available: number;
   /** The lab recently refused requests over billing, so this model is hidden for now. */
   paused: boolean;
+  /** Reference photos the model can use at once: 1 for video and some image models. */
+  maxRefs: number;
 };
 
 export type CharacterCard = {
@@ -31,6 +35,26 @@ export type CharacterCard = {
   niche: string;
   tone: string;
   coverUrl: string | null;
+  /** Structured look, see src/lib/prompts/profile.ts. */
+  profile: CharacterProfile;
+  /** How many of the look fields are filled in. */
+  profileFilled: number;
+  photoCount: number;
+  /** Role of each reference photo: photo, front, angle or full. */
+  angleTags: string[];
+  /** Signed links to every reference photo, in order. */
+  photoUrls: string[];
+  outfits: OutfitCard[];
+};
+
+export type OutfitCard = { id: string; name: string; description: string; photoUrl: string | null };
+
+export type ProductCard = {
+  id: string;
+  name: string;
+  pitch: string;
+  photoUrl: string | null;
+  labelUrl: string | null;
 };
 
 export const RATIOS = ["9:16", "1:1", "4:5", "16:9"] as const;

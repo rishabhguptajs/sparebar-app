@@ -5,10 +5,11 @@ import { CreateView } from "@/components/create-view";
 import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
+import { ProductsView } from "@/components/products-view";
 import { SettingsView } from "@/components/settings-view";
 import { StudioView } from "@/components/studio-view";
 import { FREE_TIER } from "@/config/free-tier";
-import { useCharacters, useCreditsPage, useJobs, useSettings, useStudio } from "@/lib/queries";
+import { useCharacters, useCreditsPage, useJobs, useProducts, useSettings, useStudio } from "@/lib/queries";
 
 // Each page is an empty shell that asks the API for its data. The cache shows the last answer straight away.
 
@@ -20,6 +21,11 @@ export function LibraryLoader() {
 export function CharactersLoader({ portraitCredits, openNew }: { portraitCredits: number; openNew: boolean }) {
   const { data } = useCharacters();
   return data ? <CharactersView base="/app" characters={data} portraitCredits={portraitCredits} openNew={openNew} /> : <PageSkeleton />;
+}
+
+export function ProductsLoader() {
+  const { data } = useProducts();
+  return data ? <ProductsView base="/app" products={data} /> : <PageSkeleton />;
 }
 
 export function CreditsLoader() {
@@ -47,7 +53,7 @@ export function SettingsLoader() {
 
 export function CreateLoader() {
   const { data } = useStudio();
-  return data ? <CreateView base="/app" models={data.models} characters={data.characters} /> : <PageSkeleton />;
+  return data ? <CreateView base="/app" models={data.models} characters={data.characters} products={data.products} /> : <PageSkeleton />;
 }
 
 export function StudioLoader({ rerun, character, welcome }: { rerun?: string; character?: string; welcome?: string }) {

@@ -4,8 +4,10 @@ import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useState } from "react";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { CharacterDialog } from "@/components/character-dialog";
 import { NewCharacterDialog } from "@/components/new-character-dialog";
 import { Thumb } from "@/components/media";
+import { PeopleTabs } from "@/components/people-tabs";
 import type { CharacterCard } from "@/lib/ui-types";
 
 type Props = {
@@ -20,6 +22,8 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
   const refresh = useRefreshData();
   const [creating, setCreating] = useState(openNew ?? false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const editing = characters.find((c) => c.id === editId) ?? null;
 
   async function remove(id: string) {
     setConfirmId(null);
@@ -29,6 +33,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
+      <PeopleTabs base={base} current="characters" />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Characters</h1>
@@ -66,11 +71,21 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
               </div>
               <div className="space-y-1 p-3">
                 <p className="truncate text-sm font-medium">{c.name}</p>
-                <p className="line-clamp-2 min-h-8 text-xs text-ink-2">{c.description || "No description"}</p>
+                <p className="line-clamp-2 min-h-8 text-xs text-ink-2">{c.description || (c.profileFilled > 0 ? "Look saved" : "No description")}</p>
+                {c.profileFilled === 0 && (
+                  <button type="button" onClick={() => setEditId(c.id)} className="text-xs font-medium text-accent hover:underline">
+                    Complete the look
+                  </button>
+                )}
                 <div className="flex items-center justify-between pt-1">
-                  <Link href={`${base}?character=${c.id}`} className="text-sm font-medium text-accent hover:underline">
-                    Use in studio
-                  </Link>
+                  <span className="flex items-center gap-3">
+                    <Link href={`${base}?character=${c.id}`} className="text-sm font-medium text-accent hover:underline">
+                      Use
+                    </Link>
+                    <button type="button" onClick={() => setEditId(c.id)} className="text-sm text-ink-2 hover:text-ink">
+                      Edit
+                    </button>
+                  </span>
                   {confirmId === c.id ? (
                     <span className="flex items-center gap-1 text-xs">
                       <button onClick={() => remove(c.id)} className="rounded-md px-1.5 py-1 font-medium text-danger">
@@ -96,6 +111,7 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
         </ul>
       )}
 
+      <CharacterDialog character={editing} shotCredits={portraitCredits} onClose={() => setEditId(null)} onChanged={() => refresh()} demo={demo} />
       <NewCharacterDialog open={creating} onClose={() => setCreating(false)} portraitCredits={portraitCredits} onCreated={() => refresh()} demo={demo} />
     </div>
   );

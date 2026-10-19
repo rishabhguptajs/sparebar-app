@@ -2,16 +2,18 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { OPTIONS, defaultResolution } from "@/config/model-options";
-import { MODEL_META, tierFor } from "@/config/model-meta";
+import { MODEL_META, tagsOf, tierFor } from "@/config/model-meta";
 import { MODELS } from "@/config/models";
+import { refsFor } from "@/config/model-refs";
 import { creditsForModel } from "@/lib/credits";
-import { presentCharacter, type CharacterRow } from "@/lib/characters";
+import { presentCharacter, type CharacterRow, type OutfitRow } from "@/lib/characters";
+import { signedUrl } from "@/lib/r2";
 import { presentJob } from "@/lib/jobs/present";
 import type { JobRow } from "@/lib/jobs/run";
 import { getPausedLabs } from "@/lib/labs-server";
 import { getAdapter } from "@/lib/providers";
 import { createClient } from "@/lib/supabase/server";
-import type { ModelOption } from "@/lib/ui-types";
+import type { ModelOption, ProductCard } from "@/lib/ui-types";
 
 /** Signed-in user plus a Supabase client that acts as them. Redirects to login otherwise. */
 // Reads the user from the signed token, which avoids a round trip to the auth server on every page.
@@ -77,7 +79,7 @@ export async function getModelOptions(
       maker: meta.maker,
       rank: meta.rank,
       blurb: meta.blurb,
-      tags: meta.tags,
+      tags: tagsOf(meta),
       resolutions: OPTIONS[m.key]?.resolutions ?? [],
       durations: OPTIONS[m.key]?.durations ?? [],
       defaultResolution: defaultResolution(m) ?? null,
@@ -85,6 +87,7 @@ export async function getModelOptions(
       tier: tierFor(m.kind, credits),
       available: cache.get(k) ?? 0,
       paused: paused.has(m.lab),
+      maxRefs: refsFor(m).maxRefs,
     });
   }
   // Best known first, so the first model of each type is the default.
@@ -97,7 +100,24 @@ export async function getCharacters(supabase: Supabase) {
     .select("*")
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
-  return Promise.all(((data ?? []) as CharacterRow[]).map(presentCharacter));
+  const rows = (data ?? []) as CharacterRow[];
+  const { data: outfits } = rows.length
+    ? await supabase.from("outfits").select("id, character_id, name, description, photo_key").is("deleted_at", null).in("character_id", rows.map((r) => r.id)).order("created_at")
+    : { data: [] };
+  return Promise.all(rows.map((r) => presentCharacter(r, (outfits ?? []) as OutfitRow[])));
+}
+
+export async function getProducts(supabase: Supabase): Promise<ProductCard[]> {
+  const { data } = await supabase.from("products").select("*").is("deleted_at", null).order("created_at", { ascending: false });
+  return Promise.all(
+    ((data ?? []) as { id: string; name: string; pitch: string; photo_keys: string[]; label_key: string | null }[]).map(async (p) => ({
+      id: p.id,
+      name: p.name,
+      pitch: p.pitch,
+      photoUrl: p.photo_keys[0] ? await signedUrl(p.photo_keys[0]) : null,
+      labelUrl: p.label_key ? await signedUrl(p.label_key) : null,
+    })),
+  );
 }
 
 export async function getJobs(

@@ -54,6 +54,11 @@ type StartInput = {
   seconds?: number;
   references?: ReferenceImage[];
   characterId?: string;
+  /** Version of the prompt layer that wrote providerPrompt, and the R2 keys of the references sent. Saved on the job. */
+  promptVersion?: string;
+  referenceKeys?: string[];
+  /** Anything else worth keeping with the job (template, source job, outfit). Saved in params. */
+  meta?: Record<string, unknown>;
 };
 
 /** Reserve credits, create the job, submit to the lab. Image jobs usually finish here. */
@@ -82,7 +87,13 @@ export async function startJob(input: StartInput): Promise<JobRow> {
     p_lab: model.lab,
     p_kind: model.kind,
     p_prompt: input.prompt,
-    p_params: { aspectRatio: input.aspectRatio ?? model.defaults.aspectRatio, defaults: chosen.defaults },
+    p_params: {
+      aspectRatio: input.aspectRatio ?? model.defaults.aspectRatio,
+      defaults: chosen.defaults,
+      ...(input.promptVersion ? { promptVersion: input.promptVersion } : {}),
+      ...(input.referenceKeys?.length ? { referenceKeys: input.referenceKeys } : {}),
+      ...input.meta,
+    },
     p_credits: credits,
     p_lab_cost_micros: q.costMicros,
     p_free_ok: model.freeEligible,
