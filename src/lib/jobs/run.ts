@@ -160,6 +160,7 @@ export async function advanceJob(jobId: string): Promise<JobRow | null> {
     result = failure(e, model.lab);
     // A network blip while polling should not refund a job the lab is still rendering.
     if (result.status === "failed" && !result.permanent) {
+      console.error("poll failed, will retry", job.id, job.model_key, result.error);
       await reschedule(job, job.provider_ref);
       return load(job.id);
     }
@@ -185,6 +186,7 @@ async function applyResult(jobId: string, userId: string, result: ProviderResult
       try {
         outputs = await store(userId, jobId, result.outputs);
       } catch (e) {
+        console.error("saving output failed", jobId, e);
         // Storage failed. While polling, try again next tick (the lab still has the file).
         // On a synchronous image result there is nothing to retry from, so refund.
         if (prev?.provider_ref) await reschedule(prev, prev.provider_ref);
