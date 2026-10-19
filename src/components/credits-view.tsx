@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/select";
 import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -297,20 +298,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
                 <label htmlFor="b-state" className="text-sm font-medium">
                   State
                 </label>
-                <select
-                  id="b-state"
-                  required
-                  value={stateCode}
-                  onChange={(e) => setStateCode(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm"
-                >
-                  <option value="">Choose a state</option>
-                  {STATES.map((s) => (
-                    <option key={s.code} value={s.code}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+                <Select id="b-state" value={stateCode} onChange={setStateCode} placeholder="Choose a state" options={STATES.map((s) => ({ value: s.code, label: s.name }))} />
               </div>
             )}
 

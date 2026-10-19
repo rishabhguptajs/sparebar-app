@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/select";
 import { useState } from "react";
 import { STATES } from "@/config/plans";
 import { brand } from "@/config/brand";
@@ -71,14 +72,7 @@ export function SettingsView({ email, fullName, stateCode, region }: Props) {
             <label htmlFor="s-state" className="text-sm font-medium">
               State
             </label>
-            <select id="s-state" value={state} onChange={(e) => setState(e.target.value)} className={field}>
-              <option value="">Choose a state</option>
-              {STATES.map((s) => (
-                <option key={s.code} value={s.code}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <Select id="s-state" value={state} onChange={setState} placeholder="Choose a state" options={STATES.map((s) => ({ value: s.code, label: s.name }))} />
             <p className="text-xs text-ink-2">Used to work out tax when you buy credits.</p>
           </div>
         )}
