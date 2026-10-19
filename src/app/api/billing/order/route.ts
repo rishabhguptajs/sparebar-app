@@ -64,6 +64,7 @@ export async function POST(req: Request) {
         product_key: product.key,
         kind: product.kind,
         credits: product.credits,
+        list_usd_cents: product.priceUsdCents,
         currency: q.currency,
         base_minor: q.baseMinor,
         gst_minor: q.gstMinor,

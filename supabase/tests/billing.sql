@@ -35,3 +35,7 @@ select 'other user sees no payments', count(*) = 0 from payments;
 do $$ begin perform fulfill_payment('order_2','pay_x'); raise exception 'should have failed'; exception when insufficient_privilege then null; end $$;
 select 'client cannot fulfill', true;
 reset role;
+
+-- price per credit and margin revenue (migration 0009)
+select 'usd pack grant stamped at $0.10 a credit', unit_price_micros = 100000 from credit_grants where source_ref = 'pay:pay_2';
+select 'rupee plan grant stamped with unset list price stays null', unit_price_micros is null from credit_grants where source_ref = 'pay:pay_1';

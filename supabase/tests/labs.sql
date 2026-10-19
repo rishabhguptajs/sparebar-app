@@ -1,7 +1,7 @@
 -- Isolate from jobs created by the other test files (scratch database only).
 truncate jobs, credit_entries cascade;
 insert into auth.users values ('55555555-5555-5555-5555-555555555555','l@x.co') on conflict do nothing;
-select 'all four labs are listed', count(*) = 4 from lab_stats();
+select 'all five labs are listed', count(*) = 5 from lab_stats();
 select 'no balance recorded yet', not has_balance from lab_stats() where lab = 'xai';
 
 insert into lab_balances (lab, recorded, balance_micros, recorded_at) values ('google', true, 40000000, now() - interval '1 hour');

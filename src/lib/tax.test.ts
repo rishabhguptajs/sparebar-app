@@ -61,7 +61,7 @@ describe("catalog", () => {
     expect(PLANS.map((p) => [p.priceUsdCents, p.credits])).toEqual([
       [1500, 150],
       [3900, 420],
-      [9900, 1200],
+      [9900, 1100],
     ]);
     expect(PACKS.map((p) => [p.priceUsdCents, p.credits])).toEqual([
       [1000, 100],

@@ -29,7 +29,7 @@ export default function Terms() {
       <Section title="Credits and payments">
         <ul>
           <li>Generations cost credits. The cost of each model is shown before you generate.</li>
-          <li>Credits have no cash value, cannot be transferred, and cannot be exchanged for money except as set out in the <a href="/refunds">refund policy</a>.</li>
+          <li>Credits have no cash value, cannot be transferred, and are not refundable except in the cases set out in the <a href="/refunds">refund policy</a>.</li>
           <li>Monthly plans are paid month by month and are not renewed automatically. Credit packs are one time purchases. Credits you buy do not expire.</li>
           <li>Free credits are for images only and expire. We may limit free credits to one grant per person.</li>
           <li>If a generation fails, the credits for it are returned automatically.</li>

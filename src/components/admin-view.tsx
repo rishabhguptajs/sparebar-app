@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { assessLab, usd, type LabStat } from "@/lib/labs";
-import { marginFor, TARGET_MARGIN, type MarginRow } from "@/lib/margin";
+import { marginFor, OPENROUTER_TOPUP_FEE, PAYMENT_FEE_RATE, TARGET_MARGIN, type MarginRow } from "@/lib/margin";
 
 type Props = {
   base: string;
@@ -87,9 +87,10 @@ export function AdminView({
         </div>
       </div>
       <p className="mt-1 text-sm text-ink-2">
-        Revenue counts each credit at the base price of $0.10. Plans and packs
-        sell credits for less, so real margin is lower. Target is{" "}
-        {Math.round(TARGET_MARGIN * 100)}%.
+        Revenue is what buyers paid for the credits each job used, before GST. Cost is the lab cost plus{" "}
+        {(OPENROUTER_TOPUP_FEE * 100).toFixed(1)}% OpenRouter top-up fee on OpenRouter models and an estimated{" "}
+        {(PAYMENT_FEE_RATE * 100).toFixed(2)}% payment fee. Rupee payments are valued at the dollar list price. Free
+        credits earn nothing and are shown apart. Target is {Math.round(TARGET_MARGIN * 100)}%.
       </p>
       {margins.length === 0 ? (
         <p className="mt-4 text-sm text-ink-2">
@@ -97,7 +98,7 @@ export function AdminView({
         </p>
       ) : (
         <div className="mt-4 overflow-x-auto rounded-2xl bg-panel">
-          <table className="w-full min-w-[40rem] text-sm">
+          <table className="w-full min-w-[48rem] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-ink-2">
                 {[
@@ -105,6 +106,8 @@ export function AdminView({
                   "Done",
                   "Failed",
                   "Credits",
+                  "Free",
+                  "Revenue",
                   "Lab cost",
                   "Per job",
                   "Margin",
@@ -137,6 +140,12 @@ export function AdminView({
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">
                       {r.credits}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.free_credits}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {usd(r.revenue_micros)}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">
                       {usd(r.lab_cost_micros)}

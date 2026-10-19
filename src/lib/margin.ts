@@ -1,4 +1,4 @@
-import { CREDIT_VALUE_MICROS } from "@/lib/credits";
+import { MODELS } from "@/config/models";
 
 export type MarginRow = {
   model_key: string;
@@ -7,20 +7,42 @@ export type MarginRow = {
   credits: number;
   lab_cost_micros: number;
   actual_cost_jobs: number;
+  /** What buyers paid for the credits these jobs used, from the grant each job drew from. */
+  revenue_micros: number;
+  /** Credits that earned nothing: free signup credits and admin grants. */
+  free_credits: number;
 };
 
-/** Target share of the credit price that is margin: lab cost is 30% of retail, so 70%. */
-export const TARGET_MARGIN = 0.7;
+/** OpenRouter adds this to every top-up, so a dollar of lab cost really costs more. */
+export const OPENROUTER_TOPUP_FEE = 0.055;
+
+/**
+ * Estimated payment processing share of revenue: Razorpay's 3.54% for international cards with GST.
+ * Rupee payments cost less, so this leans cautious. The forex markup is not included.
+ */
+export const PAYMENT_FEE_RATE = 0.0354;
+
+/** Margin after lab cost, the OpenRouter fee and the estimated payment fee. */
+export const TARGET_MARGIN = 0.6;
+
+const labByModel = new Map<string, string>(MODELS.map((m) => [m.key, m.lab]));
 
 export function marginFor(row: MarginRow) {
-  const revenue = row.credits * CREDIT_VALUE_MICROS; // credits at the base $0.10 each
-  const margin = revenue > 0 ? 1 - row.lab_cost_micros / revenue : null;
+  const revenue = row.revenue_micros;
+  const labCost = row.lab_cost_micros;
+  const topUpFee = labByModel.get(row.model_key) === "openrouter" ? Math.round(labCost * OPENROUTER_TOPUP_FEE) : 0;
+  const paymentFee = Math.round(revenue * PAYMENT_FEE_RATE);
+  const cost = labCost + topUpFee + paymentFee;
+  const margin = revenue > 0 ? 1 - cost / revenue : null;
   return {
     revenueMicros: revenue,
-    profitMicros: revenue - row.lab_cost_micros,
+    costMicros: cost,
+    topUpFeeMicros: topUpFee,
+    paymentFeeMicros: paymentFee,
+    profitMicros: revenue - cost,
     margin,
     belowTarget: margin !== null && margin < TARGET_MARGIN - 1e-9,
-    avgCostMicros: row.ok_jobs > 0 ? Math.round(row.lab_cost_micros / row.ok_jobs) : null,
+    avgCostMicros: row.ok_jobs > 0 ? Math.round(labCost / row.ok_jobs) : null,
     failRate: row.ok_jobs + row.failed_jobs > 0 ? row.failed_jobs / (row.ok_jobs + row.failed_jobs) : null,
   };
 }

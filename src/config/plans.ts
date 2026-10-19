@@ -17,7 +17,7 @@ export type Product = {
 export const PLANS: Product[] = [
   { key: "starter", kind: "plan", label: "Starter", priceUsdCents: 1500, priceInr: 1499, credits: 150 },
   { key: "creator", kind: "plan", label: "Creator", priceUsdCents: 3900, priceInr: 3699, credits: 420 },
-  { key: "studio", kind: "plan", label: "Studio", priceUsdCents: 9900, priceInr: 9499, credits: 1200 },
+  { key: "studio", kind: "plan", label: "Studio", priceUsdCents: 9900, priceInr: 9499, credits: 1100 },
 ];
 
 export const PACKS: Product[] = [

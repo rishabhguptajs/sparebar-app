@@ -5,17 +5,20 @@ export const metadata = { title: "Refund policy" };
 
 export default function Refunds() {
   return (
-    <LegalPage title="Refund policy" updated="18 October 2026">
+    <LegalPage title="Refund policy" updated="19 October 2026">
       <Section title="Failed generations">
         <p>If an image or video fails to generate, the credits for it are returned to your balance automatically. You do not need to ask.</p>
       </Section>
 
-      <Section title="Refunds for purchases">
+      <Section title="Purchases are not refundable">
+        <p>Credits, plans and packs are not refundable once bought. We do not refund because you changed your mind, did not like a result, or have credits left over. Free credits are never refundable.</p>
+        <p>We make an exception only when something is wrong on our side:</p>
         <ul>
-          <li>You can ask for a refund within 7 days of a purchase if you have not spent any of the credits from it.</li>
-          <li>If you have spent some of the credits, we can refund the unspent part only when something went wrong on our side, such as a repeated failure or a duplicate charge.</li>
-          <li>Free credits are not refundable.</li>
+          <li>A model or the service stopped working and we could not deliver what you paid for. We refund the unspent part, or add the credits back to your balance if you prefer.</li>
+          <li>You were charged twice, or charged an amount different from the one shown at checkout.</li>
+          <li>We close your account without a breach of the terms. We refund your unused purchased credits.</li>
         </ul>
+        <p>We decide each request on its merits. Credits already spent on generations that worked are not refunded.</p>
       </Section>
 
       <Section title="Duplicate or wrong charges">
