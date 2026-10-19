@@ -24,6 +24,7 @@ import {
   type CharacterCard,
   type ModelOption,
   type PresentedJob,
+  type ProductCard,
 } from "@/lib/ui-types";
 
 type Initial = {
@@ -37,6 +38,7 @@ type Props = {
   base: string;
   models: ModelOption[];
   characters: CharacterCard[];
+  products?: ProductCard[];
   recent: PresentedJob[];
   initial?: Initial;
   /** One-time message shown above the composer, such as the outcome of the free credits. */
@@ -52,6 +54,7 @@ export function StudioView({
   base,
   models,
   characters: charactersProp,
+  products = [],
   recent: recentProp,
   initial,
   notice,
@@ -80,6 +83,7 @@ export function StudioView({
   const [characterId, setCharacterId] = useState<string | null>(
     initial?.characterId ?? null,
   );
+  const [productId, setProductId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState(initial?.prompt ?? "");
   const [ratio, setRatio] = useState<string>(initial?.aspectRatio ?? "9:16");
   const [resolution, setResolution] = useState<string | null>(
@@ -107,6 +111,8 @@ export function StudioView({
     setSeconds(m?.defaultSeconds ?? null);
   }, [modelKey, models]);
   const character = characters.find((c) => c.id === characterId) ?? null;
+  // A video starts from one photo, so a product only applies to images.
+  const product = model?.kind === "image" ? (products.find((p) => p.id === productId) ?? null) : null;
   const cost = model ? creditsFor(model, resolution, seconds) : 0;
   const short = !!model && cost > model.available;
   const running = active(job);
@@ -189,6 +195,7 @@ export function StudioView({
           resolution: resolution ?? undefined,
           seconds: model.kind === "video" ? (seconds ?? undefined) : undefined,
           characterId: characterId ?? undefined,
+          productId: product?.id,
         }),
       });
       const body = await res.json();
@@ -248,7 +255,7 @@ export function StudioView({
       };
 
   const [open, setOpen] = useState<
-    "model" | "character" | "ratio" | "quality" | "length" | null
+    "model" | "character" | "product" | "ratio" | "quality" | "length" | null
   >(null);
   const bar = useRef<HTMLDivElement>(null);
   const promptBox = useRef<HTMLTextAreaElement>(null);
@@ -277,7 +284,7 @@ export function StudioView({
   }, [prompt]);
 
   const toggle = (
-    name: "model" | "character" | "ratio" | "quality" | "length",
+    name: "model" | "character" | "product" | "ratio" | "quality" | "length",
   ) => setOpen((o) => (o === name ? null : name));
 
   return (
@@ -517,6 +524,15 @@ export function StudioView({
               >
                 {character ? character.name : "No character"}
               </Pill>
+              {model?.kind === "image" && (
+                <Pill
+                  active={open === "product"}
+                  onClick={() => toggle("product")}
+                  label="Product"
+                >
+                  {product ? product.name : "No product"}
+                </Pill>
+              )}
               <Pill
                 active={open === "ratio"}
                 onClick={() => toggle("ratio")}
@@ -612,6 +628,44 @@ export function StudioView({
                 </span>
                 New character
               </button>
+            </div>
+          )}
+
+          {open === "product" && (
+            <div
+              className="pop absolute bottom-full left-0 mb-2 w-72 max-w-full rounded-3xl border border-line bg-bg p-2 shadow-[0_20px_60px_-16px_rgba(20,20,60,0.3)]"
+              role="radiogroup"
+              aria-label="Product"
+            >
+              <CharRow
+                label="No product"
+                selected={!product}
+                onClick={() => {
+                  setProductId(null);
+                  setOpen(null);
+                }}
+              />
+              {products.map((p) => (
+                <CharRow
+                  key={p.id}
+                  label={p.name}
+                  cover={p.photoUrl ?? undefined}
+                  selected={product?.id === p.id}
+                  onClick={() => {
+                    setProductId(p.id);
+                    setOpen(null);
+                  }}
+                />
+              ))}
+              <Link
+                href={`${base}/products`}
+                className="mt-1 flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm text-ink-2 hover:bg-panel hover:text-ink"
+              >
+                <span className="grid size-8 place-items-center rounded-full border border-dashed border-line">
+                  <PlusIcon width={16} height={16} />
+                </span>
+                {products.length ? "Manage products" : "Add a product"}
+              </Link>
             </div>
           )}
 
