@@ -181,13 +181,24 @@ export function AdsView({ base, models, characters, products, demo }: Props) {
         </div>
       </div>
 
+      {busy && (
+        <section aria-label="Making your ads" className="mt-10" role="status" aria-live="polite">
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {styles.map((id) => (
+              <li key={id} className="img-shimmer overflow-hidden rounded-2xl" style={{ aspectRatio: cssRatio(ratio) }} />
+            ))}
+          </ul>
+          <p className="mt-3 text-center text-sm text-ink-2">Making {styles.length} {styles.length === 1 ? "ad" : "ads"}. This takes about half a minute.</p>
+        </section>
+      )}
+
       {jobs.length > 0 && (
         <section aria-label="Your ads" className="mt-10 space-y-6">
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {jobs.map((j) => (
               <li key={j.id}>
                 <button type="button" onClick={() => setOpenId(j.id)} aria-pressed={open?.id === j.id} disabled={j.status !== "succeeded"} className={`block w-full overflow-hidden rounded-2xl border-2 bg-panel-2 ${open?.id === j.id ? "border-accent" : "border-transparent"}`} style={{ aspectRatio: cssRatio(ratio) }}>
-                  {j.status === "succeeded" && j.outputs[0] ? <Thumb src={j.outputs[0].url} alt={j.prompt} className="size-full object-cover" /> : <span className="grid size-full place-items-center px-2 text-center text-xs text-ink-2">{active(j) ? "Making it" : "Failed, credits refunded"}</span>}
+                  {j.status === "succeeded" && j.outputs[0] ? <Thumb src={j.outputs[0].thumbUrl ?? j.outputs[0].url} alt={j.prompt} className="size-full object-cover" /> : <span className="grid size-full place-items-center px-2 text-center text-xs text-ink-2">{active(j) ? "Making it" : "Failed, credits refunded"}</span>}
                 </button>
               </li>
             ))}

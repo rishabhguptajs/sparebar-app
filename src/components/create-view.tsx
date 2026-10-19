@@ -4,6 +4,7 @@ import { Select } from "@/components/select";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CloseIcon, DownloadIcon, PlusIcon, UploadIcon } from "@/components/icons";
+import { GenProgress } from "@/components/gen-progress";
 import { Media, Thumb } from "@/components/media";
 import { NewCharacterDialog } from "@/components/new-character-dialog";
 import { PostKit } from "@/components/post-kit";
@@ -59,6 +60,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
   const productFits = refSlots > 1;
   const short = !!model && model.credits > model.available;
   const running = active(job);
+  const working = busy || running;
   const missing = template?.blanks.some((b) => !b.optional && !(values[b.key] ?? "").trim());
   const canRun = !!character && !!template && !!model && !model.paused && !missing && !busy && !running && !short && !uploading;
 
@@ -99,6 +101,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
     setError(null);
     setJob(null);
     setAnimated(null);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -192,11 +195,11 @@ export function CreateView({ base, models, characters: charactersProp, products 
   }, [job]);
 
   useEffect(() => {
-    if (!running) return setElapsed(0);
+    if (!working) return setElapsed(0);
     const start = Date.now();
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
     return () => clearInterval(t);
-  }, [running]);
+  }, [working]);
 
   const visible = TEMPLATES.filter((t) => t.kind === kind && !t.ad);
 
@@ -365,30 +368,22 @@ export function CreateView({ base, models, characters: charactersProp, products 
       )}
 
       {/* Result */}
-      {job && template && (
+      {(job || busy) && template && (
         <section ref={resultRef} aria-label="Result" className="mt-10 flex flex-col items-center gap-5 scroll-mt-6">
           <div style={{ aspectRatio: cssRatio(template.aspectRatio), height: "min(60vh, 560px)", maxWidth: "100%" }} className="relative isolate flex items-center justify-center overflow-hidden rounded-[28px] border border-line bg-panel-2">
-            {running && (
-              <div className="sweep absolute inset-0 flex flex-col items-center justify-center gap-2 overflow-hidden px-6 text-center">
-                <p className="relative z-10 font-display text-2xl font-semibold">Generating</p>
-                <p className="relative z-10 text-sm tabular-nums text-ink-2">
-                  {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
-                </p>
-                {job.kind === "video" && <p className="relative z-10 max-w-[15rem] text-xs text-ink-2">Video can take a few minutes. You can leave this page and find it in your library.</p>}
+            {working && <GenProgress kind={job?.kind ?? (stillFirst ? "image" : (template?.kind ?? "image"))} elapsed={elapsed} />}
+            {job?.status === "succeeded" && job?.outputs[0] && (
+              <div key={job?.id} className="studio-reveal size-full">
+                <Media output={job?.outputs[0]} alt={job?.prompt} controls className="size-full object-cover" />
               </div>
             )}
-            {job.status === "succeeded" && job.outputs[0] && (
-              <div key={job.id} className="studio-reveal size-full">
-                <Media output={job.outputs[0]} alt={job.prompt} controls className="size-full object-cover" />
-              </div>
-            )}
-            {job.status === "failed" && <p className="max-w-[16rem] px-6 text-center text-sm text-danger">{job.error ?? "Generation failed. Your credits were refunded."} Try a different model.</p>}
+            {job?.status === "failed" && <p className="max-w-[16rem] px-6 text-center text-sm text-danger">{job?.error ?? "Generation failed. Your credits were refunded."} Try a different model.</p>}
           </div>
 
-          {job.status === "succeeded" && job.outputs[0] && (
+          {job?.status === "succeeded" && job?.outputs[0] && (
             <>
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <a href={job.outputs[0].downloadUrl} className="flex items-center gap-2 rounded-xl bg-panel px-4 py-2.5 text-sm font-medium hover:bg-panel-2">
+                <a href={job?.outputs[0].downloadUrl} className="flex items-center gap-2 rounded-xl bg-panel px-4 py-2.5 text-sm font-medium hover:bg-panel-2">
                   <DownloadIcon width={18} height={18} /> Download
                 </a>
                 <button type="button" onClick={generate} disabled={!canRun} className="rounded-xl bg-panel px-4 py-2.5 text-sm font-medium hover:bg-panel-2 disabled:opacity-40">
@@ -428,7 +423,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
                   )}
                 </div>
               )}
-              <PostKit jobId={animated?.status === "succeeded" ? animated.id : job.id} />
+              <PostKit jobId={animated?.status === "succeeded" ? animated.id : job?.id} />
             </>
           )}
         </section>

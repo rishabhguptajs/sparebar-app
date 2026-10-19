@@ -3,7 +3,7 @@ import { getModel } from "@/config/models";
 import { quote } from "@/config/model-options";
 import { creditsForCost } from "@/lib/credits";
 import { getAdapter, ProviderError, type OutputFile, type ProviderResult, type ReferenceImage } from "@/lib/providers";
-import { extFor, putObject } from "@/lib/r2";
+import { extFor, makeThumb, putObject } from "@/lib/r2";
 import { getPausedLabs, noteBillingError } from "@/lib/labs-server";
 import { admin } from "@/lib/supabase/admin";
 
@@ -23,7 +23,7 @@ export type JobRow = {
   credits_charged: number;
   lab_cost_micros: number;
   lab_cost_is_actual: boolean;
-  outputs: { key: string; mime: string; bytes: number }[];
+  outputs: { key: string; mime: string; bytes: number; thumb?: string }[];
   error: string | null;
   character_id: string | null;
   deleted_at: string | null;
@@ -208,9 +208,9 @@ async function applyResult(jobId: string, userId: string, result: ProviderResult
   return load(jobId);
 }
 
-/** Poll quickly at first, then back off. Video usually takes one to a few minutes. */
+/** Check every few seconds for the first couple of minutes, so a finished clip shows up quickly, then ease off. */
 async function reschedule(job: { id: string; poll_count: number }, ref: string) {
-  const delaySec = Math.min(5 * 2 ** Math.min(job.poll_count, 4), 60);
+  const delaySec = job.poll_count < 30 ? 4 : job.poll_count < 60 ? 10 : 30;
   const { error } = await admin()
     .from("jobs")
     .update({
@@ -235,7 +235,14 @@ async function store(userId: string, jobId: string, files: OutputFile[]) {
     files.map(async (f, i) => {
       const key = `u/${userId}/jobs/${jobId}/${i}.${extFor(f.mime)}`;
       await putObject(key, f.bytes, f.mime);
-      return { key, mime: f.mime, bytes: f.bytes.byteLength };
+      // A small copy for grids. Losing it only means the grid shows the full image.
+      const small = await makeThumb(f.bytes, f.mime);
+      let thumb: string | undefined;
+      if (small) {
+        const thumbKey = `u/${userId}/jobs/${jobId}/${i}.thumb.webp`;
+        thumb = await putObject(thumbKey, small, "image/webp").then(() => thumbKey, () => undefined);
+      }
+      return { key, mime: f.mime, bytes: f.bytes.byteLength, ...(thumb ? { thumb } : {}) };
     }),
   );
 }

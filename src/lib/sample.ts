@@ -115,6 +115,7 @@ const mk = (
           {
             mime: "image/svg+xml",
             url: art(i * 5 + 1, ratio),
+            thumbUrl: null,
             downloadUrl: "#",
           },
         ]
@@ -170,5 +171,5 @@ export const sampleJobs: PresentedJob[] = [
 
 export const sampleResult: PresentedJob = {
   ...mk(99, "video", "9:16", ""),
-  outputs: [{ mime: "image/svg+xml", url: art(21, "9:16"), downloadUrl: "#" }],
+  outputs: [{ mime: "image/svg+xml", url: art(21, "9:16"), thumbUrl: null, downloadUrl: "#" }],
 };

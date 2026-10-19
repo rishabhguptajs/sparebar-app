@@ -24,6 +24,7 @@ export async function presentJob(job: JobRow) {
           job.outputs.map(async (o, i) => ({
             mime: o.mime,
             url: await signedUrl(o.key),
+            thumbUrl: o.thumb ? await signedUrl(o.thumb) : null,
             downloadUrl: await signedUrl(o.key, 3600, `sparebar-${job.id.slice(0, 8)}-${i + 1}.${o.key.split(".").pop()}`),
           })),
         )

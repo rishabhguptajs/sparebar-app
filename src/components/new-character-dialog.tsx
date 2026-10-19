@@ -281,7 +281,7 @@ export function NewCharacterDialog({ open, onClose, portraitCredits, onCreated, 
               {candidates.map((c) => (
                 <li key={c.id}>
                   <button type="button" disabled={busy} onClick={() => save(c.id)} className="block w-full overflow-hidden rounded-xl border border-line hover:border-accent disabled:opacity-40">
-                    {c.outputs[0] && <Thumb src={c.outputs[0].url} alt="Portrait option" className="aspect-[3/4] w-full object-cover" />}
+                    {c.outputs[0] && <Thumb src={c.outputs[0].thumbUrl ?? c.outputs[0].url} alt="Portrait option" className="aspect-[3/4] w-full object-cover" />}
                   </button>
                 </li>
               ))}

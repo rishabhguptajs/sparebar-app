@@ -87,7 +87,7 @@ export function LibraryView({ base, jobs, demo }: Props) {
                   className="block w-full"
                   style={{ aspectRatio: cssRatio(j.aspectRatio) }}
                 >
-                  <Media output={j.outputs[0]} alt={j.prompt} className="size-full object-cover" />
+                  <Media output={j.outputs[0]} alt={j.prompt} small className="size-full object-cover" />
                 </button>
                 {j.kind === "video" && (
                   <span className="pointer-events-none absolute left-2.5 top-2.5 grid size-7 place-items-center rounded-full bg-black/55 text-white">
@@ -128,7 +128,7 @@ export function LibraryView({ base, jobs, demo }: Props) {
                   disabled={j.outputs.length === 0}
                   className="size-14 shrink-0 overflow-hidden rounded-xl bg-panel-2"
                 >
-                  {j.outputs[0] && <Media output={j.outputs[0]} alt="" className="size-full object-cover" />}
+                  {j.outputs[0] && <Media output={j.outputs[0]} alt="" small className="size-full object-cover" />}
                 </button>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">{j.prompt}</p>

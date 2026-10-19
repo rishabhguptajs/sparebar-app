@@ -233,3 +233,17 @@ dialog::backdrop {
 .bare-focus:focus-visible {
   outline: none;
 }
+
+/* Placeholder for an image that has not loaded yet. */
+@keyframes img-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.img-shimmer {
+  background: linear-gradient(100deg, var(--panel-2) 30%, color-mix(in srgb, var(--panel-2) 60%, var(--ink) 8%) 50%, var(--panel-2) 70%);
+  background-size: 200% 100%;
+  animation: img-shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .img-shimmer { animation: none; }
+}

@@ -14,6 +14,7 @@ import {
   RerunIcon,
   VideoIcon,
 } from "@/components/icons";
+import { GenProgress } from "@/components/gen-progress";
 import { Media, Thumb } from "@/components/media";
 import { PostKit } from "@/components/post-kit";
 import { NewCharacterDialog } from "@/components/new-character-dialog";
@@ -109,6 +110,7 @@ export function StudioView({
   const cost = model ? creditsFor(model, resolution, seconds) : 0;
   const short = !!model && cost > model.available;
   const running = active(job);
+  const working = busy || running;
   const canRun =
     !!model &&
     !model.paused &&
@@ -208,25 +210,30 @@ export function StudioView({
   useEffect(() => {
     if (!job || !active(job) || demo) return;
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/jobs/${job.id}`);
-      if (!res.ok) return;
-      const next = (await res.json()).job as PresentedJob;
-      if (active(next)) setJob(next);
-      else finish(next);
+      try {
+        const res = await fetch(`/api/jobs/${job.id}`);
+        if (!res.ok) throw new Error("poll failed");
+        const next = (await res.json()).job as PresentedJob;
+        if (active(next)) setJob(next);
+        else finish(next);
+      } catch {
+        // A failed check must not end the polling. Try again shortly.
+        setJob((j) => (j ? { ...j } : j));
+      }
     }, 4000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job, demo]);
 
   useEffect(() => {
-    if (!running) return setElapsed(0);
+    if (!working) return setElapsed(0);
     const start = Date.now();
     const t = setInterval(
       () => setElapsed(Math.floor((Date.now() - start) / 1000)),
       1000,
     );
     return () => clearInterval(t);
-  }, [running]);
+  }, [working]);
 
   const landscape = (() => {
     const [w, h] = ratio.split(":").map(Number);
@@ -308,7 +315,7 @@ export function StudioView({
             style={frameStyle}
             className="relative isolate flex items-center justify-center overflow-hidden rounded-[28px] border border-line bg-panel-2"
           >
-            {!job && (
+            {!job && !working && (
               <p className="max-w-[16rem] px-6 text-center text-sm text-ink-2">
                 Your {kind} appears here.{" "}
                 {character
@@ -317,23 +324,7 @@ export function StudioView({
               </p>
             )}
 
-            {running && (
-              <div className="sweep absolute inset-0 flex flex-col items-center justify-center gap-2 overflow-hidden px-6 text-center">
-                <p className="relative z-10 font-display text-2xl font-semibold">
-                  Generating
-                </p>
-                <p className="relative z-10 text-sm tabular-nums text-ink-2">
-                  {Math.floor(elapsed / 60)}:
-                  {String(elapsed % 60).padStart(2, "0")}
-                </p>
-                {job?.kind === "video" && (
-                  <p className="relative z-10 max-w-[15rem] text-xs text-ink-2">
-                    Video can take a few minutes. You can leave this page and
-                    find it in your library.
-                  </p>
-                )}
-              </div>
-            )}
+            {working && <GenProgress kind={job?.kind ?? (model?.kind === "video" ? "video" : "image")} elapsed={elapsed} />}
 
             {job?.status === "succeeded" && job.outputs[0] && (
               <div key={job.id} className="studio-reveal size-full">
@@ -419,11 +410,7 @@ export function StudioView({
                     style={{ aspectRatio: cssRatio(j.aspectRatio) }}
                   >
                     {j.outputs[0] && (
-                      <Thumb
-                        src={j.outputs[0].url}
-                        alt=""
-                        className="size-full object-cover"
-                      />
+                      <Media output={j.outputs[0]} alt="" small className="size-full object-cover" />
                     )}
                     {j.kind === "video" && (
                       <span className="absolute bottom-1 right-1 grid size-5 place-items-center rounded-full bg-black/60 text-white">
