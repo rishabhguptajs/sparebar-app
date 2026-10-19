@@ -111,9 +111,12 @@ export function StudioView({
     setSeconds(m?.defaultSeconds ?? null);
   }, [modelKey, models]);
   const character = characters.find((c) => c.id === characterId) ?? null;
-  // A video starts from one photo, so a product only applies to images.
-  const product = model?.kind === "image" ? (products.find((p) => p.id === productId) ?? null) : null;
-  const cost = model ? creditsFor(model, resolution, seconds) : 0;
+  const product = products.find((p) => p.id === productId) ?? null;
+  // A video starts from one photo. With a product, a photo of it is made first, then animated.
+  const stillModel = models.find((m) => m.key === "nano-banana-2.1" && !m.paused) ?? models.find((m) => m.kind === "image" && !m.paused);
+  const viaStill = model?.kind === "video" && !!product;
+  const stillCost = viaStill && stillModel ? stillModel.credits : 0;
+  const cost = (model ? creditsFor(model, resolution, seconds) : 0) + stillCost;
   const short = !!model && cost > model.available;
   const running = active(job);
   const working = busy || running;
@@ -185,6 +188,18 @@ export function StudioView({
     }
 
     try {
+      if (viaStill) {
+        if (!stillModel) throw new Error("No photo model is available right now.");
+        if (ratio !== "9:16" && ratio !== "16:9") throw new Error("Video with a product needs the 9:16 or 16:9 shape.");
+        const photo = await post({ modelKey: stillModel.key, prompt, aspectRatio: ratio, characterId: characterId ?? undefined, productId: product!.id });
+        const still = await settle(photo);
+        const res = await post({ modelKey, sourceJobId: still.id, motion: prompt.slice(0, 600), resolution: resolution ?? undefined, seconds: seconds ?? undefined });
+        if (active(res)) {
+          setJob(res);
+          refresh();
+        } else finish(res);
+        return;
+      }
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -211,6 +226,25 @@ export function StudioView({
     } finally {
       setBusy(false);
     }
+  }
+
+  async function post(payload: Record<string, unknown>): Promise<PresentedJob> {
+    const res = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error ?? "Something went wrong.");
+    return body.job as PresentedJob;
+  }
+
+  /** Wait for a photo to finish. It usually already has, since photos are made in the request. */
+  async function settle(j: PresentedJob): Promise<PresentedJob> {
+    let cur = j;
+    for (let i = 0; i < 60 && active(cur); i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      const res = await fetch(`/api/jobs/${cur.id}`);
+      if (res.ok) cur = (await res.json()).job as PresentedJob;
+    }
+    if (cur.status !== "succeeded") throw new Error(cur.error ?? "The product photo could not be made. Your credits were refunded.");
+    return cur;
   }
 
   // Poll a running job. Each poll can also move the job forward on the server.
@@ -445,6 +479,11 @@ export function StudioView({
             {error}
           </p>
         )}
+        {viaStill && (
+          <p className="mb-2 rounded-xl bg-bg px-4 py-2.5 text-sm text-ink-2 shadow-[0_0_0_1px_var(--line)]">
+            Makes a photo with {product?.name} first so the product stays exact, then animates it. {stillCost} credits for the photo plus {cost - stillCost} for the video, {cost} in all.
+          </p>
+        )}
         {short && (
           <p className="mb-2 rounded-xl bg-bg px-4 py-2.5 text-sm text-ink-2 shadow-[0_0_0_1px_var(--line)]">
             {model?.kind === "video" && model.available === 0
@@ -524,7 +563,7 @@ export function StudioView({
               >
                 {character ? character.name : "No character"}
               </Pill>
-              {model?.kind === "image" && (
+              {model && (
                 <Pill
                   active={open === "product"}
                   onClick={() => toggle("product")}
