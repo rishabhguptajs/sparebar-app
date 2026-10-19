@@ -16,8 +16,8 @@ import { JsonLd } from "@/components/json-ld";
 import { SITE, faqLd, graph, organizationLd, softwareLd, websiteLd } from "@/lib/seo";
 
 const STEPS = [
-  { title: "Create a character", body: "Upload up to three photos, or describe someone and we make a portrait. Save it with a name." },
-  { title: "Describe a shot", body: "Pick a character, write the scene, choose an image or a video, and set the shape. The cost shows before you run it." },
+  { title: "Create a character", body: "Upload photos, or describe the look and pick from three portraits. Add side and full body shots, outfits and products so they stay the same in every post." },
+  { title: "Describe a shot", body: "Pick a post type, fill in a few details, and get a photo, a video or a set of product ads. The cost shows before you run it." },
   { title: "Download and post", body: "Your result lands in the library. Download it, or run it again with a small change." },
 ];
 

@@ -103,7 +103,7 @@ All five stages are built in code. Nothing here has been tested against live mod
 | D product kit and wardrobe | Products page, saved outfits on a character, product and outfit pickers in Create | Product plus person on each model |
 | E measurement | `src/config/eval-set.ts`, `scripts/consistency-eval.ts` (dry run by default), `docs/consistency-scoring.md`, `consistent` flag on model meta | The results themselves |
 
-The product ads feature is not built. Its scope still needs confirming.
+Product ads are built (Ads page): image ads only, silent, saved products only, priced per generation with the total shown up front. Four ad styles run at once, each with a caption. Untested against live models.
 
 ## Decisions made
 

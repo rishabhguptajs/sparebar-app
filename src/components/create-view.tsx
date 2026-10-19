@@ -189,7 +189,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
     return () => clearInterval(t);
   }, [running]);
 
-  const visible = TEMPLATES.filter((t) => t.kind === kind);
+  const visible = TEMPLATES.filter((t) => t.kind === kind && !t.ad);
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
@@ -330,7 +330,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
                 <Select id="c-model" value={model?.key ?? ""} onChange={setModelKey} options={kindModels.map((m) => ({ value: m.key, label: `${m.label}, ${m.credits} credits`, disabled: m.paused }))} />
               </div>
 
-              {stillFirst && <p className="text-xs text-ink-2">Videos start as a photo of the same moment. You approve the photo, then animate it, so the face and product stay as you saw them.</p>}
+              {stillFirst && <p className="text-xs text-ink-2">Videos start as a photo of the same moment. You approve the photo, then animate it, so the face and product stay as you saw them. Total: {model?.credits ?? 0} credits for the photo plus {videoModel?.credits ?? 0} to animate it, {(model?.credits ?? 0) + (videoModel?.credits ?? 0)} in all.</p>}
 
               <div className="mt-auto space-y-3">
                 {error && (
