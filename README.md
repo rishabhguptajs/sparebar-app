@@ -20,7 +20,7 @@ Nothing has run against a real Supabase, Razorpay, R2 or lab account yet. The fi
 
 ## First run
 
-1. **Supabase** (free project). In the SQL editor run every file in `supabase/migrations/` in order (`0001` to `0006`). In Auth > URL Configuration add `http://localhost:3000/auth/callback` and your deployed URL to the redirect URLs.
+1. **Supabase** (free project). In the SQL editor run every file in `supabase/migrations/` in order (`0001` to `0009`). In Auth > URL Configuration add `http://localhost:3000/auth/callback` and your deployed URL to the redirect URLs.
 2. **Cloudflare R2.** Create a private bucket and an API token with Object Read and Write on it.
 3. **Google AI Studio.** Create a key on a project with prepaid billing.
 4. Fill in `.env.local` (a template with a generated `CRON_SECRET` and `ABUSE_SALT` is already there).
@@ -66,7 +66,7 @@ Each model is one entry in `src/config/models.ts`. To switch on xAI, MiniMax or 
 ## Checks
 
 ```bash
-pnpm test        # 65 tests: credits, tax, abuse rules, lab alerts, margins, all four adapters
+pnpm test        # 108 tests: credits, tax, abuse rules, lab alerts, margins, prompts, reference planning, photo checks, adapters
 pnpm typecheck
 pnpm lint
 pnpm build
@@ -89,7 +89,7 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 ## Decisions made on your behalf
 
 - Plans are monthly manual renewals. Paid credits do not expire. Free credits are 2, image only, expire in 14 days.
-- Refund policy: within 7 days if none of the credits are spent. Drafted in `src/app/(legal)/refunds`.
+- Refund policy: credits are non-refundable. Exceptions only when something is wrong on our side (a model or the service not working, a duplicate or wrong charge, an account we close without a breach). Failed generations still return credits automatically. Drafted in `src/app/(legal)/refunds`.
 - No company is registered yet, so the operator in `src/config/brand.ts` is an individual. GST is only charged once `SELLER_GSTIN` is set; until then Indian buyers pay the rupee price with no GST and invoices say "Invoice".
 - Rupee prices are fixed per plan and pack in `src/config/plans.ts` (`priceInr`, before GST), plus 18% GST once registered. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
 - Hosting: Vercel Hobby is for non-commercial use. Move to a paid plan or another host before taking payments.
