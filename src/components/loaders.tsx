@@ -71,5 +71,5 @@ export function StudioLoader({ rerun, character, welcome }: { rerun?: string; ch
       : welcome === "denied"
         ? "Free credits were already claimed from this device or email. You can add credits to keep going."
         : undefined;
-  return <StudioView key={rerun ?? character ?? "studio"} base="/app" models={data.models} characters={data.characters} recent={data.recent} initial={data.initial} notice={notice} />;
+  return <StudioView key={rerun ?? character ?? "studio"} base="/app" models={data.models} characters={data.characters} products={data.products} recent={data.recent} initial={data.initial} notice={notice} />;
 }
