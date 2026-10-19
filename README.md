@@ -20,7 +20,7 @@ Nothing has run against a real Supabase, Razorpay, R2 or lab account yet. The fi
 
 ## First run
 
-1. **Supabase** (free project). In the SQL editor run every file in `supabase/migrations/` in order (`0001` to `0009`). In Auth > URL Configuration add `http://localhost:3000/auth/callback` and your deployed URL to the redirect URLs.
+1. **Supabase** (free project). In the SQL editor run every file in `supabase/migrations/` in order (`0001` to `0011`). In Auth > URL Configuration add `http://localhost:3000/auth/callback` and your deployed URL to the redirect URLs.
 2. **Cloudflare R2.** Create a private bucket and an API token with Object Read and Write on it.
 3. **Google AI Studio.** Create a key on a project with prepaid billing.
 4. Fill in `.env.local` (a template with a generated `CRON_SECRET` and `ABUSE_SALT` is already there).
