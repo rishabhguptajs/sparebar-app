@@ -27,7 +27,7 @@ export default function Refunds() {
 
       <Section title="How to ask">
         <p>
-          Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a> from the address on your account and include the invoice number. We reply within 3 working days.
+          Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a> from the address on your account and include the email from your Dodo Payments receipt. We reply within 3 working days.
         </p>
       </Section>
 

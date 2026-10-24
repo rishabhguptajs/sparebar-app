@@ -149,10 +149,9 @@ export type PaymentRow = {
   id: string;
   product_key: string;
   credits: number;
-  currency: "USD" | "INR";
+  currency: "USD";
   total_minor: number;
   status: "created" | "paid" | "failed" | "refunded";
-  invoice_no: string | null;
   created_at: string;
 };
 
@@ -160,7 +159,7 @@ export async function getPayments(supabase: Supabase) {
   const { data } = await supabase
     .from("payments")
     .select(
-      "id, product_key, credits, currency, total_minor, status, invoice_no, created_at",
+      "id, product_key, credits, currency, total_minor, status, created_at",
     )
     .in("status", ["paid", "refunded"])
     .order("created_at", { ascending: false })

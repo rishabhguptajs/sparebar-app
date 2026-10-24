@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { brand } from "@/config/brand";
 import { FAQ } from "@/config/faq";
@@ -11,8 +10,6 @@ import { HeroField } from "@/components/hero-field";
 import { Pricing } from "@/components/pricing";
 import { AdShowcase } from "@/components/ad-showcase";
 import { Showcase } from "@/components/showcase";
-import { countryFromHeaders, regionOf } from "@/lib/country";
-import { env } from "@/lib/env";
 import { creditsForModel } from "@/lib/credits";
 import { getAdapter } from "@/lib/providers";
 import { JsonLd } from "@/components/json-ld";
@@ -27,7 +24,6 @@ const STEPS = [
 export const metadata = { title: { absolute: SITE.title }, alternates: { canonical: "/" } };
 
 export default async function Home() {
-  const region = regionOf(countryFromHeaders(await headers()));
   const models = MODELS.filter((m) => m.enabled && getAdapter(m.lab)).map((m) => ({
     key: m.key,
     label: m.label,
@@ -161,7 +157,7 @@ export default async function Home() {
               Pay for credits, use them on any model. Failed generations are refunded. Paid credits do not expire.
             </p>
 
-            <Pricing initialRegion={region} gstRegistered={env.gstRegistered()} />
+            <Pricing />
           </div>
         </section>
 

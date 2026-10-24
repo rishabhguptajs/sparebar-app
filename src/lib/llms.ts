@@ -79,7 +79,7 @@ ${PLANS.map(product).join("\n")}
 Credit packs:
 ${PACKS.map(product).join("\n")}
 New accounts get ${FREE_TIER.credits} free credits for images, no card, expiring after ${FREE_TIER.expiresDays} days.
-Visitors in India pay in rupees with GST added where it applies.
+Prices are in US dollars; payments are handled by Dodo Payments, which adds any tax at checkout.
 
 ## Frequently asked questions
 ${FAQ.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n\n")}

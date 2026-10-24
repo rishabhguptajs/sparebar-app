@@ -24,14 +24,10 @@ export type CreditsPageData = {
   balance: number;
   payments: PaymentRow[];
   activity: ActivityRow[];
-  region: "IN" | "OTHER";
-  savedStateCode: string | null;
-  gstRegistered: boolean;
-  sellerStateCode: string | null;
 };
 export const useCreditsPage = () => useQuery({ queryKey: ["credits"], queryFn: () => get<CreditsPageData>("/api/credits") });
 
-export type SettingsData = { email: string | null; fullName: string; stateCode: string; region: "IN" | "OTHER" };
+export type SettingsData = { email: string | null; fullName: string };
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: () => get<SettingsData>("/api/settings") });
 
 export type StudioData = {

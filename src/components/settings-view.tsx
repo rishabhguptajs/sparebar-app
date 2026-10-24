@@ -1,18 +1,15 @@
 "use client";
 
-import { Select } from "@/components/select";
 import { useState } from "react";
-import { STATES } from "@/config/plans";
 import { brand } from "@/config/brand";
 import { useRefreshData } from "@/lib/queries";
 
-type Props = { email: string | null; fullName: string; stateCode: string; region: "IN" | "OTHER" };
+type Props = { email: string | null; fullName: string };
 
 const field = "w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm";
 
-export function SettingsView({ email, fullName, stateCode, region }: Props) {
+export function SettingsView({ email, fullName }: Props) {
   const [name, setName] = useState(fullName);
-  const [state, setState] = useState(stateCode);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const refresh = useRefreshData();
@@ -25,7 +22,7 @@ export function SettingsView({ email, fullName, stateCode, region }: Props) {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ fullName: name, stateCode: region === "IN" ? state : "" }),
+        body: JSON.stringify({ fullName: name }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? "Could not save. Try again.");
@@ -59,23 +56,6 @@ export function SettingsView({ email, fullName, stateCode, region }: Props) {
           <input id="s-email" value={email ?? ""} readOnly disabled className={`${field} text-ink-2`} />
           <p className="text-xs text-ink-2">This is the address you sign in with.</p>
         </div>
-
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Payments</p>
-          <p className="rounded-xl bg-panel-2 px-4 py-3 text-sm text-ink-2">
-            {region === "IN" ? "You pay in rupees." : "You pay in US dollars."} This is set from the country you signed in from.
-          </p>
-        </div>
-
-        {region === "IN" && (
-          <div className="space-y-2">
-            <label htmlFor="s-state" className="text-sm font-medium">
-              State
-            </label>
-            <Select id="s-state" value={state} onChange={setState} placeholder="Choose a state" options={STATES.map((s) => ({ value: s.code, label: s.name }))} />
-            <p className="text-xs text-ink-2">Used to work out tax when you buy credits.</p>
-          </div>
-        )}
 
         <div className="flex items-center gap-4">
           <button disabled={busy} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink disabled:opacity-40">

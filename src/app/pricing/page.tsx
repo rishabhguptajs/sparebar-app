@@ -73,9 +73,8 @@ export default function Pricing() {
       </h1>
       <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-2">
         Pay for credits and use them on any model. Failed generations are
-        refunded. Paid credits do not expire. Visitors in India pay in rupees
-        with GST added where it applies, and every payment comes with an
-        invoice.
+        refunded. Paid credits do not expire. Payments are handled by
+        Dodo Payments, which adds any tax at checkout and emails the receipt.
       </p>
 
       <h2 className="mt-14 text-2xl font-light tracking-[-0.03em] sm:text-3xl">

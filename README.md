@@ -7,8 +7,8 @@ Create AI characters and generate UGC style images and videos with them. Next.js
 | Area | State |
 |---|---|
 | Sign in (email link), credits ledger, job runner | Done, SQL tested |
-| Studio, characters, library, credits page, GST invoices | Done, checked in the browser with sample data |
-| Razorpay checkout, verify and webhook routes | Done, fulfillment SQL tested, **not run against Razorpay** |
+| Studio, characters, library, credits page | Done, checked in the browser with sample data |
+| Dodo checkout and webhook routes | Done, fulfillment SQL tested, **not run against Dodo** |
 | Terms, privacy, refund pages | Drafted, **needs a lawyer or CA to review** |
 | Free tier with device, email, network checks | Done, SQL tested |
 | Lab balance alerts, margin per model, admin page | Done, SQL and logic tested |
@@ -16,7 +16,7 @@ Create AI characters and generate UGC style images and videos with them. Next.js
 | xAI, MiniMax H3, Alibaba Wan 3.0 adapters | Done, tested with mocked responses, models off until funded |
 | Landing page | Done |
 
-Nothing has run against a real Supabase, Razorpay, R2 or lab account yet. The first live run is where surprises will show up.
+Nothing has run against a real Supabase, Dodo, R2 or lab account yet. The first live run is where surprises will show up.
 
 ## First run
 
@@ -45,8 +45,7 @@ Nothing has run against a real Supabase, Razorpay, R2 or lab account yet. The fi
 | `CRON_SECRET` | The minute tick |
 | `ABUSE_SALT` | Free credits. They stay off until it is set |
 | `FREE_CREDITS_ENABLED` | Set to `false` to pause new free grants |
-| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Payments |
-| `SELLER_STATE_CODE`, `SELLER_GSTIN`, `SELLER_ADDRESS`, `SELLER_LUT_NUMBER` | Invoices |
+| `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_WEBHOOK_KEY`, `DODO_PRODUCT_*` | Payments |
 | `ALERT_WEBHOOK_URL` | Low balance alerts (Slack or Discord webhook) |
 
 ## Turning on a lab
@@ -66,7 +65,7 @@ Each model is one entry in `src/config/models.ts`. To switch on xAI, MiniMax or 
 ## Checks
 
 ```bash
-pnpm test        # 108 tests: credits, tax, abuse rules, lab alerts, margins, prompts, reference planning, photo checks, adapters
+pnpm test        # 99 tests: credits, abuse rules, lab alerts, margins, prompts, reference planning, photo checks, adapters
 pnpm typecheck
 pnpm lint
 pnpm build
@@ -81,7 +80,7 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 - **Image response shape and token usage names** in the Google adapter.
 - **xAI** image edit response, and prices: the docs list lower per second prices than the brief, so the brief's numbers are used (the safe side).
 - **MiniMax** base64 first frame. **Alibaba** base64 first frame, the per second price, and preview access approval.
-- **Razorpay:** international payments approval, subscriptions on foreign cards (plans are sold as manual monthly renewals until confirmed), the forex markup, and real webhook delivery.
+- **Dodo:** account approval, the six products and their ids, subscriptions (plans are sold as manual monthly renewals for now), the refund webhook event name (assumed `refund.succeeded`), and real webhook delivery.
 - **R2** honoring the download filename on signed links.
 - **Supabase email:** the built in sender is rate limited. Set up custom SMTP before real users sign in.
 - **Sign in code.** Email links only work in the browser that asked for them, which fails in many phone mail apps. The login page also accepts a code, but the Supabase email template must include it: in Auth > Email Templates > Magic Link add a line such as `Or enter this code: {{ .Token }}`.
@@ -90,6 +89,5 @@ SQL tests: apply `supabase/tests/00_auth_stub.sql`, then every migration, then e
 
 - Plans are monthly manual renewals. Paid credits do not expire. Free credits are 2, image only, expire in 14 days.
 - Refund policy: credits are non-refundable. Exceptions only when something is wrong on our side (a model or the service not working, a duplicate or wrong charge, an account we close without a breach). Failed generations still return credits automatically. Drafted in `src/app/(legal)/refunds`.
-- No company is registered yet, so the operator in `src/config/brand.ts` is an individual. GST is only charged once `SELLER_GSTIN` is set; until then Indian buyers pay the rupee price with no GST and invoices say "Invoice".
-- Rupee prices are fixed per plan and pack in `src/config/plans.ts` (`priceInr`, before GST), plus 18% GST once registered. CGST and SGST in the seller state, IGST elsewhere. Outside India is treated as an export of services under LUT. Have a CA confirm all of this.
+- No company is registered yet, so the operator in `src/config/brand.ts` is an individual. Dodo Payments is the merchant of record: it collects tax and sends receipts, so the app keeps no GST or invoice code.
 - Hosting: Vercel Hobby is for non-commercial use. Move to a paid plan or another host before taking payments.

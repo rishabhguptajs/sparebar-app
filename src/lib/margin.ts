@@ -17,8 +17,7 @@ export type MarginRow = {
 export const OPENROUTER_TOPUP_FEE = 0.055;
 
 /**
- * Estimated payment processing share of revenue: Razorpay's 3.54% for international cards with GST.
- * Rupee payments cost less, so this leans cautious. The forex markup is not included.
+ * Estimated payment processing share of revenue: a placeholder carried over from the old processor (3.54%). Replace it with Dodo's current fee once confirmed.
  */
 export const PAYMENT_FEE_RATE = 0.0354;
 

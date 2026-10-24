@@ -88,5 +88,5 @@ End most captions with a question, so people comment.
 
 - Turn on Instagram's **AI info** label for realistic AI video. Hiding it risks reach and your account.
 - Only show real people who agreed. Generated characters and your own face are safe.
-- Do not claim sign-ups are open until the site is. Right now sign in is paused, so until Razorpay is live, point people to `sparebar.xyz/models` instead of a sign-in button, and switch the bio link to the sign-in page once it reopens.
+- Do not claim sign-ups are open until the site is. Right now sign in is paused, so until Dodo is live, point people to `sparebar.xyz/models` instead of a sign-in button, and switch the bio link to the sign-in page once it reopens.
 - Never call it beta or invite-only anywhere.

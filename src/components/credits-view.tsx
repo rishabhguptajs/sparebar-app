@@ -1,23 +1,18 @@
 "use client";
 
 import { track } from "@/components/analytics";
-import { Select } from "@/components/select";
-import { useRefreshData } from "@/lib/queries";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { CloseIcon } from "@/components/icons";
-import { PACKS, PLANS, STATES, perCredit, type Product } from "@/config/plans";
-import { formatMoney, quote } from "@/lib/tax";
+import { PACKS, PLANS, perCredit, type Product } from "@/config/plans";
 import { timeAgo } from "@/lib/ui-types";
 
 type Payment = {
   id: string;
   product_key: string;
   credits: number;
-  currency: "USD" | "INR";
   total_minor: number;
   status: string;
-  invoice_no: string | null;
   created_at: string;
 };
 type Activity = { id: number; type: string; amount: number; note: string | null; created_at: string };
@@ -25,70 +20,28 @@ type Activity = { id: number; type: string; amount: number; note: string | null;
 type Props = {
   base: string;
   balance: number;
-  /** Detected payment region, or null when it could not be detected. */
-  region?: "IN" | "OTHER";
-  savedStateCode?: string | null;
-  gstRegistered?: boolean;
-  sellerStateCode: string | null;
   payments: Payment[];
   activity: Activity[];
-  invoiceBase: string;
   demo?: boolean;
 };
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open(): void; on(event: string, cb: () => void): void };
-  }
-}
-
-function loadCheckout() {
-  return new Promise<boolean>((resolve) => {
-    if (window.Razorpay) return resolve(true);
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
-}
-
-export function CreditsView({ balance, region = "OTHER", savedStateCode = null, gstRegistered = true, sellerStateCode, payments, activity, invoiceBase, demo }: Props) {
-  const refresh = useRefreshData();
+export function CreditsView({ balance, payments, activity, demo }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const inIndia = region === "IN";
-  const [stateCode, setStateCode] = useState(savedStateCode ?? "");
   const [busy, setBusy] = useState(false);
-  // While the payment window is open our modal dialog is closed: an open modal makes the rest of the page inert and covers it.
-  const paying = useRef(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<number | null>(null);
 
-  const q = product
-    ? (() => {
-        try {
-          return quote({ product, inIndia, stateCode, sellerStateCode: sellerStateCode ?? undefined, gstRegistered });
-        } catch {
-          return null;
-        }
-      })()
-    : null;
-
-  // What the price cards show: rupees for buyers in India, dollars for everyone else.
-  const price = (p: Product) => (inIndia ? `₹${p.priceInr.toLocaleString("en-IN")}` : `$${p.priceUsdCents / 100}`);
-  const rate = (p: Product) => (inIndia ? `₹${(p.priceInr / p.credits).toFixed(2)}` : `$${perCredit(p).toFixed(3)}`);
+  const price = (p: Product) => `$${p.priceUsdCents / 100}`;
+  const rate = (p: Product) => `$${perCredit(p).toFixed(3)}`;
 
   function open(p: Product) {
     track("plan_clicked", { product: p.key, credits: p.credits });
     setProduct(p);
     setError(null);
-    setDone(null);
     dialog.current?.showModal();
   }
 
+  // Dodo hosts the payment page. The credits arrive when its webhook confirms the payment.
   async function pay(e: React.FormEvent) {
     e.preventDefault();
     if (!product || busy) return;
@@ -96,60 +49,15 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/billing/order", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productKey: product.key, name, phone, stateCode: inIndia ? stateCode : undefined }),
+        body: JSON.stringify({ productKey: product.key }),
       });
-      const order = await res.json();
-      if (!res.ok) throw new Error(order.error ?? "Could not start the payment.");
-      if (!(await loadCheckout()) || !window.Razorpay) throw new Error("Could not load the payment window. Check your connection and try again.");
-
-      const rzp = new window.Razorpay({
-        key: order.keyId,
-        order_id: order.orderId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "Sparebar",
-        description: order.description,
-        prefill: order.prefill,
-        theme: { color: "#e5247a" },
-        modal: {
-          ondismiss: () => {
-            paying.current = false;
-            setBusy(false);
-            if (!dialog.current?.open) dialog.current?.showModal();
-          },
-        },
-        handler: async (r: Record<string, string>) => {
-          try {
-            const v = await fetch("/api/billing/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(r),
-            });
-            const out = await v.json();
-            if (!v.ok) throw new Error(out.error ?? "We could not confirm the payment.");
-            setDone(out.credits);
-            refresh();
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "We could not confirm the payment.");
-          } finally {
-            paying.current = false;
-            setBusy(false);
-            if (!dialog.current?.open) dialog.current?.showModal();
-          }
-        },
-      });
-      rzp.on("payment.failed", () => {
-        track("payment_failed", { product: product.key });
-        setError("The payment did not go through. You have not been charged. Try again or use another method.");
-        setBusy(false);
-      });
-      track("checkout_opened", { product: product.key, credits: product.credits, currency: order.currency });
-      paying.current = true;
-      dialog.current?.close();
-      rzp.open();
+      const out = await res.json();
+      if (!res.ok || !out.url) throw new Error(out.error ?? "Could not start the payment.");
+      track("checkout_opened", { product: product.key, credits: product.credits, currency: "USD" });
+      window.location.href = out.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setBusy(false);
@@ -220,12 +128,7 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
                   {p.status === "refunded" ? " · Refunded" : ""}
                 </p>
               </div>
-              <p className="tabular-nums">{formatMoney(p.total_minor, p.currency)}</p>
-              {p.invoice_no && (
-                <Link href={`${invoiceBase}/${p.id}`} className="font-medium text-accent hover:underline" target="_blank">
-                  Invoice
-                </Link>
-              )}
+              <p className="tabular-nums">${(p.total_minor / 100).toFixed(2)}</p>
             </li>
           ))}
         </ul>
@@ -254,13 +157,12 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
       <dialog
         ref={dialog}
         onClose={() => {
-          if (paying.current) return;
           setBusy(false);
           setError(null);
         }}
         className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-3xl border border-line bg-panel p-0"
       >
-        {product && done === null && (
+        {product && (
           <form onSubmit={pay} className="space-y-5 p-6">
             <div className="flex items-start justify-between">
               <div>
@@ -274,59 +176,13 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
               </button>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="b-name" className="text-sm font-medium">
-                Full name
-              </label>
-              <input id="b-name" required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm" />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="b-phone" className="text-sm font-medium">
-                Phone number
-              </label>
-              <input
-                id="b-phone"
-                required
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-                placeholder="+1 555 010 0199"
-                className="w-full rounded-xl border border-line bg-bg px-4 py-2.5 text-sm"
-              />
-              <p className="text-xs text-ink-2">Your card network needs a real number to approve the payment.</p>
-            </div>
-
-            {inIndia && (
-              <div className="space-y-2">
-                <label htmlFor="b-state" className="text-sm font-medium">
-                  State
-                </label>
-                <Select id="b-state" value={stateCode} onChange={setStateCode} placeholder="Choose a state" options={STATES.map((s) => ({ value: s.code, label: s.name }))} />
+            <dl className="space-y-1.5 rounded-xl bg-panel-2 px-4 py-3 text-sm">
+              <div className="flex justify-between font-semibold">
+                <dt>Price</dt>
+                <dd className="tabular-nums">{price(product)}</dd>
               </div>
-            )}
-
-            {q && (
-              <dl className="space-y-1.5 rounded-xl bg-panel-2 px-4 py-3 text-sm">
-                {q.currency === "INR" && gstRegistered && (
-                  <>
-                    <div className="flex justify-between">
-                      <dt className="text-ink-2">Price</dt>
-                      <dd className="tabular-nums">{formatMoney(q.baseMinor, q.currency)}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-ink-2">GST 18%</dt>
-                      <dd className="tabular-nums">{formatMoney(q.gstMinor, q.currency)}</dd>
-                    </div>
-                  </>
-                )}
-                <div className={`flex justify-between font-semibold ${q.currency === "INR" && gstRegistered ? "border-t border-line pt-1.5" : ""}`}>
-                  <dt>Total</dt>
-                  <dd className="tabular-nums">{formatMoney(q.totalMinor, q.currency)}</dd>
-                </div>
-                {!(q.currency === "INR" && gstRegistered) && <p className="text-xs text-ink-2">Inclusive of all taxes.</p>}
-              </dl>
-            )}
+              <p className="text-xs text-ink-2">Any tax is added on the payment page, which is hosted by Dodo Payments.</p>
+            </dl>
 
             {error && (
               <p role="alert" className="rounded-xl border border-danger/40 px-4 py-3 text-sm text-danger">
@@ -334,11 +190,8 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
               </p>
             )}
 
-            <button
-              disabled={busy || !q}
-              className="w-full rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40"
-            >
-              {busy ? "Waiting for payment" : q ? `Pay ${formatMoney(q.totalMinor, q.currency)}` : "Pay"}
+            <button disabled={busy} className="w-full rounded-full bg-accent px-5 py-3 text-[15px] font-semibold text-accent-ink disabled:opacity-40">
+              {busy ? "Opening payment page" : `Pay ${price(product)}`}
             </button>
             <p className="text-center text-xs text-ink-2">
               By paying you agree to the{" "}
@@ -352,16 +205,6 @@ export function CreditsView({ balance, region = "OTHER", savedStateCode = null, 
               .
             </p>
           </form>
-        )}
-
-        {done !== null && (
-          <div className="space-y-4 p-8 text-center">
-            <p className="font-display text-3xl font-semibold">{done} credits added</p>
-            <p className="text-sm text-ink-2">Your invoice is under Payments on this page.</p>
-            <button onClick={() => dialog.current?.close()} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
-              Done
-            </button>
-          </div>
         )}
       </dialog>
     </div>

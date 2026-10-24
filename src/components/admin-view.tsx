@@ -87,9 +87,9 @@ export function AdminView({
         </div>
       </div>
       <p className="mt-1 text-sm text-ink-2">
-        Revenue is what buyers paid for the credits each job used, before GST. Cost is the lab cost plus{" "}
+        Revenue is what buyers paid for the credits each job used, before tax. Cost is the lab cost plus{" "}
         {(OPENROUTER_TOPUP_FEE * 100).toFixed(1)}% OpenRouter top-up fee on OpenRouter models and an estimated{" "}
-        {(PAYMENT_FEE_RATE * 100).toFixed(2)}% payment fee. Rupee payments are valued at the dollar list price. Free
+        {(PAYMENT_FEE_RATE * 100).toFixed(2)}% payment fee. Free
         credits earn nothing and are shown apart. Target is {Math.round(TARGET_MARGIN * 100)}%.
       </p>
       {margins.length === 0 ? (

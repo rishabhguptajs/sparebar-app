@@ -14,11 +14,10 @@ export const env = {
   r2SecretAccessKey: () => need("R2_SECRET_ACCESS_KEY"),
   r2Bucket: () => need("R2_BUCKET"),
   cronSecret: () => need("CRON_SECRET"),
-  razorpayKeyId: () => need("RAZORPAY_KEY_ID"),
-  razorpayKeySecret: () => need("RAZORPAY_KEY_SECRET"),
-  razorpayWebhookSecret: () => need("RAZORPAY_WEBHOOK_SECRET"),
-  /** Set once the seller has a GSTIN. Until then no GST is charged. */
-  gstRegistered: () => !!process.env.SELLER_GSTIN,
-  /** GST state code of the seller, for the CGST/SGST versus IGST split. */
-  sellerStateCode: () => process.env.SELLER_STATE_CODE || undefined,
+  dodoApiKey: () => need("DODO_PAYMENTS_API_KEY"),
+  dodoWebhookKey: () => need("DODO_PAYMENTS_WEBHOOK_KEY"),
+  /** "test" while using Dodo test keys, "live" in production. */
+  dodoMode: () => (process.env.DODO_PAYMENTS_MODE === "live" ? ("live" as const) : ("test" as const)),
+  /** Dodo product id for a plan or pack, for example DODO_PRODUCT_PACK_100. */
+  dodoProductId: (key: string) => need(`DODO_PRODUCT_${key.toUpperCase().replace(/-/g, "_")}`),
 };

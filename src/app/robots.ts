@@ -4,7 +4,6 @@ import { brand } from "@/config/brand";
 const PRIVATE = [
   "/app",
   "/api",
-  "/invoice",
   "/preview",
   "/auth",
   "/login",

@@ -1,8 +1,8 @@
 \set u '44444444-4444-4444-4444-444444444444'
 insert into auth.users values (:'u','m@b.c') on conflict do nothing;
-insert into payments (user_id, product_key, kind, credits, list_usd_cents, currency, base_minor, gst_minor, total_minor,
-                      customer_name, customer_email, customer_phone, in_india, razorpay_order_id)
-values (:'u','studio','plan',1100,9900,'USD',9900,0,9900,'M B','m@b.c','+10000000000',false,'order_m');
+insert into payments (user_id, product_key, kind, credits, list_usd_cents, currency, base_minor, total_minor,
+                      customer_name, customer_email, checkout_session_id)
+values (:'u','studio','plan',1100,9900,'USD',9900,9900,'M B','m@b.c','order_m');
 select fulfill_payment('order_m','pay_m') is not null;
 select 'studio grant is $0.09 a credit', unit_price_micros = 90000 from credit_grants where source_ref = 'pay:pay_m';
 

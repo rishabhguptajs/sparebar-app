@@ -33,7 +33,7 @@ export default function Terms() {
           <li>Monthly plans are paid month by month and are not renewed automatically. Credit packs are one time purchases. Credits you buy do not expire.</li>
           <li>Free credits are for images only and expire. We may limit free credits to one grant per person.</li>
           <li>If a generation fails, the credits for it are returned automatically.</li>
-          <li>Payments are processed by Razorpay. Prices are in US dollars. Payments from India are charged in Indian rupees, with GST added where it applies. We issue an invoice or receipt for every payment.</li>
+          <li>Payments are processed by Dodo Payments, which acts as the merchant of record. Prices are in US dollars and may be shown in your local currency at checkout, with any applicable tax added. You receive a receipt for every payment.</li>
         </ul>
       </Section>
 

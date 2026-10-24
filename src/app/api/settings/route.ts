@@ -1,29 +1,22 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { STATES } from "@/config/plans";
-import { regionOf } from "@/lib/country";
-import { getProfile } from "@/lib/profile";
 import { admin } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
 
-export async function GET(req: Request) {
+export async function GET() {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
-  const profile = await getProfile(user.id, req.headers);
+  const { data: profile } = await admin().from("profiles").select("full_name").eq("id", user.id).maybeSingle();
   return NextResponse.json({
     email: user.email ?? null,
-    fullName: profile.full_name ?? "",
-    stateCode: profile.state_code ?? "",
-    region: regionOf(profile.country),
+    fullName: (profile as { full_name: string | null } | null)?.full_name ?? "",
   });
 }
 
 const Body = z.object({
   fullName: z.string().trim().max(80, "Keep the name under 80 characters."),
-  stateCode: z.string().refine((v) => v === "" || STATES.some((s) => s.code === v), "Choose a state from the list."),
 });
 
-// Country is never editable here: it decides the payment region and is set at sign-in.
 export async function PATCH(req: Request) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
@@ -31,7 +24,7 @@ export async function PATCH(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Check the details and try again." }, { status: 400 });
   const { error } = await admin()
     .from("profiles")
-    .update({ full_name: parsed.data.fullName || null, state_code: parsed.data.stateCode || null } as never)
+    .update({ full_name: parsed.data.fullName || null } as never)
     .eq("id", user.id);
   if (error) {
     console.error("settings save failed", error.message);

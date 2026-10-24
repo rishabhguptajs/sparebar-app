@@ -36,20 +36,15 @@ export function CreditsLoader() {
     <CreditsView
       base="/app"
       balance={data.balance}
-      region={data.region}
-      savedStateCode={data.savedStateCode}
-      gstRegistered={data.gstRegistered}
-      sellerStateCode={data.sellerStateCode}
       payments={data.payments}
       activity={data.activity}
-      invoiceBase="/invoice"
     />
   );
 }
 
 export function SettingsLoader() {
   const { data } = useSettings();
-  return data ? <SettingsView email={data.email} fullName={data.fullName} stateCode={data.stateCode} region={data.region} /> : <PageSkeleton />;
+  return data ? <SettingsView email={data.email} fullName={data.fullName} /> : <PageSkeleton />;
 }
 
 export function CreateLoader() {

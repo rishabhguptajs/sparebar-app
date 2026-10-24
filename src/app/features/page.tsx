@@ -114,7 +114,7 @@ const guide: Guide = {
         "Free to start: 2 credits, enough for one image, with no card.",
         "Monthly plans: Starter, Creator and Studio.",
         "One time packs for topping up.",
-        "Prices in dollars or rupees, with GST invoices for buyers in India.",
+        "Prices in dollars, paid by card through Dodo Payments, which sends the receipt.",
       ],
     },
   ],

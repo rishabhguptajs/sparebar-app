@@ -9,13 +9,3 @@ export function countryFromHeaders(h: Headers): string | null {
   }
   return null;
 }
-
-/** Payment region for a country. Anything that is not India is outside India. */
-export function isIndia(country: string | null | undefined) {
-  return country === "IN";
-}
-
-/** Payment region for display: India for Indian visitors, otherwise outside India. */
-export function regionOf(country: string | null | undefined): "IN" | "OTHER" {
-  return isIndia(country) ? "IN" : "OTHER";
-}

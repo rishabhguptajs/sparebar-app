@@ -24,7 +24,7 @@ export const FAQ = [
   },
   {
     q: "How do I pay?",
-    a: "By card. Prices are in US dollars. If you pay from India you are charged in rupees, with GST added where it applies, and every payment comes with an invoice.",
+    a: "By card. Prices are in US dollars. Payments are handled by Dodo Payments, which adds any tax at checkout and emails you a receipt.",
   },
   {
     q: "Who sees my photos?",

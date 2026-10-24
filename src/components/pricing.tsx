@@ -6,11 +6,10 @@ import { PACKS, PLANS, perCredit, type Product } from "@/config/plans";
 
 export type Region = "IN" | "OTHER";
 
-// Rupees for visitors in India, dollars for everyone else. The region comes from the server.
-export function Pricing({ initialRegion, gstRegistered }: { initialRegion: Region; gstRegistered: boolean }) {
-  const india = initialRegion === "IN";
-  const price = (p: Product) => (india ? `₹${p.priceInr.toLocaleString("en-IN")}` : `$${p.priceUsdCents / 100}`);
-  const rate = (p: Product) => (india ? `₹${(p.priceInr / p.credits).toFixed(2)}` : `$${perCredit(p).toFixed(3)}`);
+// Prices are in dollars. Dodo Payments may show them in the buyer's own currency at checkout.
+export function Pricing() {
+  const price = (p: Product) => `$${p.priceUsdCents / 100}`;
+  const rate = (p: Product) => `$${perCredit(p).toFixed(3)}`;
 
   return (
     <>
@@ -43,7 +42,7 @@ export function Pricing({ initialRegion, gstRegistered }: { initialRegion: Regio
         ))}
       </ul>
       <p className="mt-6 text-sm text-ink-2">
-        {india ? (gstRegistered ? "Prices are in rupees, plus GST." : "Prices are in rupees.") : "Prices are in US dollars."}
+        Prices are in US dollars. Any tax is added at checkout.
       </p>
     </>
   );

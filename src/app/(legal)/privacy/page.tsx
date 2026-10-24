@@ -15,7 +15,7 @@ export default function Privacy() {
       <Section title="What we collect">
         <ul>
           <li><strong>Account:</strong> your email address.</li>
-          <li><strong>Payments:</strong> your name, phone number, country, and for India your state, plus the amount paid and invoice details. Card details go to Razorpay and never reach us.</li>
+          <li><strong>Payments:</strong> your name, email, country, plus the amount paid and receipt details. Card details go to Dodo Payments and never reach us.</li>
           <li><strong>Your content:</strong> prompts, the photos you upload for characters, and the images and videos generated for you.</li>
           <li><strong>Usage:</strong> which models you use, credits spent, and basic technical logs such as errors and request times.</li>
         </ul>
@@ -33,7 +33,7 @@ export default function Privacy() {
           <li>Supabase for sign in and our database.</li>
           <li>Cloudflare for storing your generated media and uploads.</li>
           <li>Google, and any other AI provider whose model you choose, to generate content from your prompts and photos.</li>
-          <li>Razorpay for payments.</li>
+          <li>Dodo Payments for payments.</li>
           <li>Our hosting provider for serving the app.</li>
         </ul>
         <p>These providers may process data outside your country. Each has its own privacy terms.</p>
@@ -58,7 +58,7 @@ export default function Privacy() {
 
       <Section title="How long we keep it">
         <p>
-          We keep your account and content until you ask us to delete them. Payment and invoice records are kept for as long as tax law requires. Removing an item from your library hides it from you.
+          We keep your account and content until you ask us to delete them. Payment records are kept for as long as tax law requires. Removing an item from your library hides it from you.
         </p>
       </Section>
 
