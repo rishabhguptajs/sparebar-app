@@ -1,4 +1,5 @@
 import { AdminView } from "@/components/admin-view";
+import { parseTab } from "@/lib/admin-tabs";
 import type { LabStat } from "@/lib/labs";
 
 const ago = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
@@ -18,12 +19,15 @@ const stat = (o: Partial<LabStat> & { lab: string }): LabStat => ({
   ...o,
 });
 
-export default function PreviewAdmin() {
+export default async function PreviewAdmin({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab: rawTab } = await searchParams;
+  const tab = parseTab(rawTab);
   return (
     <AdminView
       base="/preview"
       demo
       days={30}
+      tab={tab}
       modelNames={{ "nano-banana-2.1": "Nano Banana 2.1", "gemini-omni-flash": "Gemini Omni Flash" }}
       labs={[
         stat({ lab: "openrouter", has_balance: true, balance_micros: 18_400_000, recorded_at: ago(0), spent_since_micros: 0, spent_7d_micros: 9_100_000, first_job_at: ago(168), note: "Read live from OpenRouter" }),
@@ -40,8 +44,13 @@ export default function PreviewAdmin() {
       ]}
       payments={[
         { currency: "USD", count: 6, total_minor: 24500 },
-        { currency: "INR", count: 3, total_minor: 1245000 },
       ]}
+      signups={{ total: 74, today: 3, week: 19, month: 71 }}
+      users={[
+        { id: "u1", email: "tara@example.com", country: "IN", created_at: ago(2), balance: 2, jobs: 0, paid: false },
+        { id: "u2", email: "sam@example.com", country: "US", created_at: ago(30), balance: 118, jobs: 14, paid: true },
+      ]}
+      recentPayments={[{ email: "sam@example.com", credits: 150, total_minor: 1500, status: "paid", created_at: ago(30) }]}
     />
   );
 }

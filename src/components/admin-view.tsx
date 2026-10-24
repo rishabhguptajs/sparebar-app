@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { assessLab, usd, type LabStat } from "@/lib/labs";
+import { TABS, type AdminTab } from "@/lib/admin-tabs";
+import { timeAgo } from "@/lib/ui-types";
 import { marginFor, OPENROUTER_TOPUP_FEE, PAYMENT_FEE_RATE, TARGET_MARGIN, type MarginRow } from "@/lib/margin";
 
 type Props = {
@@ -14,6 +16,10 @@ type Props = {
   modelNames: Record<string, string>;
   free: { reason: string; count: number }[];
   payments: { currency: string; count: number; total_minor: number }[];
+  signups: { total: number; today: number; week: number; month: number };
+  users: { id: string; email: string | null; country: string | null; created_at: string; balance: number; jobs: number; paid: boolean }[];
+  recentPayments: { email: string | null; credits: number; total_minor: number; status: string; created_at: string }[];
+  tab: AdminTab;
   demo?: boolean;
 };
 
@@ -45,8 +51,20 @@ export function AdminView({
   modelNames,
   free,
   payments,
+  signups,
+  users,
+  recentPayments,
+  tab: initialTab,
   demo,
 }: Props) {
+  const [tab, setTab] = useState<AdminTab>(initialTab);
+  // The address follows the tab so a reload or a shared link lands on the same one, without asking the server again.
+  function pick(key: AdminTab) {
+    setTab(key);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", key);
+    window.history.replaceState(null, "", url);
+  }
   const shown = ACTIVE_LABS.flatMap((l) => labs.filter((s) => s.lab === l));
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
@@ -54,20 +72,144 @@ export function AdminView({
         Admin
       </h1>
 
-      <h2 className="mt-8 font-display text-xl font-semibold">Lab balances</h2>
-      <p className="mt-1 max-w-xl text-sm text-ink-2">
-        OpenRouter runs nearly every model and reports its own balance, so it
-        needs no entry. Other labs do not report theirs: enter it from their
-        console after a top-up and the estimate subtracts the lab cost logged on
-        each job since.
-      </p>
-      <ul className="mt-4 grid gap-4 md:grid-cols-2">
-        {shown.map((s) => (
-          <LabCard key={s.lab} stat={s} demo={demo} />
+      <nav className="mt-6 flex gap-2 overflow-x-auto border-b border-line pb-4" aria-label="Admin sections">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => pick(t.key)}
+            aria-current={tab === t.key ? "page" : undefined}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === t.key ? "bg-accent text-accent-ink" : "text-ink-2 hover:bg-panel hover:text-ink"}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-8 [&>:first-child]:!mt-0">
+        {tab === "overview" && (
+          <>
+      <ul className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {[
+          { l: "Users", v: signups.total },
+          { l: "Last day", v: signups.today },
+          { l: "Last 7 days", v: signups.week },
+          { l: "Last 30 days", v: signups.month },
+        ].map((c) => (
+          <li key={c.l} className="rounded-2xl bg-panel p-5">
+            <p className="text-sm text-ink-2">{c.l}</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{c.v}</p>
+          </li>
         ))}
       </ul>
+      <div className="mt-10 grid gap-8 md:grid-cols-2">
+        <section>
+          <h2 className="font-display text-xl font-semibold">
+            Free credits, last 30 days
+          </h2>
+          {free.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-2">No signups yet.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
+              {free.map((f) => (
+                <li key={f.reason} className="flex justify-between px-4 py-3">
+                  <span>{REASONS[f.reason] ?? f.reason}</span>
+                  <span className="tabular-nums">{f.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section>
+          <h2 className="font-display text-xl font-semibold">
+            Payments, last 30 days
+          </h2>
+          {payments.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-2">No paid orders yet.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
+              {payments.map((p) => (
+                <li key={p.currency} className="flex justify-between px-4 py-3">
+                  <span>
+                    {p.count} {p.count === 1 ? "order" : "orders"} in{" "}
+                    {p.currency}
+                  </span>
+                  <span className="tabular-nums">
+                    {(p.total_minor / 100).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
 
-      <div className="mt-12 flex flex-wrap items-end justify-between gap-3">
+          </>
+        )}
+        {tab === "users" && (
+          <>
+      <h2 className="mt-10 font-display text-xl font-semibold">Users</h2>
+      <p className="mt-1 text-sm text-ink-2">
+        {signups.total} in total. {signups.today} in the last day, {signups.week} in the last 7 days, {signups.month} in the last 30.
+        The 50 newest are below.
+      </p>
+      <div className="mt-4 overflow-x-auto rounded-2xl bg-panel">
+        <table className="w-full min-w-[44rem] text-sm">
+          <thead>
+            <tr className="border-b border-line text-left text-ink-2">
+              {["Email", "Country", "Joined", "Credits", "Generations", "Paid"].map((h, i) => (
+                <th key={h} className={`px-4 py-3 font-medium ${i >= 3 ? "text-right" : ""}`}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} className="border-b border-line last:border-0">
+                <td className="px-4 py-3">{u.email ?? u.id.slice(0, 8)}</td>
+                <td className="px-4 py-3">{u.country ?? "unknown"}</td>
+                <td className="px-4 py-3 text-ink-2">{timeAgo(u.created_at)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{u.balance}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{u.jobs}</td>
+                <td className="px-4 py-3 text-right">{u.paid ? "Yes" : "No"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+          </>
+        )}
+        {tab === "payments" && (
+          <>
+      <h2 className="mt-10 font-display text-xl font-semibold">Recent payments</h2>
+      {recentPayments.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-2">No payments yet.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
+          {recentPayments.map((p, i) => (
+            <li key={i} className="flex items-center justify-between gap-4 px-4 py-3">
+              <span className="min-w-0 truncate">
+                {p.email ?? "unknown"}
+                <span className="ml-3 text-ink-2">
+                  {p.credits} credits, {timeAgo(p.created_at)}
+                  {p.status === "refunded" ? ", refunded" : ""}
+                </span>
+              </span>
+              <span className="tabular-nums">${(p.total_minor / 100).toFixed(2)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+          </>
+        )}
+        {tab === "margins" && (
+          <>
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-display text-xl font-semibold">Margin by model</h2>
         <div className="flex gap-1.5" role="group" aria-label="Period">
           {[
@@ -77,7 +219,7 @@ export function AdminView({
           ].map((o) => (
             <Link
               key={o.d}
-              href={`${base}/admin?days=${o.d}`}
+              href={`${base}/admin?tab=margins&days=${o.d}`}
               aria-current={(days ?? 0) === o.d ? "true" : undefined}
               className={`rounded-full border px-3.5 py-1.5 text-sm ${(days ?? 0) === o.d ? "border-accent text-ink" : "border-line text-ink-2 hover:text-ink"}`}
             >
@@ -173,51 +315,27 @@ export function AdminView({
         </div>
       )}
 
-      <div className="mt-12 grid gap-8 md:grid-cols-2">
-        <section>
-          <h2 className="font-display text-xl font-semibold">
-            Free credits, last 30 days
-          </h2>
-          {free.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-2">No signups yet.</p>
-          ) : (
-            <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
-              {free.map((f) => (
-                <li key={f.reason} className="flex justify-between px-4 py-3">
-                  <span>{REASONS[f.reason] ?? f.reason}</span>
-                  <span className="tabular-nums">{f.count}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold">
-            Payments, last 30 days
-          </h2>
-          {payments.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-2">No paid orders yet.</p>
-          ) : (
-            <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
-              {payments.map((p) => (
-                <li key={p.currency} className="flex justify-between px-4 py-3">
-                  <span>
-                    {p.count} {p.count === 1 ? "order" : "orders"} in{" "}
-                    {p.currency}
-                  </span>
-                  <span className="tabular-nums">
-                    {(p.total_minor / 100).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+          </>
+        )}
+        {tab === "labs" && (
+          <>
+      <h2 className="mt-8 font-display text-xl font-semibold">Lab balances</h2>
+      <p className="mt-1 max-w-xl text-sm text-ink-2">
+        OpenRouter runs nearly every model and reports its own balance, so it
+        needs no entry. Other labs do not report theirs: enter it from their
+        console after a top-up and the estimate subtracts the lab cost logged on
+        each job since.
+      </p>
+      <ul className="mt-4 grid gap-4 md:grid-cols-2">
+        {shown.map((s) => (
+          <LabCard key={s.lab} stat={s} demo={demo} />
+        ))}
+      </ul>
 
-      <GrantForm demo={demo} />
+          </>
+        )}
+        {tab === "credits" && <GrantForm demo={demo} />}
+      </div>
     </div>
   );
 }
