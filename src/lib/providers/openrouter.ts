@@ -11,6 +11,8 @@ import type { GenerateInput, ProviderAdapter, ProviderResult } from "./types";
 const BASE = "https://openrouter.ai/api/v1";
 /** Every video model we list takes these two. Others (1:1, 4:3) are not shared by Veo and Runway. */
 const VIDEO_RATIOS = ["9:16", "16:9"] as const;
+/** GPT Image 1 and Mini only take these three; the newer GPT Images take the full list. */
+const GPT_IMAGE_1_RATIOS = ["1:1", "3:2", "2:3"] as const;
 
 type ImageResp = {
   data?: { b64_json?: string; media_type?: string }[];
@@ -60,9 +62,17 @@ export const openrouter: ProviderAdapter = {
           model: model.apiModel,
           prompt,
           n: 1,
-          aspect_ratio: aspectRatio ?? model.defaults.aspectRatio ?? "9:16",
+          aspect_ratio: /^openai\/gpt-image-1(-mini)?$/.test(model.apiModel)
+            ? nearestRatio(
+                aspectRatio ?? model.defaults.aspectRatio,
+                GPT_IMAGE_1_RATIOS,
+              )
+            : (aspectRatio ?? model.defaults.aspectRatio ?? "9:16"),
+          // GPT Image has no resolution; its picker choice is the quality.
           ...(model.defaults.imageSize
-            ? { resolution: model.defaults.imageSize }
+            ? model.apiModel.startsWith("openai/gpt-image-")
+              ? { quality: model.defaults.imageSize }
+              : { resolution: model.defaults.imageSize }
             : {}),
           ...(refs.length ? { input_references: refs } : {}),
         },

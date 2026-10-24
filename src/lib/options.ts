@@ -24,5 +24,8 @@ const HINTS: Record<string, string> = {
   "1K": "Standard",
   "2K": "High",
   "4K": "Ultra",
+  low: "Draft",
+  medium: "Standard",
+  high: "Best",
 };
 export const resolutionHint = (value: string) => HINTS[value] ?? "";

@@ -144,6 +144,66 @@ export const MODELS: ModelConfig[] = [
     freeEligible: false,
   },
   {
+    key: "gpt-image-2",
+    label: "GPT Image 2",
+    lab: "openrouter",
+    apiModel: "openai/gpt-image-2",
+    kind: "image",
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: portrait, roughly $0.04 to $0.05.
+    defaults: { imageSize: "medium", aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
+    enabled: true,
+    freeEligible: false,
+  },
+  {
+    key: "gpt-image-2.5-sunburst",
+    label: "GPT Image 2.5 Sunburst",
+    lab: "openrouter",
+    apiModel: "openai/gpt-image-2.5-sunburst",
+    kind: "image",
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: same $30 per 1M rate as GPT Image 2, so the same estimate (not yet confirmed).
+    defaults: { imageSize: "medium", aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
+    enabled: true,
+    freeEligible: false,
+  },
+  {
+    key: "gpt-image-2.5-flare",
+    label: "GPT Image 2.5 Flare",
+    lab: "openrouter",
+    apiModel: "openai/gpt-image-2.5-flare",
+    kind: "image",
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: same $30 per 1M rate as GPT Image 2, so the same estimate (not yet confirmed).
+    defaults: { imageSize: "medium", aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
+    enabled: true,
+    freeEligible: false,
+  },
+  {
+    key: "gpt-image-1",
+    label: "GPT Image 1",
+    lab: "openrouter",
+    apiModel: "openai/gpt-image-1",
+    kind: "image",
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: 2:3 portrait. Only 1:1, 3:2 and 2:3 are accepted.
+    defaults: { imageSize: "medium", aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.063) }],
+    enabled: true,
+    freeEligible: false,
+  },
+  {
+    key: "gpt-image-1-mini",
+    label: "GPT Image 1 Mini",
+    lab: "openrouter",
+    apiModel: "openai/gpt-image-1-mini",
+    kind: "image",
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: 2:3 portrait. Only 1:1, 3:2 and 2:3 are accepted.
+    defaults: { imageSize: "medium", aspectRatio: "9:16" },
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.015) }],
+    enabled: true,
+    freeEligible: false,
+  },
+  {
     key: "gemini-omni-flash",
     label: "Gemini Omni Flash",
     lab: "google", // Not on OpenRouter, so this one still calls Google directly (GEMINI_API_KEY).

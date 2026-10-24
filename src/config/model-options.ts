@@ -273,6 +273,41 @@ export const OPTIONS: Record<string, ModelOptions> = {
       { value: "4K", costMicros: 170000 },
     ],
   },
+  "gpt-image-2": {
+    resolutions: [
+      { value: "low", costMicros: 6000 },
+      { value: "medium", costMicros: 50000 },
+      { value: "high", costMicros: 210000 },
+    ],
+  },
+  "gpt-image-2.5-sunburst": {
+    resolutions: [
+      { value: "low", costMicros: 6000 },
+      { value: "medium", costMicros: 50000 },
+      { value: "high", costMicros: 210000 },
+    ],
+  },
+  "gpt-image-2.5-flare": {
+    resolutions: [
+      { value: "low", costMicros: 6000 },
+      { value: "medium", costMicros: 50000 },
+      { value: "high", costMicros: 210000 },
+    ],
+  },
+  "gpt-image-1": {
+    resolutions: [
+      { value: "low", costMicros: 16000 },
+      { value: "medium", costMicros: 63000 },
+      { value: "high", costMicros: 250000 },
+    ],
+  },
+  "gpt-image-1-mini": {
+    resolutions: [
+      { value: "low", costMicros: 6000 },
+      { value: "medium", costMicros: 15000 },
+      { value: "high", costMicros: 52000 },
+    ],
+  },
 };
 
 /** The resolution a model uses when none is chosen. */

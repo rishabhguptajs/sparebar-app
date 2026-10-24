@@ -332,6 +332,36 @@ export const MODEL_META: Record<string, ModelMeta> = {
     blurb: "Earlier Recraft Pro.",
     tags: ["Photo reference"],
   },
+  "gpt-image-2": {
+    maker: "OpenAI",
+    rank: 26,
+    blurb: "ChatGPT's image model. Follows long prompts and writes clean text.",
+    tags: ["Photo reference"],
+  },
+  "gpt-image-2.5-sunburst": {
+    maker: "OpenAI",
+    rank: 27,
+    blurb: "Newer ChatGPT image model, same price as GPT Image 2.",
+    tags: ["Photo reference"],
+  },
+  "gpt-image-2.5-flare": {
+    maker: "OpenAI",
+    rank: 28,
+    blurb: "Newer ChatGPT image model, same price as GPT Image 2.",
+    tags: ["Photo reference"],
+  },
+  "gpt-image-1": {
+    maker: "OpenAI",
+    rank: 29,
+    blurb: "The first ChatGPT image model.",
+    tags: ["Photo reference"],
+  },
+  "gpt-image-1-mini": {
+    maker: "OpenAI",
+    rank: 30,
+    blurb: "Cheap ChatGPT images for drafts.",
+    tags: ["Photo reference"],
+  },
 };
 
 export type Tier = "budget" | "standard" | "premium";
