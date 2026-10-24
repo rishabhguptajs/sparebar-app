@@ -18,7 +18,8 @@ export async function GET(req: Request) {
   let user: User | null = null;
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) user = data.user;
+    if (error) console.error("sign-in code exchange failed", error.status, error.message);
+    else user = data.user;
   } else if (url.searchParams.get("session")) {
     user = (await supabase.auth.getUser()).data.user;
   }
