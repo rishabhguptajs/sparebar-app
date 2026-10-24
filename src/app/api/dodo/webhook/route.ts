@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyWebhook } from "@/lib/dodo";
 import { admin } from "@/lib/supabase/admin";
 import { track } from "@/lib/analytics";
+import { notifyOwner } from "@/lib/notify";
 
 type Event = {
   type: string;
@@ -34,7 +35,15 @@ export async function POST(req: Request) {
           // A session we never created (the account may serve other things): acknowledge so it is not retried.
           if (error && !error.message.includes("unknown order")) throw error;
           const row = (data as { user_id: string; credits: number; already: boolean }[] | null)?.[0];
-          if (row && !row.already) track(row.user_id, "credits_purchased", { credits: row.credits });
+          if (row && !row.already) {
+            track(row.user_id, "credits_purchased", { credits: row.credits });
+            const { data: buyer } = await db.from("profiles").select("email").eq("id", row.user_id).maybeSingle();
+            notifyOwner(`Sparebar payment: ${row.credits} credits`, [
+              `Buyer: ${(buyer as { email: string | null } | null)?.email ?? row.user_id}`,
+              `Credits: ${row.credits}`,
+              `Dodo payment: ${paymentId}`,
+            ]);
+          }
         }
         break;
       }

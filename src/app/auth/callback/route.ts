@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { DEVICE_COOKIE } from "@/config/free-tier";
 import { claimFreeCredits } from "@/lib/free-tier";
+import { announceSignup } from "@/lib/notify";
 import { recordProfile } from "@/lib/profile";
 import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +29,7 @@ export async function GET(req: Request) {
   // The email proves the address, so this is the moment to offer free credits.
   const free = await claimFreeCredits(user, req.headers);
   track(user.id, "signed_in", { free_credits: free.outcome });
+  await announceSignup(user, req.headers, free.outcome);
   const target = new URL(dest, url.origin);
   if (free.outcome !== "off") target.searchParams.set("welcome", free.outcome);
   const res = NextResponse.redirect(target);
