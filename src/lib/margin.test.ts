@@ -23,7 +23,7 @@ describe("marginFor", () => {
     const m = marginFor(row(200_000, 33_600));
     expect(m.topUpFeeMicros).toBe(0);
     expect(m.paymentFeeMicros).toBe(Math.round(200_000 * PAYMENT_FEE_RATE));
-    expect(m.margin).toBeCloseTo(1 - (33_600 + 7_080) / 200_000, 3);
+    expect(m.margin).toBeCloseTo(1 - (33_600 + 200_000 * PAYMENT_FEE_RATE) / 200_000, 3);
     expect(m.belowTarget).toBe(false);
   });
 

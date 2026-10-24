@@ -17,12 +17,14 @@ export type MarginRow = {
 export const OPENROUTER_TOPUP_FEE = 0.055;
 
 /**
- * Estimated payment processing share of revenue: a placeholder carried over from the old processor (3.54%). Replace it with Dodo's current fee once confirmed.
+ * Estimated payment processing share of revenue. Dodo charges 4% plus 40 cents per sale, plus 1.5% on cards from outside
+ * the US, so 5.5% plus 40 cents. The 40 cents is about 1.5% on an average sale of $25, which makes roughly 7%.
+ * Small packs cost more than that and big plans less. Check dodopayments.com/pricing if the rates change.
  */
-export const PAYMENT_FEE_RATE = 0.0354;
+export const PAYMENT_FEE_RATE = 0.07;
 
 /** Margin after lab cost, the OpenRouter fee and the estimated payment fee. */
-export const TARGET_MARGIN = 0.6;
+export const TARGET_MARGIN = 0.5;
 
 const labByModel = new Map<string, string>(MODELS.map((m) => [m.key, m.lab]));
 
