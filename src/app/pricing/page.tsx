@@ -8,14 +8,14 @@ import { abs, breadcrumbLd, faqLd, graph, usd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Pricing: credits for AI images and videos",
-  description: `Sparebar plans start at $15 for 150 credits and packs at $10 for 100. Credits work on every model, failed generations are refunded, and new accounts get ${FREE_TIER.credits} free credits.`,
+  description: `Sparebar plans start at $15 for 170 credits and packs at $10 for 110. Credits work on every model, failed generations are refunded, and new accounts get ${FREE_TIER.credits} free credits.`,
   alternates: { canonical: "/pricing" },
 };
 
 const faq = [
   {
     q: "How much does Sparebar cost?",
-    a: `Plans start at $15 a month for 150 credits. Credit packs start at $10 for 100 credits. New accounts get ${FREE_TIER.credits} free credits, no card needed.`,
+    a: `Plans start at $15 a month for 170 credits. Credit packs start at $10 for 110 credits. New accounts get ${FREE_TIER.credits} free credits, no card needed.`,
   },
   {
     q: "Do credits expire?",

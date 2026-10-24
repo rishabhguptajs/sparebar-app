@@ -49,7 +49,7 @@ const guide: Guide = {
     },
     {
       q: "How much does an AI UGC video cost?",
-      a: "Each model has a fixed credit cost shown before you run it. Lower priced image models start at 2 credits. Plans start at $15 for 150 credits and packs start at $10 for 100 credits.",
+      a: "Each model has a fixed credit cost shown before you run it. Lower priced image models start at 2 credits. Plans start at $15 for 170 credits and packs start at $10 for 110 credits.",
     },
     {
       q: "Do I need a card to try it?",
