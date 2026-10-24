@@ -1,5 +1,5 @@
 import "server-only";
-import { alertText, assessLab, labPaused, looksLikeBillingError, shouldAlert, type LabReport, type LabStat } from "@/lib/labs";
+import { alertText, assessLab, labPaused, OPENROUTER_MIN_BALANCE_MICROS, looksLikeBillingError, shouldAlert, type LabReport, type LabStat } from "@/lib/labs";
 import { admin } from "@/lib/supabase/admin";
 
 /** OpenRouter reports its own balance: credits bought minus credits used. Null when it cannot be read. */
@@ -36,8 +36,25 @@ export async function getLabReports(): Promise<LabReport[]> {
   return (await getLabStats()).map((s) => assessLab(s));
 }
 
-/** Labs whose models should be hidden for now because the lab recently refused requests over billing. */
+// Every page load and job start asks for paused labs, so the live OpenRouter balance is read at most once a minute.
+let lowCache: { at: number; low: boolean } | null = null;
+async function openRouterLow() {
+  if (lowCache && Date.now() - lowCache.at < 60_000) return lowCache.low;
+  const micros = await getOpenRouterBalanceMicros();
+  // An unreadable balance does not switch anything off.
+  const low = micros !== null && micros < OPENROUTER_MIN_BALANCE_MICROS;
+  lowCache = { at: Date.now(), low };
+  return low;
+}
+
+/** Labs whose models should be hidden for now: they refused requests over billing, or OpenRouter is under $1. */
 export async function getPausedLabs(): Promise<Set<string>> {
+  const paused = await billingPausedLabs();
+  if (await openRouterLow()) paused.add("openrouter");
+  return paused;
+}
+
+async function billingPausedLabs(): Promise<Set<string>> {
   try {
     // Reads only the small lab_balances table. lab_stats() aggregates every job and is for the admin page.
     const { data } = await admin().from("lab_balances").select("lab, recorded, recorded_at, billing_error_at").not("billing_error_at", "is", null);

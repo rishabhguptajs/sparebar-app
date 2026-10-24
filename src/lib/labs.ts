@@ -47,6 +47,8 @@ const DAY = 86_400_000;
 export const BILLING_ERROR_WINDOW_MS = 2 * 60 * 60 * 1000;
 /** After a billing style error, the lab's models are hidden from users for this long. */
 export const PAUSE_WINDOW_MS = 15 * 60 * 1000;
+/** OpenRouter models are switched off for users while its live balance is under this, until it is topped up. */
+export const OPENROUTER_MIN_BALANCE_MICROS = 1_000_000;
 export const ALERT_REPEAT_MS = 12 * 60 * 60 * 1000;
 
 function billingErrorActive(s: LabStat, now: number, windowMs: number) {
