@@ -85,9 +85,10 @@ export async function recordEarning(providerPaymentId: string) {
   if (error) console.error("referral earning failed", error.message);
 }
 
+/** Throws on failure so the webhook answers non-2xx and Dodo retries; safe to repeat, it only touches active rows. */
 export async function reverseEarning(providerPaymentId: string) {
   const { error } = await admin().rpc("reverse_referral_earning", { p_payment_id: providerPaymentId } as never);
-  if (error) console.error("referral reversal failed", error.message);
+  if (error) throw error;
 }
 
 export async function referralSummary(userId: string): Promise<ReferralSummary> {
