@@ -111,3 +111,25 @@ describe("profile", () => {
     expect(profileCompleteness(maya)).toEqual({ filled: 6, total: 9 });
   });
 });
+
+describe("avatar prompt", () => {
+  const base = { name: "Ananya", description: "North Indian woman in her early 20s.", look: "Faint redness around the nose.", profile: { ...maya, wardrobe: "Thrifted denim and baby tees", vibe: "Playful" }, niches: ["fashion"] };
+
+  it("asks for a candid selfie in a real place, wearing their own clothes", async () => {
+    const { buildAvatarPrompt } = await import("./build");
+    const t = buildAvatarPrompt({ ...base, shot: "front" }).text;
+    expect(t).toContain("selfie");
+    expect(t).toContain("Thrifted denim and baby tees");
+    expect(t).toContain("Setting:");
+    expect(t).not.toMatch(/plain background|neutral expression/i);
+    expect(t).toContain("No brand logos");
+  });
+
+  it("keeps the same clothes and place when made from the front shot", async () => {
+    const { buildAvatarPrompt } = await import("./build");
+    const t = buildAvatarPrompt({ ...base, shot: "full", fromReference: true }).text;
+    expect(t).toContain("same face, hair, build, clothes and place");
+    expect(t).toContain("Head to toe");
+    expect(t).not.toContain("Setting:");
+  });
+});

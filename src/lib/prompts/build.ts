@@ -190,3 +190,43 @@ export function buildProductPrompt(input: { scene: string; photos: number; produ
   ];
   return { text: lines.filter(Boolean).join("\n"), version: PROMPT_VERSION };
 }
+
+export type AvatarShot = "front" | "angle" | "full";
+
+const AVATAR_SHOT: Record<AvatarShot, string> = {
+  front: "A candid front camera selfie, arm held out, taken on a phone. Head, shoulders and upper body, a little wide angle. Looking at the lens with a relaxed, natural half smile, not posed.",
+  angle: "A candid photo taken by a friend, three quarter view, the face turned slightly away and a soft natural smile. Waist up, a little off centre, caught between moments.",
+  full: "A full length photo taken by a friend from a few steps away. Head to toe, standing in a relaxed everyday pose, shoes visible, mid movement rather than stiff.",
+};
+
+/**
+ * Reference photos for a premade avatar. Unlike a character portrait these are made to look like real phone photos:
+ * a lived in place, the avatar's own clothes and a natural expression. A neutral face against a plain wall reads as an
+ * ID photo and makes every later ad look stiff. The three shots come from one imagined day, so the angle and full body
+ * shots are made from the front shot with the same clothes and place.
+ */
+export function buildAvatarPrompt(input: {
+  name: string;
+  description: string;
+  look: string;
+  profile: CharacterProfile;
+  niches: string[];
+  shot: AvatarShot;
+  /** The front shot is attached, so keep the same person, clothes and place. */
+  fromReference?: boolean;
+}): { text: string; version: string } {
+  const { name, description, look, profile, niches, shot, fromReference } = input;
+  const lines = [
+    fromReference ? "The reference photo shows the person. Keep exactly the same person, with the same face, hair, build, clothes and place, and change only the framing as described." : null,
+    AVATAR_SHOT[shot],
+    identityLine(name, profile) || null,
+    description.trim() ? `About their look: ${description.trim()}` : null,
+    look.trim() ? `Photo details: ${look.trim()}` : null,
+    profile.wardrobe ? `Wearing: one specific everyday outfit in this style: ${profile.wardrobe}.` : null,
+    profile.vibe ? `Personality shows in the expression and posture: ${profile.vibe}.` : null,
+    fromReference ? null : `Setting: a real, lived in place from their everyday life${niches.length ? ` (they make ${niches.join(" and ")} content)` : ""}, such as a balcony, a street, a room or a trail. Natural light, a believable messy background, not a studio.`,
+    "Shot on a recent iPhone. True skin with visible pores and small imperfections, natural hair with flyaways, no retouching, no beauty filter, no airbrushed or plastic skin.",
+    "No brand logos and no readable text on clothing or accessories. One person only.",
+  ];
+  return { text: lines.filter(Boolean).join("\n"), version: "a1" };
+}
