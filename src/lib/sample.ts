@@ -173,3 +173,6 @@ export const sampleResult: PresentedJob = {
   ...mk(99, "video", "9:16", ""),
   outputs: [{ mime: "image/svg+xml", url: art(21, "9:16"), thumbUrl: null, downloadUrl: "#" }],
 };
+
+/** Stand-in picture for the avatar preview. The real portraits are generated from the admin page. */
+export const sampleAvatarArt = (i: number) => art(((i % 30) + 1));

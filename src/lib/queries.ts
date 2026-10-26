@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActivityRow, PaymentRow } from "@/lib/data";
 import type { ReferralSummary } from "@/lib/referral";
-import type { CharacterCard, ModelOption, PresentedJob, ProductCard } from "@/lib/ui-types";
+import type { AvatarCard, CharacterCard, ModelOption, PresentedJob, ProductCard } from "@/lib/ui-types";
 
 async function get<T>(url: string): Promise<T> {
   const res = await fetch(url, { cache: "no-store" });
@@ -18,6 +18,8 @@ export const useMe = (demo = false) => useQuery({ queryKey: ["me"], queryFn: () 
 export const useJobs = () => useQuery({ queryKey: ["jobs"], queryFn: async () => (await get<{ jobs: PresentedJob[] }>("/api/jobs")).jobs });
 
 export const useCharacters = () => useQuery({ queryKey: ["characters"], queryFn: async () => (await get<{ characters: CharacterCard[] }>("/api/characters")).characters });
+
+export const useAvatars = () => useQuery({ queryKey: ["avatars"], queryFn: async () => (await get<{ avatars: AvatarCard[] }>("/api/avatars")).avatars });
 
 export const useProducts = () => useQuery({ queryKey: ["products"], queryFn: async () => (await get<{ products: ProductCard[] }>("/api/products")).products });
 

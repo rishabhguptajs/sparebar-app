@@ -6,12 +6,13 @@ import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { ReferralsView } from "@/components/referrals-view";
+import { AvatarsView } from "@/components/avatars-view";
 import { AdsView } from "@/components/ads-view";
 import { ProductsView } from "@/components/products-view";
 import { SettingsView } from "@/components/settings-view";
 import { StudioView } from "@/components/studio-view";
 import { FREE_TIER } from "@/config/free-tier";
-import { useCharacters, useCreditsPage, useJobs, useProducts, useReferrals, useSettings, useStudio } from "@/lib/queries";
+import { useAvatars, useCharacters, useCreditsPage, useJobs, useProducts, useReferrals, useSettings, useStudio } from "@/lib/queries";
 
 // Each page is an empty shell that asks the API for its data. The cache shows the last answer straight away.
 
@@ -23,6 +24,11 @@ export function LibraryLoader() {
 export function CharactersLoader({ portraitCredits, openNew }: { portraitCredits: number; openNew: boolean }) {
   const { data } = useCharacters();
   return data ? <CharactersView base="/app" characters={data} portraitCredits={portraitCredits} openNew={openNew} /> : <PageSkeleton />;
+}
+
+export function AvatarsLoader() {
+  const { data } = useAvatars();
+  return data ? <AvatarsView base="/app" avatars={data} /> : <PageSkeleton />;
 }
 
 export function ProductsLoader() {
