@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { DEVICE_COOKIE } from "@/config/free-tier";
+import { CODE_ALPHABET, CODE_LENGTH, REFERRAL, REFERRAL_COOKIE } from "@/config/referral";
 
 // Set SIGNIN_PAUSED=true to close sign in, the app and paid actions. Webhooks and the cron tick stay open.
 const PAUSED_PATHS = [
@@ -60,7 +61,18 @@ export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req });
   // Mark this browser as one device, so a free grant can be limited to one per device.
   const newDevice = req.cookies.get(DEVICE_COOKIE) ? null : crypto.randomUUID();
+  // A ?ref= link remembers who sent this browser. The signup step reads it and locks the referrer in.
+  const ref = req.nextUrl.searchParams.get("ref")?.toUpperCase();
+  const newRef = ref && ref.length === CODE_LENGTH && [...ref].every((c) => CODE_ALPHABET.includes(c)) ? ref : null;
   const withDevice = (r: NextResponse) => {
+    if (newRef && process.env.REFERRALS_ENABLED !== "false")
+      r.cookies.set(REFERRAL_COOKIE, newRef, {
+        httpOnly: false, // the login page reads it, so the email sign-in can carry it to another browser
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * REFERRAL.cookieDays,
+        path: "/",
+      });
     if (newDevice)
       r.cookies.set(DEVICE_COOKIE, newDevice, {
         httpOnly: true,

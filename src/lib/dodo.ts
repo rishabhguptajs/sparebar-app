@@ -13,6 +13,7 @@ export async function createCheckout(input: {
   name: string;
   returnUrl: string;
   metadata: Record<string, string>;
+  discountCode?: string;
 }): Promise<Checkout & { checkout_url: string }> {
   const res = await fetch(`${BASE[env.dodoMode()]}/checkouts`, {
     method: "POST",
@@ -22,6 +23,7 @@ export async function createCheckout(input: {
       customer: { email: input.email, name: input.name },
       return_url: input.returnUrl,
       metadata: input.metadata,
+      ...(input.discountCode ? { discount_code: input.discountCode } : {}),
     }),
     cache: "no-store",
   });
@@ -30,6 +32,25 @@ export async function createCheckout(input: {
     throw new Error(`Dodo checkout failed: ${body?.message ?? res.status}`);
   }
   return body as Checkout & { checkout_url: string };
+}
+
+/** One-use percentage discount for a single product. Amount is in basis points (1500 = 15%). */
+export async function createDiscount(input: { code: string; productId: string; basisPoints: number; expiresAt: Date }) {
+  const res = await fetch(`${BASE[env.dodoMode()]}/discounts`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.dodoApiKey()}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "percentage",
+      amount: input.basisPoints,
+      code: input.code,
+      restricted_to: [input.productId],
+      usage_limit: 1,
+      expires_at: input.expiresAt.toISOString(),
+    }),
+    cache: "no-store",
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Dodo discount failed: ${body?.message ?? res.status}`);
 }
 
 /** Standard Webhooks: HMAC SHA256 of "id.timestamp.body" with the base64 key behind the whsec_ secret. */

@@ -3,8 +3,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { brand } from "@/config/brand";
 import { getProduct } from "@/config/plans";
-import { createCheckout } from "@/lib/dodo";
+import { createCheckout, createDiscount } from "@/lib/dodo";
 import { env } from "@/lib/env";
+import { eligibleForFriendDiscount } from "@/lib/referral";
+import { discountedCents, newReferralCode } from "@/lib/referral-code";
+import { REFERRAL } from "@/config/referral";
 import { admin } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
 
@@ -25,8 +28,17 @@ export async function POST(req: Request) {
   try {
     const id = randomUUID();
     const name = user.email.split("@")[0];
+    const productId = env.dodoProductId(product.key);
+    // A referred friend's first purchase gets the friend discount, through a one-use code for this product only.
+    let discountCode: string | undefined;
+    if (await eligibleForFriendDiscount(user.id)) {
+      discountCode = `REF${newReferralCode()}`;
+      await createDiscount({ code: discountCode, productId, basisPoints: REFERRAL.friendDiscountBp, expiresAt: new Date(Date.now() + 86_400_000) });
+    }
+    const payCents = discountCode ? discountedCents(product.priceUsdCents) : product.priceUsdCents;
     const session = await createCheckout({
-      productId: env.dodoProductId(product.key),
+      productId,
+      discountCode,
       email: user.email,
       name,
       returnUrl: `${brand.url}/app/credits?checkout=return`,
@@ -43,8 +55,10 @@ export async function POST(req: Request) {
         credits: product.credits,
         list_usd_cents: product.priceUsdCents,
         currency: "USD",
-        base_minor: product.priceUsdCents,
-        total_minor: product.priceUsdCents,
+        base_minor: payCents,
+        total_minor: payCents,
+        discount_code: discountCode ?? null,
+        discount_cents: product.priceUsdCents - payCents,
         customer_name: name,
         customer_email: user.email,
         checkout_session_id: session.session_id,

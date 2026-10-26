@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { track } from "@/components/analytics";
 import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
+import { REFERRAL_COOKIE } from "@/config/referral";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -28,6 +29,10 @@ export default function LoginPage() {
   const next = () =>
     new URLSearchParams(window.location.search).get("next") ?? "/app";
 
+  // The referral code saved by a ?ref= link. Sent with the email sign-in so it still counts if the link
+  // is opened in a different browser.
+  const referralCode = () => document.cookie.match(new RegExp(`(?:^|; )${REFERRAL_COOKIE}=([A-Z0-9]+)`))?.[1];
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setState("sending");
@@ -35,6 +40,7 @@ export default function LoginPage() {
     const { error } = await createClient().auth.signInWithOtp({
       email,
       options: {
+        data: referralCode() ? { referral_code: referralCode() } : undefined,
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next())}`,
       },
     });
