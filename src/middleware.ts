@@ -101,6 +101,13 @@ export async function middleware(req: NextRequest) {
     url.searchParams.set("next", req.nextUrl.pathname);
     return withDevice(NextResponse.redirect(url));
   }
+  // Signed-in users have no reason to see the sign-in page.
+  if (data?.claims && req.nextUrl.pathname === "/login") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/app";
+    url.search = "";
+    return withDevice(NextResponse.redirect(url));
+  }
   return withDevice(res);
 }
 
