@@ -44,6 +44,12 @@ describe("structured characters", () => {
     expect(r.version).toBe(PROMPT_VERSION);
   });
 
+  it("tells the model not to add text or extra arms when a product is shown", () => {
+    const r = buildCharacterPrompt({ ...base, product: { name: "Plora Calm" }, refs: { character: 1, outfit: false, product: 1 } });
+    expect(r.text).toMatch(/Add no other text, captions, slogans or overlays/);
+    expect(r.text).toMatch(/exactly two arms and two hands/);
+  });
+
   it("uses the everyday style when a post sets no outfit", () => {
     const r = buildCharacterPrompt({ ...base, character: { ...base.character, profile: { ...maya, wardrobe: "Neutral knitwear" } } });
     expect(r.text).toContain("Outfit: Neutral knitwear");

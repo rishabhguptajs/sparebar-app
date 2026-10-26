@@ -192,10 +192,10 @@ const ad = (id: string, title: string, blurb: string, framing: Framing, scene: (
 });
 
 export const AD_STYLES: Template[] = [
-  ad("ad-hold", "Hold it up", "Holds the product next to their face, smiling.", "close", (p, h, n) => `${n} holds ${p} up next to their face, smiling at the camera, the label clearly facing the camera and easy to read.${h ? ` The ad is about: ${h}.` : ""} Clean bright background, polished product advertisement photo.`),
-  ad("ad-use", "Using it", "Using the product in an everyday moment.", "half", (p, h, n) => `${n} using ${p} in an everyday moment, natural and happy, the product clearly visible in frame with its label readable.${h ? ` The ad is about: ${h}.` : ""} Soft natural light, lifestyle advertisement photo.`),
-  ad("ad-show", "Showing it off", "Presents the product with both hands to the camera.", "half", (p, h, n) => `${n} presenting ${p} to the camera with both hands, product centred and sharp, label facing the camera, confident friendly expression.${h ? ` The ad is about: ${h}.` : ""} Styled simple backdrop, studio quality advertisement photo.`),
-  ad("ad-home", "At home", "A relaxed home scene with the product.", "full", (p, h, n) => `${n} in a cosy modern home with ${p} close at hand on a table, relaxed pose, the product clearly visible with its label readable.${h ? ` The ad is about: ${h}.` : ""} Warm daylight, lifestyle advertisement photo.`),
+  ad("ad-hold", "Hold it up", "Holds the product up near their face, smiling.", "close", (p, h, n) => `A candid photo of ${n} taken by a friend, not a selfie. ${n} holds ${p} up beside their face in one hand, smiling at the camera, the product clearly visible. The other hand rests naturally out of the way.${h ? ` The ad is about: ${h}.` : ""} Real lived-in room, natural window light, shot on a phone.`),
+  ad("ad-use", "Using it", "Using the product in an everyday moment.", "half", (p, h, n) => `A candid photo of ${n} using ${p} in an everyday moment, natural and happy, the product clearly visible in frame.${h ? ` The ad is about: ${h}.` : ""} Soft natural light, a real lived-in place, shot on a phone.`),
+  ad("ad-show", "Showing it off", "Presents the product to the camera.", "half", (p, h, n) => `A candid photo of ${n} presenting ${p} to the camera, holding it with both hands in front of their chest, product centred and sharp, confident friendly expression.${h ? ` The ad is about: ${h}.` : ""} A real room with natural light and a slightly messy background, shot on a phone.`),
+  ad("ad-home", "At home", "A relaxed home scene with the product.", "full", (p, h, n) => `A candid photo of ${n} in a cosy home with ${p} close at hand on a table, relaxed pose, the product clearly visible.${h ? ` The ad is about: ${h}.` : ""} Warm daylight, nothing staged, shot on a phone.`),
 ];
 
 export function getTemplate(id: string) {

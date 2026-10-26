@@ -114,7 +114,7 @@ export function buildCharacterPrompt(input: BuildInput): { text: string; version
   }
   lines.push(
     refs.product > 0
-      ? "Do not change the face, add other people, or alter any text or logo on the product."
+      ? "Do not change the face, add other people, or alter any text or logo on the product. Add no other text, captions, slogans or overlays anywhere in the picture, and do not copy any words that appear in the product reference image outside the product itself. The person has exactly two arms and two hands."
       : "Do not change the face or add other people.",
   );
   return { text: lines.filter(Boolean).join("\n"), version: PROMPT_VERSION };
