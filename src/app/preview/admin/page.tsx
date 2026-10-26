@@ -36,13 +36,13 @@ export default async function PreviewAdmin({ searchParams }: { searchParams: Pro
         { id: "o2", email: "maya@example.com", amountCents: 2600, method: "wise", destination: "maya@example.com", status: "paid", note: null, createdAt: ago(200), flagged: false },
       ]}
       tab={tab}
-      modelNames={{ "nano-banana-2.1": "Nano Banana 2.1", "gemini-omni-flash": "Gemini Omni Flash" }}
+      modelNames={{ "nano-banana-2.1": "Nano Banana 2.1", "veo-3.1-fast": "Veo 3.1 Fast" }}
       labs={[
         stat({ lab: "openrouter", has_balance: true, balance_micros: 18_400_000, recorded_at: ago(0), spent_since_micros: 0, spent_7d_micros: 9_100_000, first_job_at: ago(168), note: "Read live from OpenRouter" }),
-        stat({ lab: "google", has_balance: true, balance_micros: 40_000_000, recorded_at: ago(72), spent_since_micros: 21_300_000, spent_7d_micros: 22_000_000, first_job_at: ago(240), note: "Topped up $40" }),
+        stat({ lab: "xai", has_balance: true, balance_micros: 40_000_000, recorded_at: ago(72), spent_since_micros: 21_300_000, spent_7d_micros: 22_000_000, first_job_at: ago(240), note: "Topped up $40" }),
       ]}
       margins={[
-        { model_key: "gemini-omni-flash", ok_jobs: 41, failed_jobs: 3, credits: 1107, lab_cost_micros: 32_800_000, actual_cost_jobs: 12, revenue_micros: 104_200_000, free_credits: 0 },
+        { model_key: "veo-3.1-fast", ok_jobs: 41, failed_jobs: 3, credits: 1107, lab_cost_micros: 32_800_000, actual_cost_jobs: 12, revenue_micros: 104_200_000, free_credits: 0 },
         { model_key: "nano-banana-2.1", ok_jobs: 212, failed_jobs: 4, credits: 424, lab_cost_micros: 7_123_200, actual_cost_jobs: 0, revenue_micros: 39_800_000, free_credits: 40 },
       ]}
       free={[

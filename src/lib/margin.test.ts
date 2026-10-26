@@ -5,9 +5,9 @@ import { creditsForModel } from "@/lib/credits";
 import { marginFor, OPENROUTER_TOPUP_FEE, PAYMENT_FEE_RATE, TARGET_MARGIN } from "./margin";
 
 const OR = MODELS.find((m) => m.lab === "openrouter")!.key;
-const GOOGLE = MODELS.find((m) => m.lab === "google")!.key;
+const DIRECT = "direct-lab-model";
 
-const row = (revenue: number, cost: number, ok = 1, failed = 0, key = GOOGLE, free = 0) => ({
+const row = (revenue: number, cost: number, ok = 1, failed = 0, key = DIRECT, free = 0) => ({
   model_key: key,
   ok_jobs: ok,
   failed_jobs: failed,
@@ -29,7 +29,7 @@ describe("marginFor", () => {
 
   it("adds the OpenRouter top-up fee to OpenRouter models only", () => {
     const viaOr = marginFor(row(200_000, 60_000, 1, 0, OR));
-    const direct = marginFor(row(200_000, 60_000, 1, 0, GOOGLE));
+    const direct = marginFor(row(200_000, 60_000, 1, 0, DIRECT));
     expect(viaOr.topUpFeeMicros).toBe(Math.round(60_000 * OPENROUTER_TOPUP_FEE));
     expect(direct.topUpFeeMicros).toBe(0);
     expect(viaOr.margin!).toBeLessThan(direct.margin!);

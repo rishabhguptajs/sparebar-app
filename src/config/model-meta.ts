@@ -92,12 +92,6 @@ export const MODEL_META: Record<string, ModelMeta> = {
     blurb: "Older Seedance, cheap with sound.",
     tags: ["Sound", "Up to 12s", "Up to 1080p", "Photo to video"],
   },
-  "gemini-omni-flash": {
-    maker: "Google",
-    rank: 13,
-    blurb: "Gemini's own video model, follows long prompts.",
-    tags: ["Sound", "Up to 8s", "Photo to video"],
-  },
   "hailuo-3": {
     maker: "MiniMax",
     rank: 14,

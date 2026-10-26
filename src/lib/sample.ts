@@ -95,8 +95,8 @@ const mk = (
   mins = i * 37,
 ): PresentedJob => ({
   id: `s${i}`,
-  modelKey: kind === "image" ? "nano-banana-2.1" : "gemini-omni-flash",
-  modelLabel: kind === "image" ? "Nano Banana 2.1" : "Gemini Omni Flash",
+  modelKey: kind === "image" ? "nano-banana-2.1" : "veo-3.1-fast",
+  modelLabel: kind === "image" ? "Nano Banana 2.1" : "Veo 3.1 Fast",
   kind,
   prompt,
   aspectRatio: ratio,

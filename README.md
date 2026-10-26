@@ -40,7 +40,6 @@ Nothing has run against a real Supabase, Dodo, R2 or lab account yet. The first 
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Everything |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | Saving generated media |
-| `GEMINI_API_KEY` | Google models |
 | `XAI_API_KEY`, `MINIMAX_API_KEY`, `DASHSCOPE_API_KEY`, `ALIBABA_BASE_URL` | Those labs, once funded |
 | `CRON_SECRET` | The minute tick |
 | `ABUSE_SALT` | Free credits. They stay off until it is set |

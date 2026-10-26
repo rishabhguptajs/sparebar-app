@@ -43,7 +43,7 @@ const REASONS: Record<string, string> = {
 };
 
 /** Only the labs that serve models now. The old direct adapters stay in code as fallbacks but need no tracking. */
-const ACTIVE_LABS = ["openrouter", "google"];
+const ACTIVE_LABS = ["openrouter"];
 
 export function AdminView({
   base,
