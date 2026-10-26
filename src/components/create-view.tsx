@@ -206,8 +206,6 @@ export function CreateView({ base, models, characters: charactersProp, products 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Create a post</h1>
-      <p className="mt-1 max-w-lg text-sm text-ink-2">Pick your influencer and a post type. We write the scene, you fill in a few details.</p>
-
       {/* 1 */}
       <section className="mt-10" aria-label="Influencer">
         <h2 className="text-sm font-medium">1. Influencer</h2>

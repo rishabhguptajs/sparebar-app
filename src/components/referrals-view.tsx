@@ -95,11 +95,6 @@ export function ReferralsView({ data, demo }: { data: ReferralSummary; demo?: bo
   return (
     <div className="mx-auto max-w-3xl px-5 py-8 lg:px-10 lg:py-10">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Refer and earn</h1>
-      <p className="mt-1 max-w-xl text-sm text-ink-2">
-        Share your link. When a friend signs up and buys credits, you earn {REFERRAL.share * 100}% of what they pay, on every purchase for{" "}
-        {REFERRAL.windowMonths} months. They get {REFERRAL.friendDiscountBp / 100}% off their first purchase.
-      </p>
-
       <div className="mt-6 rounded-3xl bg-panel p-5">
         <p className="text-sm font-medium">Your link</p>
         <div className="mt-2 flex flex-wrap gap-2">

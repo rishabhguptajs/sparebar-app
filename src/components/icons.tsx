@@ -27,6 +27,15 @@ export const PeopleIcon = (p: P) => (
   </svg>
 );
 
+export const AvatarsIcon = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="9" cy="8.5" r="3" />
+    <path d="M3.5 19c.6-3.2 2.8-4.8 5.5-4.8s4.9 1.6 5.5 4.8" />
+    <circle cx="17" cy="9.5" r="2.4" />
+    <path d="M16.5 14.4c2.3-.2 4 1.2 4.5 4" />
+  </svg>
+);
+
 export const GridIcon = (p: P) => (
   <svg {...base(p)}>
     <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />

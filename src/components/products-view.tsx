@@ -95,8 +95,6 @@ export function ProductsView({ base, products, demo }: { base: string; products:
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
       <PeopleTabs base={base} current="products" />
       <h1 className="font-display text-3xl font-semibold tracking-tight">Products</h1>
-      <p className="mt-1 max-w-lg text-sm text-ink-2">Save a product once and hold it in any post. The photos keep its shape and label the same every time.</p>
-
       <form onSubmit={add} className="mt-8 grid gap-5 rounded-3xl border border-line bg-panel p-5 md:grid-cols-2">
         <div className="space-y-4">
           <div className="space-y-2">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Switch between the two lists that feed a post: who is in it and what they hold. */
+/** Switch between the lists that feed a post: who is in it and what they hold. */
 export function PeopleTabs({ base, current }: { base: string; current: "characters" | "products" }) {
   const tabs = [
     { key: "characters", label: "Characters", href: `${base}/characters` },

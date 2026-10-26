@@ -71,10 +71,7 @@ export function CreditsView({ balance, payments, activity, friendDiscount, demo 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Credits</h1>
-          <p className="mt-1 max-w-lg text-sm text-ink-2">
-            Every image and video costs credits. If a generation fails, the credits come back automatically.
-          </p>
-        </div>
+          </div>
         <p className="rounded-2xl bg-panel px-5 py-3">
           <span className="font-display text-4xl font-semibold tabular-nums">{balance}</span>
           <span className="ml-2 text-sm text-ink-2">credits left</span>
