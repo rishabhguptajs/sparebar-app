@@ -4,6 +4,7 @@ import { track } from "@/components/analytics";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { CloseIcon } from "@/components/icons";
+import { REFERRAL } from "@/config/referral";
 import { PACKS, PLANS, perCredit, type Product } from "@/config/plans";
 import { timeAgo } from "@/lib/ui-types";
 
@@ -22,10 +23,11 @@ type Props = {
   balance: number;
   payments: Payment[];
   activity: Activity[];
+  friendDiscount?: boolean;
   demo?: boolean;
 };
 
-export function CreditsView({ balance, payments, activity, demo }: Props) {
+export function CreditsView({ balance, payments, activity, friendDiscount, demo }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,6 +80,12 @@ export function CreditsView({ balance, payments, activity, demo }: Props) {
           <span className="ml-2 text-sm text-ink-2">credits left</span>
         </p>
       </div>
+
+      {friendDiscount && (
+        <p className="mt-6 rounded-2xl bg-panel px-5 py-3 text-sm">
+          You were invited by a friend, so your first purchase is {REFERRAL.friendDiscountBp / 100}% off. It is applied at checkout.
+        </p>
+      )}
 
       <h2 className="mt-10 font-display text-xl font-semibold">Monthly plans</h2>
       <p className="mt-1 text-sm text-ink-2">Paid month by month. Buy a plan again whenever you want another month of credits.</p>

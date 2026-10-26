@@ -27,6 +27,14 @@ export default async function PreviewAdmin({ searchParams }: { searchParams: Pro
       base="/preview"
       demo
       days={30}
+      referrers={[
+        { id: "r1", email: "priya@example.com", referred: 24, earnedCents: 18450, flagged: true },
+        { id: "r2", email: "maya@example.com", referred: 6, earnedCents: 3120, flagged: false },
+      ]}
+      payouts={[
+        { id: "o1", email: "priya@example.com", amountCents: 14200, method: "upi", destination: "priya@okbank", status: "requested", note: null, createdAt: ago(5), flagged: true },
+        { id: "o2", email: "maya@example.com", amountCents: 2600, method: "wise", destination: "maya@example.com", status: "paid", note: null, createdAt: ago(200), flagged: false },
+      ]}
       tab={tab}
       modelNames={{ "nano-banana-2.1": "Nano Banana 2.1", "gemini-omni-flash": "Gemini Omni Flash" }}
       labs={[

@@ -8,6 +8,7 @@ export default function PreviewCredits() {
       base="/preview"
       balance={38}
       demo
+      friendDiscount
       payments={[{ id: "p1", product_key: "starter", credits: 150, total_minor: 1500, status: "paid", created_at: ago(60 * 30) }]}
       activity={[
         { id: 4, type: "refund", amount: 27, note: null, created_at: ago(40) },

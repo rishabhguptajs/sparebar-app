@@ -5,6 +5,7 @@ import { parseTab } from "@/lib/admin-tabs";
 import { getAdminUser } from "@/lib/data";
 import { getLabStats } from "@/lib/labs-server";
 import type { MarginRow } from "@/lib/margin";
+import { REFERRAL } from "@/config/referral";
 import { admin } from "@/lib/supabase/admin";
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ days?: string; tab?: string }> }) {
@@ -57,6 +58,33 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     payTotals.set(p.currency, { count: cur.count + 1, total_minor: cur.total_minor + Number(p.total_minor) });
   }
 
+  // Referrals: who refers, what they earned, and the payouts waiting for you.
+  const [refProfiles, refEarnings, payoutRows] = await Promise.all([
+    db.from("profiles").select("referred_by").not("referred_by", "is", null),
+    db.from("referral_earnings").select("referrer_id, amount_cents").eq("status", "active"),
+    db.from("referral_payouts").select("id, referrer_id, amount_cents, method, destination, status, note, created_at").order("created_at", { ascending: false }).limit(50),
+  ]);
+  const referredBy = new Map<string, number>();
+  for (const r of (refProfiles.data ?? []) as { referred_by: string }[]) referredBy.set(r.referred_by, (referredBy.get(r.referred_by) ?? 0) + 1);
+  const earnedBy = new Map<string, number>();
+  for (const e of (refEarnings.data ?? []) as { referrer_id: string; amount_cents: number }[]) earnedBy.set(e.referrer_id, (earnedBy.get(e.referrer_id) ?? 0) + e.amount_cents);
+  const payouts = (payoutRows.data ?? []) as { id: string; referrer_id: string; amount_cents: number; method: string; destination: string; status: string; note: string | null; created_at: string }[];
+  const refIds = [...new Set([...referredBy.keys(), ...earnedBy.keys(), ...payouts.map((p) => p.referrer_id)])];
+  const refEmails = new Map<string, string | null>();
+  if (refIds.length) {
+    const { data: rows } = await db.from("profiles").select("id, email").in("id", refIds);
+    for (const r of (rows ?? []) as { id: string; email: string | null }[]) refEmails.set(r.id, r.email);
+  }
+  const referrers = refIds
+    .map((id) => {
+      const referred = referredBy.get(id) ?? 0;
+      const earnedCents = earnedBy.get(id) ?? 0;
+      return { id, email: refEmails.get(id) ?? null, referred, earnedCents, flagged: earnedCents >= REFERRAL.flagEarnedCents || referred >= REFERRAL.flagReferred };
+    })
+    .sort((a, b) => b.earnedCents - a.earnedCents)
+    .slice(0, 50);
+  const flaggedIds = new Set(referrers.filter((r) => r.flagged).map((r) => r.id));
+
   return (
     <AdminView
       base="/app"
@@ -64,6 +92,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       margins={(margins.data ?? []) as MarginRow[]}
       days={days}
       tab={tab}
+      referrers={referrers}
+      payouts={payouts.map((p) => ({ id: p.id, email: refEmails.get(p.referrer_id) ?? null, amountCents: p.amount_cents, method: p.method, destination: p.destination, status: p.status, note: p.note, createdAt: p.created_at, flagged: flaggedIds.has(p.referrer_id) }))}
       modelNames={Object.fromEntries(MODELS.map((m) => [m.key, m.label]))}
       free={[...freeCounts].map(([reason, count]) => ({ reason, count }))}
       payments={[...payTotals].map(([currency, v]) => ({ currency, ...v }))}

@@ -5,12 +5,13 @@ import { CreateView } from "@/components/create-view";
 import { CreditsView } from "@/components/credits-view";
 import { LibraryView } from "@/components/library-view";
 import { PageSkeleton } from "@/components/page-skeleton";
+import { ReferralsView } from "@/components/referrals-view";
 import { AdsView } from "@/components/ads-view";
 import { ProductsView } from "@/components/products-view";
 import { SettingsView } from "@/components/settings-view";
 import { StudioView } from "@/components/studio-view";
 import { FREE_TIER } from "@/config/free-tier";
-import { useCharacters, useCreditsPage, useJobs, useProducts, useSettings, useStudio } from "@/lib/queries";
+import { useCharacters, useCreditsPage, useJobs, useProducts, useReferrals, useSettings, useStudio } from "@/lib/queries";
 
 // Each page is an empty shell that asks the API for its data. The cache shows the last answer straight away.
 
@@ -38,8 +39,14 @@ export function CreditsLoader() {
       balance={data.balance}
       payments={data.payments}
       activity={data.activity}
+      friendDiscount={data.friendDiscount}
     />
   );
+}
+
+export function ReferralsLoader() {
+  const { data } = useReferrals();
+  return data ? <ReferralsView data={data} /> : <PageSkeleton />;
 }
 
 export function SettingsLoader() {

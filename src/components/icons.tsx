@@ -106,6 +106,13 @@ export const CoinIcon = (p: P) => (
   </svg>
 );
 
+export const GiftIcon = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="4" y="10" width="16" height="10" rx="1.5" />
+    <path d="M3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.2-5-1.2C7 7 9 7 12 7zM12 7c1.5-3 5-3.2 5-1.2C17 7 15 7 12 7z" />
+  </svg>
+);
+
 export const ShieldIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M12 3.5l7 2.5v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z" />
