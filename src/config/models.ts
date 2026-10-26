@@ -139,9 +139,9 @@ export const MODELS: ModelConfig[] = [
     apiModel: "qwen/qwen-image-3",
     kind: "image",
     defaults: { imageSize: "1K", aspectRatio: "9:16" },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.03) }],
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.036) }],
     enabled: true,
-    freeEligible: false,
+    freeEligible: true,
   },
   {
     key: "gpt-image-2",
@@ -149,9 +149,9 @@ export const MODELS: ModelConfig[] = [
     lab: "openrouter",
     apiModel: "openai/gpt-image-2",
     kind: "image",
-    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: portrait, roughly $0.04 to $0.05.
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: roughly $0.05 on its own, $0.062 to $0.072 with character and product photos attached, which is how the app uses it. Priced at the top of that so it is 3 credits.
     defaults: { imageSize: "medium", aspectRatio: "9:16" },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.072) }],
     enabled: true,
     freeEligible: false,
   },

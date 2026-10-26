@@ -232,8 +232,8 @@ export const OPTIONS: Record<string, ModelOptions> = {
   },
   "qwen-image-3": {
     resolutions: [
-      { value: "1K", costMicros: 30000 },
-      { value: "2K", costMicros: 30000 },
+      { value: "1K", costMicros: 36000 },
+      { value: "2K", costMicros: 36000 },
     ],
   },
   "qwen-image-3-pro": {
@@ -276,7 +276,7 @@ export const OPTIONS: Record<string, ModelOptions> = {
   "gpt-image-2": {
     resolutions: [
       { value: "low", costMicros: 6000 },
-      { value: "medium", costMicros: 50000 },
+      { value: "medium", costMicros: 72000 },
       { value: "high", costMicros: 210000 },
     ],
   },

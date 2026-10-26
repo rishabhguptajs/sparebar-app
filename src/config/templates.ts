@@ -181,7 +181,7 @@ const ad = (id: string, title: string, blurb: string, framing: Framing, scene: (
   kind: "image",
   aspectRatio: "4:5",
   framing,
-  modelKey: "nano-banana-2.1",
+  modelKey: "gpt-image-2",
   product: true,
   ad: true,
   blanks: [

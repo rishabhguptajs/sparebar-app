@@ -3,13 +3,14 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { OPTIONS, defaultResolution } from "@/config/model-options";
 import { MODEL_META, tagsOf, tierFor } from "@/config/model-meta";
-import { MODELS } from "@/config/models";
+import { getModel, MODELS } from "@/config/models";
 import { refsFor } from "@/config/model-refs";
 import { creditsForModel } from "@/lib/credits";
 import { presentCharacter, type CharacterRow, type OutfitRow } from "@/lib/characters";
 import { signedUrl } from "@/lib/r2";
 import { presentJob } from "@/lib/jobs/present";
 import type { JobRow } from "@/lib/jobs/run";
+import { FALLBACK_IMAGE_MODEL, PREFERRED_IMAGE_MODEL, preferredImageModel } from "@/lib/preferred-model";
 import { getPausedLabs } from "@/lib/labs-server";
 import { getAdapter } from "@/lib/providers";
 import { createClient } from "@/lib/supabase/server";
@@ -199,4 +200,12 @@ export async function getAdminUser() {
   return (profile as { is_admin?: boolean } | null)?.is_admin
     ? data.user
     : null;
+}
+
+/** The model a portrait or ad should use for this user: GPT Image 2 when they have paid credits for it. */
+export async function preferredPortraitModel(supabase: Supabase, userId: string, runs = 1): Promise<string> {
+  const model = getModel(PREFERRED_IMAGE_MODEL);
+  if (!model) return FALLBACK_IMAGE_MODEL;
+  const available = await balanceFor(supabase, userId, "image", false);
+  return preferredImageModel([{ key: model.key, credits: creditsForModel(model), available, paused: false }], runs);
 }

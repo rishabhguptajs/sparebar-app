@@ -1,5 +1,6 @@
 "use client";
 
+import { preferredImageModel } from "@/lib/preferred-model";
 import { creditsFor, resolutionHint } from "@/lib/options";
 import { ModelPicker } from "@/components/model-picker";
 import { useRefreshData } from "@/lib/queries";
@@ -72,9 +73,11 @@ export function StudioView({
   );
   const [creating, setCreating] = useState(false);
   const portraitCredits =
-    models.find((m) => m.key === "nano-banana-2.1")?.credits ?? 2;
+    models.find((m) => m.key === preferredImageModel(models))?.credits ?? 2;
   const startModel =
-    models.find((m) => m.key === initial?.modelKey) ?? models[0];
+    models.find((m) => m.key === initial?.modelKey) ??
+    models.find((m) => m.key === preferredImageModel(models)) ??
+    models[0];
 
   const [kind, setKind] = useState<"image" | "video">(
     startModel?.kind ?? "image",
@@ -113,7 +116,7 @@ export function StudioView({
   const character = characters.find((c) => c.id === characterId) ?? null;
   const product = products.find((p) => p.id === productId) ?? null;
   // A video starts from one photo. With a product, a photo of it is made first, then animated.
-  const stillModel = models.find((m) => m.key === "nano-banana-2.1" && !m.paused) ?? models.find((m) => m.kind === "image" && !m.paused);
+  const stillModel = models.find((m) => m.key === preferredImageModel(models) && !m.paused) ?? models.find((m) => m.kind === "image" && !m.paused);
   const viaStill = model?.kind === "video" && !!product;
   const stillCost = viaStill && stillModel ? stillModel.credits : 0;
   const cost = (model ? creditsFor(model, resolution, seconds) : 0) + stillCost;
