@@ -1,4 +1,4 @@
-// Free tier. 2 credits is one Nano Banana 2.1 image. Free credits are image-only and expire.
+// Free tier. 2 credits is one Qwen Image 3 image. Free credits are image-only and expire.
 export const FREE_TIER = {
   credits: 2,
   expiresDays: 14,

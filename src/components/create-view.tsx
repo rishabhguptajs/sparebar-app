@@ -11,6 +11,7 @@ import { PostKit } from "@/components/post-kit";
 import { TEMPLATES, type Template } from "@/config/templates";
 import { useRefreshData } from "@/lib/queries";
 import { resizeImage } from "@/lib/resize-image";
+import { preferredImageModel } from "@/lib/preferred-model";
 import { cssRatio, type CharacterCard, type ModelOption, type PresentedJob, type ProductCard } from "@/lib/ui-types";
 
 type Props = { base: string; models: ModelOption[]; characters: CharacterCard[]; products?: ProductCard[] };
@@ -24,7 +25,7 @@ export function CreateView({ base, models, characters: charactersProp, products 
   const [added, setAdded] = useState<CharacterCard[]>([]);
   const characters = useMemo(() => [...charactersProp, ...added.filter((a) => !charactersProp.some((c) => c.id === a.id))], [charactersProp, added]);
   const [creating, setCreating] = useState(false);
-  const portraitCredits = models.find((m) => m.key === "nano-banana-2.1")?.credits ?? 2;
+  const portraitCredits = models.find((m) => m.key === preferredImageModel(models))?.credits ?? 2;
 
   const [characterId, setCharacterId] = useState<string | null>(null);
   const [kind, setKind] = useState<"image" | "video">("image");
@@ -206,8 +207,6 @@ export function CreateView({ base, models, characters: charactersProp, products 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Create a post</h1>
-      <p className="mt-1 max-w-lg text-sm text-ink-2">Pick your influencer and a post type. We write the scene, you fill in a few details.</p>
-
       {/* 1 */}
       <section className="mt-10" aria-label="Influencer">
         <h2 className="text-sm font-medium">1. Influencer</h2>

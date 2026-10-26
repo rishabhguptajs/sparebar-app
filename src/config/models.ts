@@ -1,7 +1,7 @@
 // Model catalog. A model is a config entry: swapping a lab or a price is an edit here, not in code.
 // All money is integer micro-USD (1 USD = 1_000_000) to avoid float rounding at the credit boundary.
 
-export type Lab = "openrouter" | "google" | "xai" | "minimax" | "alibaba";
+export type Lab = "openrouter" | "xai" | "minimax" | "alibaba";
 export type Kind = "image" | "video";
 
 export type Price = {
@@ -139,9 +139,9 @@ export const MODELS: ModelConfig[] = [
     apiModel: "qwen/qwen-image-3",
     kind: "image",
     defaults: { imageSize: "1K", aspectRatio: "9:16" },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.03) }],
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.036) }],
     enabled: true,
-    freeEligible: false,
+    freeEligible: true,
   },
   {
     key: "gpt-image-2",
@@ -149,9 +149,9 @@ export const MODELS: ModelConfig[] = [
     lab: "openrouter",
     apiModel: "openai/gpt-image-2",
     kind: "image",
-    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: portrait, roughly $0.04 to $0.05.
+    // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: roughly $0.05 on its own, $0.062 to $0.072 with character and product photos attached, which is how the app uses it. Priced at the top of that so it is 3 credits.
     defaults: { imageSize: "medium", aspectRatio: "9:16" },
-    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.05) }],
+    prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.072) }],
     enabled: true,
     freeEligible: false,
   },
@@ -200,24 +200,6 @@ export const MODELS: ModelConfig[] = [
     // Token billed. The picker's "resolution" is the quality (low, medium, high). Default medium: 2:3 portrait. Only 1:1, 3:2 and 2:3 are accepted.
     defaults: { imageSize: "medium", aspectRatio: "9:16" },
     prices: [{ effectiveFrom: "2026-01-01", costMicros: usd(0.015) }],
-    enabled: true,
-    freeEligible: false,
-  },
-  {
-    key: "gemini-omni-flash",
-    label: "Gemini Omni Flash",
-    lab: "google", // Not on OpenRouter, so this one still calls Google directly (GEMINI_API_KEY).
-    apiModel: "gemini-omni-1.1-flash",
-    kind: "video",
-    // Omni has no duration field; length follows the prompt. Google quotes about $0.10 per second at 720p.
-    defaults: { resolution: "720p", seconds: 8, aspectRatio: "9:16" },
-    prices: [
-      {
-        effectiveFrom: "2026-01-01",
-        costMicros: usd(0.1) * 8,
-        perMillionOutputTokens: { video: usd(17.5), text: usd(9) },
-      },
-    ],
     enabled: true,
     freeEligible: false,
   },

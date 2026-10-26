@@ -2,6 +2,7 @@ export const TABS = [
   { key: "overview", label: "Overview" },
   { key: "users", label: "Users" },
   { key: "payments", label: "Payments" },
+  { key: "referrals", label: "Referrals" },
   { key: "margins", label: "Margins" },
   { key: "labs", label: "Labs" },
   { key: "credits", label: "Grant credits" },

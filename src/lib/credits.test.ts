@@ -20,13 +20,12 @@ describe("credits", () => {
       "grok-imagine-image": 2,
       "seedream-5-pro": 2,
       "flux-3-image": 2,
-      "qwen-image-3": 1,
-      "gpt-image-2": 2,
+      "qwen-image-3": 2,
+      "gpt-image-2": 3,
       "gpt-image-2.5-sunburst": 2,
       "gpt-image-2.5-flare": 2,
       "gpt-image-1": 3,
       "gpt-image-1-mini": 1,
-      "gemini-omni-flash": 27,
       "veo-3.1": 107,
       "veo-3.1-fast": 27,
       "veo-3.1-lite": 14,
@@ -142,9 +141,5 @@ describe("credits", () => {
     const nano = getModel("nano-banana-2.1")!;
     expect(creditsForModel(nano, { resolution: "4K" })).toBe(3);
     expect(quote(nano, { seconds: 8 })).toBeNull();
-    // Models without choices keep their one price.
-    const omni = getModel("gemini-omni-flash")!;
-    expect(quote(omni)?.costMicros).toBe(800_000);
-    expect(quote(omni, { resolution: "1080p" })).toBeNull();
   });
 });

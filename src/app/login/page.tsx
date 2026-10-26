@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { track } from "@/components/analytics";
+import { EMAIL_SIGN_IN } from "@/config/auth";
 import { brand } from "@/config/brand";
 import { FREE_TIER } from "@/config/free-tier";
+import { REFERRAL_COOKIE } from "@/config/referral";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -28,6 +30,10 @@ export default function LoginPage() {
   const next = () =>
     new URLSearchParams(window.location.search).get("next") ?? "/app";
 
+  // The referral code saved by a ?ref= link. Sent with the email sign-in so it still counts if the link
+  // is opened in a different browser.
+  const referralCode = () => document.cookie.match(new RegExp(`(?:^|; )${REFERRAL_COOKIE}=([A-Z0-9]+)`))?.[1];
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setState("sending");
@@ -35,6 +41,7 @@ export default function LoginPage() {
     const { error } = await createClient().auth.signInWithOtp({
       email,
       options: {
+        data: referralCode() ? { referral_code: referralCode() } : undefined,
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next())}`,
       },
     });
@@ -94,11 +101,11 @@ export default function LoginPage() {
 
         {linkFailed && (
           <p role="alert" className="mt-6 rounded-2xl border border-danger/40 px-4 py-3 text-sm text-danger">
-            That did not work. Request a new email link and open it in the same browser, enter the code from the email, or use Google.
+            That did not work. Try signing in with Google again.
           </p>
         )}
 
-        {state === "sent" ? (
+        {EMAIL_SIGN_IN && state === "sent" ? (
           <div className="mt-8 space-y-6">
             <p className="text-sm text-ink-2">
               We sent an email to <span className="text-ink">{email}</span>. Open the link in it, or enter the code below.
@@ -155,6 +162,8 @@ export default function LoginPage() {
               {googleBusy ? "Opening Google" : "Continue with Google"}
             </button>
 
+            {EMAIL_SIGN_IN && (
+              <>
             <div className="my-6 flex items-center gap-4 text-xs text-ink-2">
               <span className="h-px flex-1 bg-line" />
               or use your email
@@ -184,6 +193,8 @@ export default function LoginPage() {
                 </p>
               )}
             </form>
+              </>
+            )}
           </div>
         )}
       </div>

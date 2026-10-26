@@ -3,6 +3,7 @@ import { verifyWebhook } from "@/lib/dodo";
 import { admin } from "@/lib/supabase/admin";
 import { track } from "@/lib/analytics";
 import { notifyOwner } from "@/lib/notify";
+import { recordEarning, reverseEarning } from "@/lib/referral";
 
 type Event = {
   type: string;
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
           // A session we never created (the account may serve other things): acknowledge so it is not retried.
           if (error && !error.message.includes("unknown order")) throw error;
           const row = (data as { user_id: string; credits: number; already: boolean }[] | null)?.[0];
+          if (row) await recordEarning(paymentId); // safe on repeats: one earning per payment
           if (row && !row.already) {
             track(row.user_id, "credits_purchased", { credits: row.credits });
             const { data: buyer } = await db.from("profiles").select("email").eq("id", row.user_id).maybeSingle();
@@ -55,6 +57,7 @@ export async function POST(req: Request) {
         if (paymentId) {
           const { error } = await db.rpc("refund_payment", { p_payment_id: paymentId } as never);
           if (error) throw error;
+          await reverseEarning(paymentId);
         }
         break;
       }

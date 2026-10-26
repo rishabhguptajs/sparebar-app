@@ -7,6 +7,7 @@ import { PostKit } from "@/components/post-kit";
 import { Select } from "@/components/select";
 import { DownloadIcon } from "@/components/icons";
 import { AD_STYLES } from "@/config/templates";
+import { preferredImageModel } from "@/lib/preferred-model";
 import { useRefreshData } from "@/lib/queries";
 import { cssRatio, type CharacterCard, type ModelOption, type PresentedJob, type ProductCard } from "@/lib/ui-types";
 
@@ -37,7 +38,7 @@ export function AdsView({ base, models, characters, products, demo }: Props) {
 
   const character = characters.find((c) => c.id === characterId) ?? characters[0] ?? null;
   const product = products.find((p) => p.id === productId) ?? products[0] ?? null;
-  const model = imageModels.find((m) => m.key === modelKey) ?? imageModels.find((m) => m.key === "nano-banana-2.1") ?? imageModels[0];
+  const model = imageModels.find((m) => m.key === modelKey) ?? imageModels.find((m) => m.key === preferredImageModel(imageModels, styles.length)) ?? imageModels[0];
   const total = (model?.credits ?? 0) * styles.length;
   const short = !!model && total > model.available;
   const canRun = !!character && !!product && !!model && !model.paused && styles.length > 0 && !short && !busy;
@@ -106,8 +107,6 @@ export function AdsView({ base, models, characters, products, demo }: Props) {
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-10">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Product ads</h1>
-      <p className="mt-1 max-w-lg text-sm text-ink-2">Your character with your product, in several ad styles at once. Each ad gets a caption to post with it.</p>
-
       <div className="mt-8 grid gap-5 rounded-3xl border border-line bg-panel p-5 md:grid-cols-2">
         <div className="space-y-4">
           <div className="space-y-2">

@@ -2,7 +2,8 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActivityRow, PaymentRow } from "@/lib/data";
-import type { CharacterCard, ModelOption, PresentedJob, ProductCard } from "@/lib/ui-types";
+import type { ReferralSummary } from "@/lib/referral";
+import type { AvatarCard, CharacterCard, ModelOption, PresentedJob, ProductCard } from "@/lib/ui-types";
 
 async function get<T>(url: string): Promise<T> {
   const res = await fetch(url, { cache: "no-store" });
@@ -18,14 +19,20 @@ export const useJobs = () => useQuery({ queryKey: ["jobs"], queryFn: async () =>
 
 export const useCharacters = () => useQuery({ queryKey: ["characters"], queryFn: async () => (await get<{ characters: CharacterCard[] }>("/api/characters")).characters });
 
+export const useAvatars = () => useQuery({ queryKey: ["avatars"], queryFn: async () => (await get<{ avatars: AvatarCard[] }>("/api/avatars")).avatars });
+
 export const useProducts = () => useQuery({ queryKey: ["products"], queryFn: async () => (await get<{ products: ProductCard[] }>("/api/products")).products });
 
 export type CreditsPageData = {
   balance: number;
   payments: PaymentRow[];
   activity: ActivityRow[];
+  /** First purchase of a referred friend: the discount applies. */
+  friendDiscount: boolean;
 };
 export const useCreditsPage = () => useQuery({ queryKey: ["credits"], queryFn: () => get<CreditsPageData>("/api/credits") });
+
+export const useReferrals = () => useQuery({ queryKey: ["referrals"], queryFn: () => get<ReferralSummary>("/api/referral") });
 
 export type SettingsData = { email: string | null; fullName: string };
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: () => get<SettingsData>("/api/settings") });

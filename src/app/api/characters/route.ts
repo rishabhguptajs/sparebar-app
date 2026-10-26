@@ -7,7 +7,7 @@ import { buildPortraitPrompt } from "@/lib/prompts/build";
 import { hasProfile, ProfileSchema } from "@/lib/prompts/profile";
 import { extFor, putObject } from "@/lib/r2";
 import { admin } from "@/lib/supabase/admin";
-import { getCharacters } from "@/lib/data";
+import { getCharacters, preferredPortraitModel } from "@/lib/data";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 export const maxDuration = 60;
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       const portrait = buildPortraitPrompt({ name: fields.data.name, description: fields.data.description, profile: profile.data });
       const job = await startJob({
         userId: user.id,
-        modelKey: "nano-banana-2.1",
+        modelKey: await preferredPortraitModel(await createClient(), user.id),
         prompt: `Portrait of ${fields.data.name}`,
         providerPrompt: portrait.text,
         aspectRatio: "3:4",

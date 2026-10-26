@@ -6,7 +6,7 @@ const hoursAgo = (h: number) => new Date(NOW - h * 3_600_000).toISOString();
 const daysAgo = (d: number) => hoursAgo(d * 24);
 
 const base: LabStat = {
-  lab: "google",
+  lab: "xai",
   has_balance: true,
   balance_micros: 40_000_000,
   recorded_at: daysAgo(2),
@@ -98,7 +98,7 @@ describe("shouldAlert", () => {
 describe("alertText", () => {
   it("names the lab and what to do, without em dashes", () => {
     const t = alertText(assessLab({ ...base, spent_since_micros: 37_000_000 }, NOW));
-    expect(t).toContain("Google");
+    expect(t).toContain("xAI");
     expect(t).toContain("$3.00 left");
     expect(t).not.toContain("—");
   });

@@ -19,6 +19,8 @@ type Props = {
   signups: { total: number; today: number; week: number; month: number };
   users: { id: string; email: string | null; country: string | null; created_at: string; balance: number; jobs: number; paid: boolean }[];
   recentPayments: { email: string | null; credits: number; total_minor: number; status: string; created_at: string }[];
+  referrers?: { id: string; email: string | null; referred: number; earnedCents: number; flagged: boolean }[];
+  payouts?: { id: string; email: string | null; amountCents: number; method: string; destination: string; status: string; note: string | null; createdAt: string; flagged: boolean }[];
   tab: AdminTab;
   demo?: boolean;
 };
@@ -41,7 +43,7 @@ const REASONS: Record<string, string> = {
 };
 
 /** Only the labs that serve models now. The old direct adapters stay in code as fallbacks but need no tracking. */
-const ACTIVE_LABS = ["openrouter", "google"];
+const ACTIVE_LABS = ["openrouter"];
 
 export function AdminView({
   base,
@@ -54,6 +56,8 @@ export function AdminView({
   signups,
   users,
   recentPayments,
+  referrers = [],
+  payouts = [],
   tab: initialTab,
   demo,
 }: Props) {
@@ -84,6 +88,9 @@ export function AdminView({
             {t.label}
           </button>
         ))}
+        <Link href={`${base}/admin/avatars`} className="shrink-0 rounded-full px-4 py-2 text-sm font-medium text-ink-2 hover:bg-panel hover:text-ink">
+          Avatars
+        </Link>
       </nav>
 
       <div className="mt-8 [&>:first-child]:!mt-0">
@@ -207,6 +214,7 @@ export function AdminView({
 
           </>
         )}
+        {tab === "referrals" && <ReferralsTab referrers={referrers} payouts={payouts} demo={demo} />}
         {tab === "margins" && (
           <>
       <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
@@ -337,6 +345,108 @@ export function AdminView({
         {tab === "credits" && <GrantForm demo={demo} />}
       </div>
     </div>
+  );
+}
+
+function ReferralsTab({ referrers, payouts, demo }: { referrers: NonNullable<Props["referrers"]>; payouts: NonNullable<Props["payouts"]>; demo?: boolean }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const money = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const open = payouts.filter((p) => p.status === "requested");
+  const settled = payouts.filter((p) => p.status !== "requested").slice(0, 10);
+
+  // Pay the person first (UPI, bank, Wise), then mark it paid here. Rejecting hands the earnings back to them.
+  async function settle(id: string, status: "paid" | "rejected") {
+    if (demo) return setMsg("Saving is off in the preview.");
+    const note = status === "rejected" ? (window.prompt("Why is it rejected? The referrer does not see this.") ?? "") : "";
+    if (status === "rejected" && !note) return;
+    if (status === "paid" && !window.confirm("Mark as paid? Only do this after you have sent the money.")) return;
+    setBusy(id);
+    setMsg(null);
+    const res = await fetch("/api/admin/payout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status, note: note || undefined }),
+    });
+    const body = await res.json().catch(() => ({}));
+    setBusy(null);
+    if (!res.ok) return setMsg(body.error ?? "Could not update the payout.");
+    router.refresh();
+  }
+
+  return (
+    <>
+      <h2 className="mt-10 font-display text-xl font-semibold">Payouts waiting</h2>
+      {msg && <p className="mt-2 text-sm text-danger">{msg}</p>}
+      {open.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-2">Nothing waiting.</p>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {open.map((p) => (
+            <li key={p.id} className="rounded-2xl bg-panel p-4 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium">
+                  {p.email ?? "unknown"}
+                  {p.flagged && <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-ink">Check first</span>}
+                </span>
+                <span className="font-display text-lg font-semibold tabular-nums">{money(p.amountCents)}</span>
+              </div>
+              <p className="mt-1 break-all text-ink-2">
+                {p.method}: {p.destination}
+              </p>
+              <p className="text-xs text-ink-2">Requested {timeAgo(p.createdAt)}</p>
+              <div className="mt-3 flex gap-2">
+                <button disabled={busy === p.id} onClick={() => settle(p.id, "paid")} className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-ink disabled:opacity-50">
+                  Mark paid
+                </button>
+                <button disabled={busy === p.id} onClick={() => settle(p.id, "rejected")} className="rounded-full bg-panel-2 px-4 py-2 text-xs font-semibold disabled:opacity-50">
+                  Reject
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-10 font-display text-xl font-semibold">Referrers</h2>
+      <p className="mt-1 text-sm text-ink-2">Earned is what they have earned in total, refunds taken off. Flagged ones are over the limits in src/config/referral.ts.</p>
+      {referrers.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-2">No referrals yet.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
+          {referrers.map((r) => (
+            <li key={r.id} className="flex items-center justify-between gap-4 px-4 py-3">
+              <span className="min-w-0 truncate">
+                {r.email ?? "unknown"}
+                {r.flagged && <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-ink">Flagged</span>}
+                <span className="ml-3 text-ink-2">{r.referred} referred</span>
+              </span>
+              <span className="tabular-nums">{money(r.earnedCents)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {settled.length > 0 && (
+        <>
+          <h2 className="mt-10 font-display text-xl font-semibold">Recent payouts</h2>
+          <ul className="mt-4 divide-y divide-line overflow-hidden rounded-2xl bg-panel text-sm">
+            {settled.map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                <span className="min-w-0 truncate">
+                  {p.email ?? "unknown"}
+                  <span className="ml-3 text-ink-2">
+                    {p.status}, {timeAgo(p.createdAt)}
+                  </span>
+                </span>
+                <span className="tabular-nums">{money(p.amountCents)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </>
   );
 }
 

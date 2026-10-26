@@ -3,7 +3,6 @@
 
 export const LAB_NAMES: Record<string, string> = {
   openrouter: "OpenRouter",
-  google: "Google",
   xai: "xAI",
   minimax: "MiniMax",
   alibaba: "Alibaba",

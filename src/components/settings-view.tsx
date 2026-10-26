@@ -38,8 +38,6 @@ export function SettingsView({ email, fullName }: Props) {
   return (
     <div className="mx-auto max-w-2xl px-5 py-8 lg:px-10 lg:py-10">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Settings</h1>
-      <p className="mt-1 text-sm text-ink-2">Your account details.</p>
-
       <form onSubmit={save} className="mt-8 space-y-5">
         <div className="space-y-2">
           <label htmlFor="s-name" className="text-sm font-medium">

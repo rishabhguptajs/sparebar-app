@@ -4,7 +4,8 @@ import { startJob, UserFacingError } from "@/lib/jobs/run";
 import { presentJob } from "@/lib/jobs/present";
 import { buildPortraitPrompt } from "@/lib/prompts/build";
 import { hasProfile, ProfileSchema } from "@/lib/prompts/profile";
-import { getUser } from "@/lib/supabase/server";
+import { preferredPortraitModel } from "@/lib/data";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 // Three portraits of the same description at once. The user picks the one that looks right, and that one
 // becomes the character's reference (POST /api/characters with pickedJobId). Each portrait costs its own credits.
@@ -28,11 +29,12 @@ export async function POST(req: Request) {
   }
 
   const portrait = buildPortraitPrompt({ name, description, profile });
+  const modelKey = await preferredPortraitModel(await createClient(), user.id, CANDIDATE_COUNT);
   const runs = await Promise.allSettled(
     Array.from({ length: CANDIDATE_COUNT }, () =>
       startJob({
         userId: user.id,
-        modelKey: "nano-banana-2.1",
+        modelKey,
         prompt: `Portrait of ${name}`,
         providerPrompt: portrait.text,
         aspectRatio: "3:4",

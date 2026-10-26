@@ -37,16 +37,18 @@ export function CharactersView({ base, characters, portraitCredits, openNew, dem
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight">Characters</h1>
-          <p className="mt-1 max-w-md text-sm text-ink-2">
-            A character keeps the same face across every image and video you make with it.
-          </p>
+          </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href={`${base}/avatars`} className="rounded-full border border-line px-4 py-2.5 text-sm font-medium hover:bg-panel">
+            Browse avatars
+          </Link>
+          <button
+            onClick={() => setCreating(true)}
+            className="flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
+          >
+            <PlusIcon width={18} height={18} /> New character
+          </button>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink"
-        >
-          <PlusIcon width={18} height={18} /> New character
-        </button>
       </div>
 
       {characters.length === 0 ? (

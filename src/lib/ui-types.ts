@@ -47,7 +47,25 @@ export type CharacterCard = {
   outfits: OutfitCard[];
 };
 
-export type OutfitCard = { id: string; name: string; description: string; photoUrl: string | null };
+/** A premade avatar in the shared library. */
+export type AvatarCard = {
+  id: string;
+  slug: string;
+  name: string;
+  gender: string;
+  niches: string[];
+  tagline: string;
+  description: string;
+  tone: string;
+  ageRange: string;
+  coverUrl: string | null;
+  photoUrls: string[];
+  /** How many brands picked this avatar. */
+  brandCount: number;
+  active: boolean;
+};
+
+export type OutfitCard ={ id: string; name: string; description: string; photoUrl: string | null };
 
 export type ProductCard = {
   id: string;

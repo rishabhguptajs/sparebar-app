@@ -44,6 +44,12 @@ describe("structured characters", () => {
     expect(r.version).toBe(PROMPT_VERSION);
   });
 
+  it("tells the model not to add text or extra arms when a product is shown", () => {
+    const r = buildCharacterPrompt({ ...base, product: { name: "Plora Calm" }, refs: { character: 1, outfit: false, product: 1 } });
+    expect(r.text).toMatch(/Add no other text, captions, slogans or overlays/);
+    expect(r.text).toMatch(/exactly two arms and two hands/);
+  });
+
   it("uses the everyday style when a post sets no outfit", () => {
     const r = buildCharacterPrompt({ ...base, character: { ...base.character, profile: { ...maya, wardrobe: "Neutral knitwear" } } });
     expect(r.text).toContain("Outfit: Neutral knitwear");
@@ -109,5 +115,27 @@ describe("profile", () => {
   });
   it("counts filled option fields", () => {
     expect(profileCompleteness(maya)).toEqual({ filled: 6, total: 9 });
+  });
+});
+
+describe("avatar prompt", () => {
+  const base = { name: "Ananya", description: "North Indian woman in her early 20s.", look: "Faint redness around the nose.", profile: { ...maya, wardrobe: "Thrifted denim and baby tees", vibe: "Playful" }, niches: ["fashion"] };
+
+  it("asks for a candid selfie in a real place, wearing their own clothes", async () => {
+    const { buildAvatarPrompt } = await import("./build");
+    const t = buildAvatarPrompt({ ...base, shot: "front" }).text;
+    expect(t).toContain("selfie");
+    expect(t).toContain("Thrifted denim and baby tees");
+    expect(t).toContain("Setting:");
+    expect(t).not.toMatch(/plain background|neutral expression/i);
+    expect(t).toContain("No brand logos");
+  });
+
+  it("keeps the same clothes and place when made from the front shot", async () => {
+    const { buildAvatarPrompt } = await import("./build");
+    const t = buildAvatarPrompt({ ...base, shot: "full", fromReference: true }).text;
+    expect(t).toContain("same face, hair, build, clothes and place");
+    expect(t).toContain("Head to toe");
+    expect(t).not.toContain("Setting:");
   });
 });

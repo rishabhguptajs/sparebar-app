@@ -4,6 +4,7 @@ import { startJob, UserFacingError } from "@/lib/jobs/run";
 import { buildPortraitPrompt, type PortraitAngle } from "@/lib/prompts/build";
 import { getObjectBytes } from "@/lib/r2";
 import { admin } from "@/lib/supabase/admin";
+import { preferredPortraitModel } from "@/lib/data";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 // Adds a three quarter shot and a full body shot to a character, made from its first photo.
@@ -24,6 +25,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: `A character holds up to ${MAX_CHARACTER_REFS} photos. Remove one first.` }, { status: 400 });
   }
 
+  const modelKey = await preferredPortraitModel(supabase, user.id, ANGLES.length);
   try {
     const f = await getObjectBytes(row.reference_keys[0]);
     const reference = { mime: f.mime, base64: Buffer.from(f.bytes).toString("base64") };
@@ -33,7 +35,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         const p = buildPortraitPrompt({ name, description, profile, angle, fromReference: true });
         return startJob({
           userId: user.id,
-          modelKey: "nano-banana-2.1",
+          modelKey,
           prompt: `${angle === "full" ? "Full body" : "Three quarter"} shot of ${name}`,
           providerPrompt: p.text,
           aspectRatio: "3:4",

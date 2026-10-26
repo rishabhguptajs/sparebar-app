@@ -10,6 +10,8 @@ import { useMe } from "@/lib/queries";
 import {
   CloseIcon,
   CoinIcon,
+  GiftIcon,
+  AvatarsIcon,
   GridIcon,
   ImageIcon,
   PeopleIcon,
@@ -72,6 +74,12 @@ export function AppShell({
       active: path.startsWith(`${base}/characters`),
     },
     {
+      href: `${base}/avatars`,
+      label: "Avatars",
+      icon: AvatarsIcon,
+      active: path.startsWith(`${base}/avatars`),
+    },
+    {
       href: `${base}/library`,
       label: "Library",
       icon: GridIcon,
@@ -82,6 +90,12 @@ export function AppShell({
       label: "Credits",
       icon: CoinIcon,
       active: path.startsWith(`${base}/credits`),
+    },
+    {
+      href: `${base}/referrals`,
+      label: "Refer & earn",
+      icon: GiftIcon,
+      active: path.startsWith(`${base}/referrals`),
     },
     {
       href: `${base}/settings`,
@@ -101,9 +115,12 @@ export function AppShell({
       : []),
   ];
 
-  // Library is the last of the everyday places. Credits, settings and admin go in the More sheet on phones.
-  const primary = nav.slice(0, 5);
-  const secondary = nav.slice(5);
+  // The first six are what you make with. Credits, referrals, settings and admin are account items.
+  const main = nav.slice(0, 6);
+  const account = nav.slice(6);
+  // Phones keep five tabs: Avatars moves into the More sheet with the account items.
+  const primary = main.filter((n) => n.label !== "Avatars");
+  const secondary = nav.filter((n) => n.label === "Avatars" || account.includes(n));
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[220px_minmax(0,1fr)]">
@@ -116,7 +133,7 @@ export function AppShell({
         </Link>
 
         <nav className="mt-9 flex flex-col gap-1" aria-label="Main">
-          {nav.map((n) => (
+          {main.map((n) => (
             <Link
               key={n.href}
               href={n.href}
@@ -144,6 +161,21 @@ export function AppShell({
             </p>
             <p className="mt-2 text-xs font-medium text-accent">Add credits</p>
           </Link>
+          <nav className="flex flex-col gap-0.5" aria-label="Account">
+            {account
+              .filter((n) => n.label !== "Credits")
+              .map((n) => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  aria-current={n.active ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${n.active ? "bg-panel text-ink" : "text-ink-2 hover:bg-panel/60 hover:text-ink"}`}
+                >
+                  <n.icon className={n.active ? "text-accent" : ""} />
+                  {n.label}
+                </Link>
+              ))}
+          </nav>
           <div className="flex items-center justify-between gap-2 px-1">
             <p
               className="min-w-0 truncate text-xs text-ink-2"
